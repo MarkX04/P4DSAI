@@ -444,34 +444,60 @@
       }
 
       .matrix-table {
-        min-width: 980px;
+        table-layout: fixed;
         border-collapse: collapse;
       }
 
       .matrix-table th,
       .matrix-table td {
         border: 1px solid #d1ddd3;
-        padding: 8px;
+        width: 62px;
+        height: 62px;
         text-align: center;
-        font-size: 0.79rem;
+        vertical-align: middle;
+        font-size: 0.76rem;
+        padding: 2px;
+        overflow: hidden;
+      }
+
+      .matrix-table thead th {
+        height: 110px;
+        background: transparent;
+        border: none;
+        vertical-align: bottom;
+        padding: 0 0 8px 0;
+      }
+      .matrix-table thead th .col-label {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748b;
       }
 
       .matrix-table th {
-        position: sticky;
-        top: 0;
         z-index: 1;
-        background: #eef4ff;
+        background: transparent;
         color: #1b345d;
       }
 
       .matrix-table .row-head {
-        text-align: left;
+        text-align: right;
+        padding-right: 8px;
         position: sticky;
         left: 0;
         z-index: 2;
-        background: #f4f8ff;
-        color: #1b345d;
-        font-weight: 700;
+        background: #fafbfc;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.78rem;
+        width: 140px;
+        border: none;
+      }
+      .matrix-table thead th.row-head {
+        width: 140px;
+        height: 110px;
       }
 
       .matrix-legend {
@@ -766,6 +792,24 @@
       }
       .btn-tutorial:hover { background: #553db0; }
       .btn-tutorial.tut-active { background: #3d2e8a; }
+      /* ── Matrix tooltip ────────────────────────────────────────── */
+      .matrix-tooltip {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        background: rgba(30,30,30,.92);
+        color: #f1f5f9;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        box-shadow: 0 4px 14px rgba(0,0,0,.25);
+        opacity: 0;
+        transition: opacity 120ms;
+        white-space: nowrap;
+      }
+      .matrix-tooltip.visible { opacity: 1; }
+      .matrix-tooltip b { color: #93c5fd; }
       /* ── Zoomable heatmap ──────────────────────────────────────── */
       .heatmap-zoom-wrap {
         overflow: auto;
@@ -828,7 +872,7 @@
 
       <section class="section" id="methodology">
         <header class="section-head">
-          <h2>Analysis Methodology</h2>
+          <h2>📊 Analysis Methodology</h2>
           <button
             class="toggle"
             data-target="methodology-body"
@@ -838,111 +882,49 @@
           </button>
         </header>
                 <div class="section-body" id="methodology-body">
-          <div class="card-grid">
-            <article class="card">
-              <h3>1&nbsp; Data Understanding &amp; Cleaning</h3>
-              <ul>
-                <li>Load UCI dataset (ID&nbsp;350); rename X1–X23 to domain names.</li>
-                <li>Inspect shape, dtypes, missing values, duplicate rows.</li>
-                <li>Recode SEX / EDUCATION / MARRIAGE to labelled categories.</li>
-                <li>Flag PAY_1–6 as <em>ordinal</em> rather than numeric.</li>
-              </ul>
-              <details class="why-box" style="margin-top:8px">
-                <summary>Why do this first?</summary>
-                <div class="why-box-body">
-                  <p>Without confirmed column meanings and correct dtypes, every
-                  subsequent chart or statistic is potentially misleading. Renaming
-                  and type-casting is the minimum prerequisite for trustworthy EDA.</p>
-                </div>
-              </details>
-            </article>
-
-            <article class="card">
-              <h3>2&nbsp; Categorical Variable Analysis</h3>
-              <ul>
-                <li><strong>Count bar chart</strong> – shows class frequency for SEX, EDUCATION, MARRIAGE.</li>
-                <li><strong>Stacked 100&nbsp;% bar</strong> – shows default proportion per group (bivariate vs target).</li>
-              </ul>
-              <details class="why-box" style="margin-top:8px">
-                <summary>Why bar &amp; stacked bar?</summary>
-                <div class="why-box-body">
-                  <p>Nominal categorical variables have no inherent order. A bar chart
-                  respects this by treating each label equally. Stacking to 100&nbsp;%
-                  normalises for group size, making default-rate comparison fair even
-                  when groups are unequal (Female&nbsp;>>&nbsp;Male here).</p>
-                </div>
-              </details>
-            </article>
-
-            <article class="card">
-              <h3>3&nbsp; Ordinal Variable Analysis (PAY_1–6)</h3>
-              <ul>
-                <li><strong>Ordered bar chart</strong> – frequency by delay code (–2 → 8).</li>
-                <li><strong>Line chart</strong> – default rate trend along the ordered scale.</li>
-              </ul>
-              <details class="why-box" style="margin-top:8px">
-                <summary>Why ordinal ≠ numerical?</summary>
-                <div class="why-box-body">
-                  <p>PAY codes are <em>ordered categories</em>, not continuous numbers.
-                  The gap between –2 and –1 is conceptually different from 2&nbsp;vs&nbsp;3.
-                  Histograms or scatter plots that assume equal spacing would be
-                  misleading. Instead we:</p>
-                  <ul>
-                    <li>Treat each code as a <strong>discrete ordered level</strong>.</li>
-                    <li>Use a <strong>bar chart respecting the order</strong> for distribution.</li>
-                    <li>Use a <strong>line chart</strong> to show the monotonic default-rate trend.</li>
-                  </ul>
-                </div>
-              </details>
-            </article>
-
-            <article class="card">
-              <h3>4&nbsp; Numerical Variable Analysis</h3>
-              <ul>
-                <li><strong>Binned histogram</strong> – shows skew / distribution shape for
-                    LIMIT_BAL, AGE, BILL_AMT_x, PAY_AMT_x.</li>
-                <li><strong>Default-rate line by bin</strong> – bivariate signal vs target.</li>
-              </ul>
-              <details class="why-box" style="margin-top:8px">
-                <summary>Why binned histogram + line?</summary>
-                <div class="why-box-body">
-                  <p>Continuous variables have too many unique values for a plain bar chart.
-                  Binning (equal-width) aggregates counts into readable intervals while
-                  preserving distribution shape. The overlaid default-rate line reveals
-                  whether and how risk changes across the value range.</p>
-                </div>
-              </details>
-            </article>
-
-            <article class="card">
-              <h3>5&nbsp; Correlation &amp; Outlier Analysis</h3>
-              <ul>
-                <li><strong>Pearson heatmap</strong> – measures linear association among
-                    <em>continuous</em> features (ordinal PAY codes excluded).</li>
-                <li><strong>IQR outlier detection</strong> – flags extreme values using
-                    the 1.5 × IQR rule; severity classified as Low / Medium / High.</li>
-              </ul>
-              <details class="why-box" style="margin-top:8px">
-                <summary>Why Pearson? Why IQR?</summary>
-                <div class="why-box-body">
-                  <p><strong>Pearson correlation</strong> is the standard linear association
-                  measure for continuous variables. We <em>exclude</em> PAY_1–6 because
-                  their ordinal scale violates the continuity assumption; Spearman would be
-                  needed for those.</p>
-                  <p><strong>IQR (Interquartile Range)</strong> is robust to extreme
-                  skewness — unlike z-score which assumes normality. Financial variables
-                  (bills, payments) are heavily right-skewed, making IQR the appropriate
-                  choice here.</p>
-                </div>
-              </details>
-            </article>
+          <p>
+            This report analyzes tabular data (structured CSV format) with focus on data quality,
+            feature distributions, and relationships. Different from text analysis, we examine:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Analysis Type</th>
+                  <th>Purpose</th>
+                  <th>Key Metrics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Numerical Features</strong></td>
+                  <td>Distribution &amp; outliers</td>
+                  <td>Mean, Median, Std, IQR, Outliers</td>
+                </tr>
+                <tr>
+                  <td><strong>Categorical Features</strong></td>
+                  <td>Category frequencies</td>
+                  <td>Unique values, Mode, Cardinality</td>
+                </tr>
+                <tr>
+                  <td><strong>Correlation</strong></td>
+                  <td>Feature relationships</td>
+                  <td>Pearson r, Multicollinearity</td>
+                </tr>
+                <tr>
+                  <td><strong>Target Analysis</strong></td>
+                  <td>Class balance &amp; relationships</td>
+                  <td>Distribution, Target vs features</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
       <section class="section" id="dataset-overview">
         <header class="section-head">
-          <h2>Dataset Overview</h2>
+          <h2>📋 Dataset Overview</h2>
           <button
             class="toggle"
             data-target="overview-body"
@@ -1194,7 +1176,7 @@
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="categorical-analysis">
         <header class="section-head">
-          <h2>Categorical Variables Analysis</h2>
+          <h2>📂 Categorical Variables Analysis</h2>
           <div class="section-head-actions">
             <button
               class="toggle"
@@ -1211,20 +1193,6 @@
             Distribution counts and default-rate comparison for major
             categorical variables.
           </p>
-          <details class="why-box tut-toggle" data-section="categorical-body">
-            <summary>&#x1F4D6;&nbsp; Method: Count Bar + Stacked 100&nbsp;% Bar (bivariate vs target)</summary>
-            <div class="why-box-body">
-              <p><strong>Variable type:</strong>
-                <span class="badge badge-orange">Nominal Categorical</span>
-                SEX, EDUCATION, MARRIAGE have no inherent order.</p>
-              <p><strong>Why count bar?</strong> Shows the size of each group — essential to know before
-              comparing default rates (a group with only 50 people gives unreliable rates).</p>
-              <p><strong>Why stacked 100&nbsp;% bar?</strong> Normalises for group size so default
-              proportions are directly comparable across groups of different sizes.</p>
-              <p><strong>How to read:</strong> The green segment is "no default"; the orange segment is
-              "default". A taller orange segment → higher default risk in that group.</p>
-            </div>
-          </details>
 
           <div class="pay-status-controls">
             <strong>Select variable:</strong>
@@ -1248,6 +1216,7 @@
               <h3>Default Composition by Group (Stacked %)</h3>
               <canvas id="catRateChart" height="190"></canvas>
             </article>
+          </div>
 
           <div class="code-panel tut-toggle" data-section="categorical-body">
             <div class="code-panel-header">
@@ -1323,7 +1292,6 @@ axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Proportion 
 axes[<span class="cn">1</span>].set_ylim(<span class="cn">0</span>, <span class="cn">1</span>)
 
 plt.tight_layout(); plt.show()</code></pre></div>
-          </div>
         </div>
       </section>
 
@@ -1332,7 +1300,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="ordinal-analysis">
         <header class="section-head">
-          <h2>Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
+          <h2>📶 Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
           <div class="section-head-actions">
             <button class="toggle" data-target="ordinal-body" aria-expanded="true">
               Toggle Section
@@ -1341,33 +1309,6 @@ plt.tight_layout(); plt.show()</code></pre></div>
           </div>
         </header>
         <div class="section-body" id="ordinal-body">
-
-          <details class="why-box tut-toggle" data-section="ordinal-body">
-            <summary>&#x1F4D6;&nbsp; Why ordinal? Why not put PAY_1&ndash;6 in the numerical section?</summary>
-            <div class="why-box-body">
-              <p><strong>PAY_1–PAY_6 are ordinal categorical variables,</strong> not continuous numbers.
-              Each value is a <em>coded category</em> that represents a payment behaviour — the integer
-              codes themselves do not have equal spacing:</p>
-              <ul>
-                <li>The jump from <strong>&minus;2 → &minus;1</strong> means "went from zero consumption
-                to paid on time" — a qualitative shift.</li>
-                <li>The jump from <strong>2 → 3</strong> means "one extra month of delay" — a more
-                quantitative shift.</li>
-                <li>Using mean / standard deviation or a histogram on these codes assumes equal
-                intervals, which is statistically incorrect.</li>
-              </ul>
-              <p><strong>Correct treatment:</strong></p>
-              <ul>
-                <li><span class="badge badge-green">Count bar</span> — treat each code as a discrete
-                ordered level; use an <strong>ordered bar chart</strong> from &minus;2 to 8.</li>
-                <li><span class="badge badge-orange">Default-rate line</span> — plot the default rate as
-                a <strong>line across the ordered levels</strong> to reveal the monotonic risk trend.</li>
-                <li><span class="badge badge-blue">Pearson excluded</span> — PAY codes are <em>excluded</em>
-                from the Pearson correlation matrix. Spearman rank correlation would be appropriate
-                for ordinal-to-target association.</li>
-              </ul>
-            </div>
-          </details>
 
           <h3 style="margin-top:16px">PAY Code Reference Scale</h3>
           <div class="ordinal-scale">
@@ -1492,7 +1433,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
 
       <section class="section" id="numerical-analysis">
         <header class="section-head">
-          <h2>Numerical Variables Analysis</h2>
+          <h2>📈 Numerical Variables Analysis</h2>
           <div class="section-head-actions">
             <button
               class="toggle"
@@ -1505,24 +1446,6 @@ plt.tight_layout(); plt.show()</code></pre></div>
           </div>
         </header>
         <div class="section-body" id="numerical-body">
-          <details class="why-box tut-toggle" data-section="numerical-body">
-            <summary>&#x1F4D6;&nbsp; Method: Binned Histogram + Default-Rate Line (bivariate vs target)</summary>
-            <div class="why-box-body">
-              <p><strong>Variable type:</strong>
-                <span class="badge badge-green">Continuous Numeric</span>
-                LIMIT_BAL, AGE, BILL_AMT_x, PAY_AMT_x are true continuous measures
-                (money amounts / age in years).</p>
-              <p><strong>Why binned histogram?</strong> Continuous variables have thousands of unique
-              values. Equal-width binning aggregates them into readable intervals while preserving
-              distribution shape, mean, and skewness.</p>
-              <p><strong>Why line chart for default rate?</strong> After binning, each bin becomes an
-              ordered group. A line chart shows how default probability changes across the value range,
-              revealing monotonic or non-linear risk patterns.</p>
-              <p><strong>Important note on PAY_AMT:</strong> A very large proportion of values are 0
-              (clients who made no payment). Bin 0 dominates. Engineer a binary
-              <em>has_paid</em> flag per month for modelling.</p>
-            </div>
-          </details>
 
           <details open>
             <summary>Bill Amount Analysis (BILL_AMT_1 to BILL_AMT_6)</summary>
@@ -1699,7 +1622,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
 
       <section class="section" id="target-distribution">
         <header class="section-head">
-          <h2>Target Variable Distribution</h2>
+          <h2>🎯 Target Variable Distribution</h2>
           <div class="section-head-actions">
             <button
               class="toggle"
@@ -1720,24 +1643,6 @@ plt.tight_layout(); plt.show()</code></pre></div>
             determines which evaluation metrics (F1, AUC-ROC) and resampling
             strategies (SMOTE, class weighting) are appropriate.
           </p>
-          <details class="why-box tut-toggle" data-section="target-dist-body">
-            <summary>&#x1F4D6;&nbsp; Method: Doughnut Chart + Bar Chart (class balance check)</summary>
-            <div class="why-box-body">
-              <p><strong>Variable type:</strong>
-                <span class="badge badge-blue">Binary Target</span>
-                Default (1 = defaulted, 0 = did not default).</p>
-              <p><strong>Why doughnut chart?</strong> The doughnut (or pie) chart is the most
-              intuitive way to show a two-class proportion. The hollow centre makes the proportion
-              labels easier to read than a full pie.</p>
-              <p><strong>Why also a bar chart?</strong> The bar chart shows <em>absolute counts</em>
-              rather than proportions, making the scale of the imbalance (23 k vs 6.6 k) immediately
-              clear. Together, both charts give the full picture.</p>
-              <p><strong>EDA implication:</strong> A ~78:22 split is a
-              <em>moderate imbalance</em>. Accuracy alone would be misleading (a dummy
-              "always predict 0" classifier scores ~78&nbsp;%). Use
-              <strong>F1-score, AUC-ROC</strong> or Precision-Recall curve for evaluation.</p>
-            </div>
-          </details>
 
           <div class="grid" style="margin-bottom: 16px">
             <article class="kpi">
@@ -1770,14 +1675,14 @@ plt.tight_layout(); plt.show()</code></pre></div>
             </article>
           </div>
 
-          <div class="chart-grid">
+          <div class="chart-grid" style="max-width:700px;grid-template-columns:1fr 1fr">
             <article class="chart-card">
               <h3>Class Distribution (Doughnut)</h3>
-              <canvas id="targetDoughnut" height="220"></canvas>
+              <canvas id="targetDoughnut" height="160"></canvas>
             </article>
             <article class="chart-card">
               <h3>Class Counts (Bar)</h3>
-              <canvas id="targetBar" height="220"></canvas>
+              <canvas id="targetBar" height="160"></canvas>
             </article>
           </div>
 
@@ -1871,7 +1776,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
 
       <section class="section" id="correlation-analysis">
         <header class="section-head">
-          <h2>Correlation Matrix Analysis</h2>
+          <h2>🔗 Correlation Matrix Analysis</h2>
           <div class="section-head-actions">
             <button
               class="toggle"
@@ -1888,31 +1793,6 @@ plt.tight_layout(); plt.show()</code></pre></div>
             Pearson correlations measured on <strong>continuous numeric</strong> features only.
             PAY_1–6 (ordinal) are intentionally excluded — see the method explanation below.
           </p>
-          <details class="why-box tut-toggle" data-section="correlation-body">
-            <summary>&#x1F4D6;&nbsp; Method: Pearson Correlation Heatmap (continuous features only)</summary>
-            <div class="why-box-body">
-              <p><strong>What is Pearson correlation?</strong> It measures the strength and direction
-              of the <em>linear</em> relationship between two continuous variables.
-              Values range from &minus;1 (perfect negative) to +1 (perfect positive); 0 means no
-              linear association.</p>
-              <p><strong>Why exclude PAY_1–6?</strong>
-                <span class="badge badge-blue">Ordinal ≠ Continuous</span>
-                Pearson assumes equal-interval scaling. PAY codes (−2, −1, 0, 1, … 8) are ordered
-                categories with unequal conceptual spacing. Including them would produce
-                misleading correlation values. Use <strong>Spearman rank correlation</strong>
-                for PAY variables instead.</p>
-              <p><strong>Variables included:</strong>
-                <span class="badge badge-green">Credit_Limit, Age</span>
-                <span class="badge badge-green">BILL_AMT_1–6</span>
-                <span class="badge badge-green">PAY_AMT_1–6</span>
-                <span class="badge badge-orange">Default (target)</span>
-              </p>
-              <p><strong>How to read the heatmap:</strong>
-                Deep blue = strong positive correlation; deep red = strong negative;
-                near-white = weak. Diagonal is always 1.0 (self-correlation).
-              </p>
-            </div>
-          </details>
 
 
           <div class="code-panel tut-toggle" style="margin-top:16px" data-section="correlation-body">
@@ -1983,15 +1863,15 @@ fig.show()</code></pre></div>
               </div>
               <div class="matrix-legend">
                 <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(186,66,66)"></span>
-                  <span>Strong negative (r near &minus;1)</span>
+                  <span class="legend-swatch" style="background:rgb(120,150,200)"></span>
+                  <span>Negative correlation (r &lt; 0)</span>
                 </div>
                 <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(248,248,248);border:1px solid #e2e8f0"></span>
+                  <span class="legend-swatch" style="background:rgb(216,210,218);border:1px solid #e2e8f0"></span>
                   <span>Weak correlation (r near 0)</span>
                 </div>
                 <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(54,120,204)"></span>
+                  <span class="legend-swatch" style="background:rgb(139,42,42)"></span>
                   <span>Strong positive (r near +1)</span>
                 </div>
               </div>
@@ -2002,7 +1882,7 @@ fig.show()</code></pre></div>
 
       <section class="section" id="outlier-analysis">
         <header class="section-head">
-          <h2>Outlier Detection Analysis (IQR)</h2>
+          <h2>🔍 Outlier Detection Analysis (IQR)</h2>
           <div class="section-head-actions">
             <button
               class="toggle"
@@ -2020,29 +1900,6 @@ fig.show()</code></pre></div>
             <em>continuous numeric</em> columns (ordinal PAY_1–6 excluded).
             See method explanation below.
           </p>
-          <details class="why-box tut-toggle" data-section="outlier-body">
-            <summary>&#x1F4D6;&nbsp; Method: IQR Outlier Detection + Box Plot visualisation</summary>
-            <div class="why-box-body">
-              <p><strong>What is IQR (Interquartile Range)?</strong>
-                IQR = Q3 &minus; Q1 (middle 50&nbsp;% spread).
-                A value is flagged as an outlier if it falls below
-                <em>Q1 &minus; 1.5 &times; IQR</em> or above <em>Q3 + 1.5 &times; IQR</em>.</p>
-              <p><strong>Why IQR, not Z-score?</strong>
-                Z-score assumes the data follows a normal distribution.
-                Financial variables like BILL_AMT and PAY_AMT are heavily
-                <em>right-skewed</em> (most bills are moderate; a few are enormous).
-                IQR is <strong>robust to skewness</strong> — it only uses the middle 50&nbsp;%
-                of data and is unaffected by the very extremes it is trying to detect.</p>
-              <p><strong>Severity classification used here:</strong></p>
-              <ul>
-                <li><span class="badge badge-green">Low</span> &lt;&nbsp;1&nbsp;% outliers — negligible impact.</li>
-                <li><span class="badge" style="background:#fff4e6;color:#9c4221;border-color:#f4b888;">Medium</span>
-                    1–7.9&nbsp;% outliers — monitor but may not need removal.</li>
-                <li><span class="badge" style="background:#fce4ec;color:#9b1c1c;border-color:#f48fb1;">High</span>
-                    &ge;&nbsp;8&nbsp;% outliers — apply RobustScaler or winsorisation before linear/distance-based models.</li>
-              </ul>
-            </div>
-          </details>
           <div class="table-wrap">
             <table class="outlier-format">
               <thead>
@@ -2146,7 +2003,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="sample-rows">
         <header class="section-head">
-          <h2>Sample Rows by Target Class</h2>
+          <h2>📝 Sample Rows by Target Class</h2>
           <button
             class="toggle"
             data-target="sample-rows-body"
@@ -2337,7 +2194,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="key-insights">
         <header class="section-head">
-          <h2>Key Insights &amp; Conclusion</h2>
+          <h2>💡 Key Insights &amp; Conclusion</h2>
           <button
             class="toggle"
             data-target="insights-body"
@@ -3313,13 +3170,20 @@ plt.tight_layout(); plt.show()</code></pre></div>
       }
 
       function corrColor(value) {
-        const clamped = Math.max(-1, Math.min(1, Number(value)));
-        if (clamped >= 0) {
-          const intensity = Math.round(255 - clamped * 201);
-          return `rgb(${intensity}, ${intensity}, 255)`;
+        /* RdBu_r: +1 → dark red, 0 → light gray, −1 → steel blue */
+        const t = Math.max(-1, Math.min(1, Number(value)));
+        const lerp = (a, b, p) => Math.round(a + (b - a) * p);
+        if (t >= 0) {
+          const r = lerp(216, 139, t);
+          const g = lerp(210, 42, t);
+          const b = lerp(218, 42, t);
+          return `rgb(${r},${g},${b})`;
         }
-        const intensity = Math.round(255 - Math.abs(clamped) * 201);
-        return `rgb(255, ${intensity}, ${intensity})`;
+        const p = Math.abs(t);
+        const r = lerp(216, 120, p);
+        const g = lerp(210, 150, p);
+        const b = lerp(218, 200, p);
+        return `rgb(${r},${g},${b})`;
       }
 
       function renderCorrelationHeatmap() {
@@ -3329,16 +3193,16 @@ plt.tight_layout(); plt.show()</code></pre></div>
         }
 
         const keys = Object.keys(correlationMatrix);
-        const headerCells = keys.map((key) => `<th>${key}</th>`).join("");
+        const headerCells = keys.map((key) => `<th><div class="col-label">${key}</div></th>`).join("");
 
         const bodyRows = keys
           .map((rowKey) => {
             const rowCells = keys
               .map((colKey) => {
                 const value = correlationMatrix[rowKey][colKey];
-                const valueText = formatMetric(value, 6);
+                const valueText = formatMetric(value, 2);
                 const bg = corrColor(value);
-                return `<td style="background:${bg}" title="${rowKey} vs ${colKey}: ${valueText}">${valueText}</td>`;
+                return `<td style="background:${bg};color:#1a202c;font-weight:${Math.abs(value)>0.5?700:400}" data-row="${rowKey}" data-col="${colKey}" data-val="${value}">${valueText}</td>`;
               })
               .join("");
 
@@ -3349,7 +3213,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
         matrixTable.innerHTML = `
           <thead>
             <tr>
-              <th class="row-head">Variable</th>
+              <th class="row-head"></th>
               ${headerCells}
             </tr>
           </thead>
@@ -3357,6 +3221,29 @@ plt.tight_layout(); plt.show()</code></pre></div>
             ${bodyRows}
           </tbody>
         `;
+
+        /* ── floating tooltip on hover ── */
+        let tip = document.querySelector('.matrix-tooltip');
+        if (!tip) {
+          tip = document.createElement('div');
+          tip.className = 'matrix-tooltip';
+          document.body.appendChild(tip);
+        }
+        matrixTable.addEventListener('mouseover', function(e) {
+          const td = e.target.closest('td[data-row]');
+          if (!td) { tip.classList.remove('visible'); return; }
+          const r = td.dataset.row, c = td.dataset.col;
+          const v = Number(td.dataset.val);
+          tip.innerHTML = `<b>x:</b> ${c}<br><b>y:</b> ${r}<br><b>z:</b> ${v.toFixed(4)}`;
+          tip.classList.add('visible');
+        });
+        matrixTable.addEventListener('mousemove', function(e) {
+          tip.style.left = (e.clientX + 14) + 'px';
+          tip.style.top  = (e.clientY + 14) + 'px';
+        });
+        matrixTable.addEventListener('mouseleave', function() {
+          tip.classList.remove('visible');
+        });
       }
 
       function renderCorrelationTables() {
