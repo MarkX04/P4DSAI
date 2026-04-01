@@ -1,0 +1,3977 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taiwan Credit EDA Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f7f2;
+        --paper: #ffffff;
+        --ink: #122118;
+        --muted: #4b5f51;
+        --line: #d4dfd3;
+        --accent: #0f766e;
+        --accent-soft: #c6efea;
+        --accent-2: #2f855a;
+        --warn: #c05621;
+        --shadow: 0 10px 28px rgba(18, 33, 24, 0.1);
+        --radius: 16px;
+        --radius-sm: 10px;
+        --max: 1120px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "IBM Plex Sans", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 8% 8%,
+            #ddf5e8 0%,
+            rgba(221, 245, 232, 0) 34%
+          ),
+          radial-gradient(
+            circle at 92% 14%,
+            #d4f0f5 0%,
+            rgba(212, 240, 245, 0) 30%
+          ),
+          linear-gradient(165deg, #f6f9f4 0%, #eef5f0 48%, #ecf2f7 100%);
+        line-height: 1.56;
+        min-height: 100%;
+      }
+
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 24px 18px 56px;
+        animation: fade-up 520ms ease both;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: linear-gradient(
+          140deg,
+          #f8fff9 0%,
+          #f0faf6 45%,
+          #eff6ff 100%
+        );
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -90px;
+        top: -90px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(15, 118, 110, 0.18) 0%,
+          rgba(15, 118, 110, 0) 70%
+        );
+        pointer-events: none;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 2.7vw, 2.4rem);
+      }
+
+      h2 {
+        margin-bottom: 8px;
+        font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+      }
+
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #b4d9c6;
+        background: #e7f7ef;
+        color: #1d4933;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .kpi {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(15, 118, 110, 0.16);
+        border-color: #9ccfc8;
+      }
+
+      .kpi .label {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin-bottom: 2px;
+      }
+
+      .kpi .value {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+      }
+
+      .section {
+        margin-top: 18px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 25px rgba(18, 33, 24, 0.06);
+        overflow: hidden;
+      }
+
+      .section-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .toggle {
+        border: 1px solid #8bc7bf;
+        background: #ebfbf8;
+        color: #0f4d46;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .section-controls {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .bulk-toggle {
+        border: 1px solid #7fb8b0;
+        background: #e6f8f5;
+        color: #104840;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .section-body {
+        padding: 16px 18px 18px;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbfa 100%);
+        transition:
+          border-color 180ms ease,
+          transform 180ms ease;
+      }
+
+      .card:hover {
+        border-color: #95c7bb;
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        margin-bottom: 8px;
+        font-size: 1.03rem;
+      }
+
+      ul {
+        margin-top: 6px;
+        padding-left: 18px;
+      }
+
+      .note {
+        margin-top: 10px;
+        border-left: 3px solid var(--accent);
+        background: #f2fcfa;
+        color: #1a4f49;
+        padding: 8px 10px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.92rem;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 2px solid #a8b8ad;
+        border-radius: var(--radius-sm);
+        background: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.94rem;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #c5d2c9;
+        border-right: 1px solid #c5d2c9;
+      }
+
+      tr th:last-child,
+      tr td:last-child {
+        border-right: none;
+      }
+
+      th {
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(180deg, #d9ece0 0%, #cce4d6 100%);
+        color: #143325;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-bottom: 2px solid #9bb2a3;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #f9fcfa;
+      }
+
+      .feature-table th {
+        background: linear-gradient(180deg, #d3e5f6 0%, #c3d9ef 100%);
+        color: #102a43;
+        border-bottom: 2px solid #8eacc8;
+      }
+
+      .type-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+
+      .type-numeric {
+        background: #e6fffa;
+        color: #0f766e;
+        border-color: #87d2c8;
+      }
+
+      .type-categorical {
+        background: #fff4e6;
+        color: #9c4221;
+        border-color: #f4b888;
+      }
+
+      .type-ordinal {
+        background: #edf2ff;
+        color: #3741a0;
+        border-color: #afbbff;
+      }
+
+      .type-binary {
+        background: #f0fff4;
+        color: #22613a;
+        border-color: #a5d6b3;
+      }
+
+      .bar-wrap {
+        margin-top: 8px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .bar {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #f2f7f4;
+        overflow: hidden;
+        height: 28px;
+        position: relative;
+      }
+
+      .fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        color: #fff;
+        font-size: 0.84rem;
+        font-weight: 600;
+        transition: width 520ms ease;
+      }
+
+      .fill.non-default {
+        width: 77.88%;
+        background: linear-gradient(90deg, #0f766e, #18a39a);
+      }
+
+      .fill.default {
+        width: 22.12%;
+        background: linear-gradient(90deg, #c05621, #dd6b20);
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: #fbfefc;
+        padding: 10px 12px;
+      }
+
+      details + details {
+        margin-top: 10px;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #163827;
+        font-family: "Space Grotesk", sans-serif;
+      }
+
+      .footer {
+        margin-top: 20px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .chart-card {
+        border: 1px solid #b9c9be;
+        border-radius: var(--radius-sm);
+        background: #fcfffd;
+        padding: 12px;
+      }
+
+      .chart-card h3 {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .mini-note {
+        margin-top: 8px;
+        font-size: 0.86rem;
+        color: #3f5647;
+      }
+
+      .stats-table th {
+        background: linear-gradient(180deg, #d7f0ea 0%, #c4e7de 100%);
+        color: #0f3e39;
+        border-bottom: 2px solid #89bfb3;
+      }
+
+      .matrix-wrap {
+        overflow: auto;
+        border: 1px solid #b8c7bc;
+        border-radius: var(--radius-sm);
+        background: #ffffff;
+      }
+
+      .matrix-table {
+        min-width: 980px;
+        border-collapse: collapse;
+      }
+
+      .matrix-table th,
+      .matrix-table td {
+        border: 1px solid #d1ddd3;
+        padding: 8px;
+        text-align: center;
+        font-size: 0.79rem;
+      }
+
+      .matrix-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #eef4ff;
+        color: #1b345d;
+      }
+
+      .matrix-table .row-head {
+        text-align: left;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #f4f8ff;
+        color: #1b345d;
+        font-weight: 700;
+      }
+
+      .matrix-legend {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 8px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #334b3b;
+      }
+
+      .legend-swatch {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1px solid #90a59a;
+      }
+
+      .outlier-format th {
+        background: linear-gradient(180deg, #6f84e3 0%, #5873d6 100%);
+        color: #f6f8ff;
+        border-bottom: 1px solid #4f67c3;
+      }
+
+      .outlier-format tbody tr:nth-child(odd) {
+        background: #f6f8fc;
+      }
+
+      .severity-low,
+      .severity-medium,
+      .severity-high {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+      }
+
+      .severity-low {
+        color: #2f6844;
+      }
+
+      .severity-medium {
+        color: #8a5a15;
+      }
+
+      .severity-high {
+        color: #9c2a2a;
+      }
+
+      .mono-block {
+        margin-top: 10px;
+        border: 1px solid #c9d8cf;
+        border-radius: 10px;
+        background: #f7fbf8;
+        padding: 10px;
+        max-height: 320px;
+        overflow: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.45;
+      }
+
+      .pay-status-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .pay-status-controls select {
+        border: 1px solid #9eb7a9;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-family: "IBM Plex Sans", sans-serif;
+        background: #f7fcf8;
+      }
+
+      .pay-var-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pay-var-btn {
+        border: 1px solid #9ec9bf;
+        background: #f2fbf8;
+        color: #1d4f45;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .pay-var-btn.active {
+        background: #0f766e;
+        color: #f4fffd;
+        border-color: #0f766e;
+      }
+
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .hero {
+          padding: 20px;
+        }
+
+        .section-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      /* ── Why-box ─────────────────────────────────────────── */
+      .why-box {
+        margin-top: 14px;
+        border: 1px solid #b4d4c6;
+        border-radius: 10px;
+        background: #f2fbf7;
+        overflow: hidden;
+      }
+      .why-box summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #0b4f3a;
+        font-size: 0.9rem;
+        padding: 10px 14px;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        user-select: none;
+      }
+      .why-box summary::-webkit-details-marker { display: none; }
+      .why-box summary::before {
+        content: "\25B6";
+        font-size: 0.65rem;
+        transition: transform 200ms ease;
+        flex-shrink: 0;
+      }
+      details[open].why-box > summary::before { transform: rotate(90deg); }
+      .why-box-body {
+        padding: 6px 16px 14px;
+        border-top: 1px solid #c4e0d4;
+        font-size: 0.88rem;
+        color: #1e3d30;
+        line-height: 1.55;
+      }
+      .why-box-body p  { margin: 8px 0 0; }
+      .why-box-body ul { margin: 6px 0; padding-left: 18px; }
+      .why-box-body li { margin-bottom: 4px; }
+      .why-box-body strong { color: #0f5646; }
+      .why-box-body .badge {
+        display: inline-block;
+        border-radius: 4px;
+        padding: 1px 7px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        border: 1px solid;
+        margin-right: 3px;
+      }
+      .badge-green  { background:#e6fffa; color:#0f766e; border-color:#87d2c8; }
+      .badge-orange { background:#fff4e6; color:#9c4221; border-color:#f4b888; }
+      .badge-blue   { background:#edf2ff; color:#3741a0; border-color:#afbbff; }
+
+      /* ── Code Panel ───────────────────────────────────────── */
+      .code-panel {
+        margin-top: 16px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #2d3748;
+      }
+      .code-panel-header {
+        display: flex;
+        align-items: center;
+        background: #21262d;
+        border-bottom: 1px solid #30363d;
+        padding: 0 10px 0 0;
+      }
+      .code-tabs { display: flex; flex: 1; flex-wrap: wrap; }
+      .code-tab {
+        padding: 9px 16px;
+        color: #8b949e;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid transparent;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition: color 140ms, border-color 140ms;
+      }
+      .code-tab:hover:not(.active) { color: #c9d1d9; }
+      .code-tab.active { color: #79c0ff; border-bottom-color: #79c0ff; }
+      .code-copy-btn {
+        padding: 5px 13px;
+        background: #0d1117;
+        color: #7ee787;
+        border: 1px solid #238636;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        white-space: nowrap;
+        transition: background 150ms;
+      }
+      .code-copy-btn:hover { background: #238636; color: #fff; }
+      .code-tab-pane { display: none; }
+      .code-tab-pane.active { display: block; }
+      .code-tab-pane pre {
+        margin: 0;
+        background: #0d1117;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: #c9d1d9;
+      }
+      /* syntax colours */
+      .ck { color: #ff7b72; }   /* keywords */
+      .cs { color: #a5d6ff; }   /* strings  */
+      .cc { color: #8b949e; font-style: italic; } /* comments */
+      .cn { color: #79c0ff; }   /* numbers  */
+      .cm { color: #7ee787; }   /* module names */
+      .cp { color: #e3b341; }   /* function/method names */
+
+      /* ── Ordinal scale legend ─────────────────────────────── */
+      .ordinal-scale {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 12px 0;
+      }
+      .ord-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid;
+      }
+      .ord-neg2 { background:#e8f5ff; color:#1a4d7a; border-color:#90caf9; }
+      .ord-neg1 { background:#e8fff0; color:#1a5c3a; border-color:#81c784; }
+      .ord-zero { background:#fffde7; color:#7a5c00; border-color:#ffd54f; }
+      .ord-pos  { background:#fff3e0; color:#7a2a00; border-color:#ffb74d; }
+      .ord-high { background:#fce4ec; color:#7a0020; border-color:#f48fb1; }
+      /* ── Tutorial toggle ───────────────────────────────────────── */
+      .tut-toggle { display: none; }
+      .tut-toggle.tut-visible { display: block; }
+      .section-head-actions { display: flex; gap: 6px; align-items: center; }
+      .btn-tutorial {
+        padding: 6px 14px;
+        background: #6d4fc7;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 150ms;
+        font-family: "IBM Plex Sans", sans-serif;
+        white-space: nowrap;
+      }
+      .btn-tutorial:hover { background: #553db0; }
+      .btn-tutorial.tut-active { background: #3d2e8a; }
+      /* ── Zoomable heatmap ──────────────────────────────────────── */
+      .heatmap-zoom-wrap {
+        overflow: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fafbfc;
+        padding: 8px;
+        max-height: 620px;
+      }
+      .heatmap-zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+      .heatmap-zoom-controls button {
+        padding: 4px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 5px;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: background 120ms;
+      }
+      .heatmap-zoom-controls button:hover { background: #edf2ff; }
+      .heatmap-zoom-controls .zoom-label {
+        font-size: 0.82rem;
+        color: #4a5568;
+        font-weight: 600;
+        min-width: 42px;
+        text-align: center;
+      }
+      .matrix-scalable {
+        display: inline-block;
+        transform-origin: top left;
+        transition: transform 160ms ease;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Taiwan Credit Default: Exploratory Data Analysis Report</h1>
+        <p>
+          Static EDA report compiled from notebook outputs for the UCI Taiwan
+          credit card default dataset. This page highlights methodology, data
+          profile, key statistical signals, and interpretation notes.
+        </p>
+        <div class="section-controls">
+          <button class="bulk-toggle" id="expand-all" type="button">
+            Expand All Sections
+          </button>
+          <button class="bulk-toggle" id="collapse-all" type="button">
+            Collapse All Sections
+          </button>
+        </div>
+      </section>
+
+      <section class="section" id="methodology">
+        <header class="section-head">
+          <h2>Analysis Methodology</h2>
+          <button
+            class="toggle"
+            data-target="methodology-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+                <div class="section-body" id="methodology-body">
+          <div class="card-grid">
+            <article class="card">
+              <h3>1&nbsp; Data Understanding &amp; Cleaning</h3>
+              <ul>
+                <li>Load UCI dataset (ID&nbsp;350); rename X1–X23 to domain names.</li>
+                <li>Inspect shape, dtypes, missing values, duplicate rows.</li>
+                <li>Recode SEX / EDUCATION / MARRIAGE to labelled categories.</li>
+                <li>Flag PAY_1–6 as <em>ordinal</em> rather than numeric.</li>
+              </ul>
+              <details class="why-box" style="margin-top:8px">
+                <summary>Why do this first?</summary>
+                <div class="why-box-body">
+                  <p>Without confirmed column meanings and correct dtypes, every
+                  subsequent chart or statistic is potentially misleading. Renaming
+                  and type-casting is the minimum prerequisite for trustworthy EDA.</p>
+                </div>
+              </details>
+            </article>
+
+            <article class="card">
+              <h3>2&nbsp; Categorical Variable Analysis</h3>
+              <ul>
+                <li><strong>Count bar chart</strong> – shows class frequency for SEX, EDUCATION, MARRIAGE.</li>
+                <li><strong>Stacked 100&nbsp;% bar</strong> – shows default proportion per group (bivariate vs target).</li>
+              </ul>
+              <details class="why-box" style="margin-top:8px">
+                <summary>Why bar &amp; stacked bar?</summary>
+                <div class="why-box-body">
+                  <p>Nominal categorical variables have no inherent order. A bar chart
+                  respects this by treating each label equally. Stacking to 100&nbsp;%
+                  normalises for group size, making default-rate comparison fair even
+                  when groups are unequal (Female&nbsp;>>&nbsp;Male here).</p>
+                </div>
+              </details>
+            </article>
+
+            <article class="card">
+              <h3>3&nbsp; Ordinal Variable Analysis (PAY_1–6)</h3>
+              <ul>
+                <li><strong>Ordered bar chart</strong> – frequency by delay code (–2 → 8).</li>
+                <li><strong>Line chart</strong> – default rate trend along the ordered scale.</li>
+              </ul>
+              <details class="why-box" style="margin-top:8px">
+                <summary>Why ordinal ≠ numerical?</summary>
+                <div class="why-box-body">
+                  <p>PAY codes are <em>ordered categories</em>, not continuous numbers.
+                  The gap between –2 and –1 is conceptually different from 2&nbsp;vs&nbsp;3.
+                  Histograms or scatter plots that assume equal spacing would be
+                  misleading. Instead we:</p>
+                  <ul>
+                    <li>Treat each code as a <strong>discrete ordered level</strong>.</li>
+                    <li>Use a <strong>bar chart respecting the order</strong> for distribution.</li>
+                    <li>Use a <strong>line chart</strong> to show the monotonic default-rate trend.</li>
+                  </ul>
+                </div>
+              </details>
+            </article>
+
+            <article class="card">
+              <h3>4&nbsp; Numerical Variable Analysis</h3>
+              <ul>
+                <li><strong>Binned histogram</strong> – shows skew / distribution shape for
+                    LIMIT_BAL, AGE, BILL_AMT_x, PAY_AMT_x.</li>
+                <li><strong>Default-rate line by bin</strong> – bivariate signal vs target.</li>
+              </ul>
+              <details class="why-box" style="margin-top:8px">
+                <summary>Why binned histogram + line?</summary>
+                <div class="why-box-body">
+                  <p>Continuous variables have too many unique values for a plain bar chart.
+                  Binning (equal-width) aggregates counts into readable intervals while
+                  preserving distribution shape. The overlaid default-rate line reveals
+                  whether and how risk changes across the value range.</p>
+                </div>
+              </details>
+            </article>
+
+            <article class="card">
+              <h3>5&nbsp; Correlation &amp; Outlier Analysis</h3>
+              <ul>
+                <li><strong>Pearson heatmap</strong> – measures linear association among
+                    <em>continuous</em> features (ordinal PAY codes excluded).</li>
+                <li><strong>IQR outlier detection</strong> – flags extreme values using
+                    the 1.5 × IQR rule; severity classified as Low / Medium / High.</li>
+              </ul>
+              <details class="why-box" style="margin-top:8px">
+                <summary>Why Pearson? Why IQR?</summary>
+                <div class="why-box-body">
+                  <p><strong>Pearson correlation</strong> is the standard linear association
+                  measure for continuous variables. We <em>exclude</em> PAY_1–6 because
+                  their ordinal scale violates the continuity assumption; Spearman would be
+                  needed for those.</p>
+                  <p><strong>IQR (Interquartile Range)</strong> is robust to extreme
+                  skewness — unlike z-score which assumes normality. Financial variables
+                  (bills, payments) are heavily right-skewed, making IQR the appropriate
+                  choice here.</p>
+                </div>
+              </details>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="dataset-overview">
+        <header class="section-head">
+          <h2>Dataset Overview</h2>
+          <button
+            class="toggle"
+            data-target="overview-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="overview-body">
+          <h3>Dataset Snapshot</h3>
+          <div class="hero-meta">
+            <span class="tag">Dataset: UCI ID 350</span>
+            <span class="tag">Rows: 30,000</span>
+            <span class="tag">Features + Target: 24</span>
+            <span class="tag">Target: Y (default next month)</span>
+          </div>
+
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Missing-Value Columns</div>
+              <div class="value">0</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Duplicate Rows</div>
+              <div class="value">35</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Class 0 (Non-default)</div>
+              <div class="value">23,364 (77.88%)</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Class 1 (Default)</div>
+              <div class="value">6,636 (22.12%)</div>
+            </article>
+          </div>
+
+          <h3 style="margin-top: 16px">Dataset Overview</h3>
+          <div class="table-wrap">
+            <table class="feature-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Notebook Output</th>
+                  <th>Interpretation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Dataset source</td>
+                  <td>UCI Default of Credit Card Clients (ID 350)</td>
+                  <td>
+                    Standard benchmark dataset for credit default
+                    classification.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Rows / Columns</td>
+                  <td>30,000 rows / 24 columns</td>
+                  <td>
+                    Sufficient sample size for robust descriptive and
+                    inferential analysis.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Missingness</td>
+                  <td>Columns with missing values: 0</td>
+                  <td>
+                    No imputation pipeline required for baseline modeling.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Duplicates</td>
+                  <td>35 duplicated rows</td>
+                  <td>
+                    Low duplicate ratio, but should be handled consistently for
+                    train/test splits.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Class balance</td>
+                  <td>Class 0: 23,364 | Class 1: 6,636</td>
+                  <td>
+                    Moderate imbalance, so metrics beyond accuracy are
+                    recommended.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Feature Descriptions</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Feature Name</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LIMIT_BALANCE</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>
+                    Amount of given credit (NT dollars), including individual
+                    and family supplementary credit.
+                  </td>
+                </tr>
+                <tr>
+                  <td>SEX</td>
+                  <td>
+                    <span class="type-pill type-categorical">Categorical</span>
+                  </td>
+                  <td>Gender (1 = male, 2 = female).</td>
+                </tr>
+                <tr>
+                  <td>EDUCATION</td>
+                  <td>
+                    <span class="type-pill type-categorical">Categorical</span>
+                  </td>
+                  <td>
+                    Education level (graduate school, university, high school,
+                    others).
+                  </td>
+                </tr>
+                <tr>
+                  <td>MARRIAGE</td>
+                  <td>
+                    <span class="type-pill type-categorical">Categorical</span>
+                  </td>
+                  <td>Marital status (married, single, others).</td>
+                </tr>
+                <tr>
+                  <td>AGE</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Age of card holder in years.</td>
+                </tr>
+                <tr>
+                  <td>PAY_1</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>
+                    Repayment status in month 1. Negative or zero indicates paid
+                    duly; positive values indicate delay months.
+                  </td>
+                </tr>
+                <tr>
+                  <td>PAY_2</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>Repayment status in month 2.</td>
+                </tr>
+                <tr>
+                  <td>PAY_3</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>Repayment status in month 3.</td>
+                </tr>
+                <tr>
+                  <td>PAY_4</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>Repayment status in month 4.</td>
+                </tr>
+                <tr>
+                  <td>PAY_5</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>Repayment status in month 5.</td>
+                </tr>
+                <tr>
+                  <td>PAY_6</td>
+                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td>Repayment status in month 6.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT1</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 1.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT2</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 2.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT3</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 3.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT4</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 4.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT5</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 5.</td>
+                </tr>
+                <tr>
+                  <td>BILL_AMT6</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Bill statement amount in month 6.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT1</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 1.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT2</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 2.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT3</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 3.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT4</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 4.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT5</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 5.</td>
+                </tr>
+                <tr>
+                  <td>PAY_AMT6</td>
+                  <td><span class="type-pill type-numeric">Numeric</span></td>
+                  <td>Previous payment amount in month 6.</td>
+                </tr>
+                <tr>
+                  <td>Y (DEFAULT)</td>
+                  <td>
+                    <span class="type-pill type-binary">Binary Target</span>
+                  </td>
+                  <td>
+                    Default payment next month (0 = no default, 1 = default).
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- TARGET DISTRIBUTION                                             -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="categorical-analysis">
+        <header class="section-head">
+          <h2>Categorical Variables Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="categorical-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="categorical-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="categorical-body">
+          <p>
+            Distribution counts and default-rate comparison for major
+            categorical variables.
+          </p>
+          <details class="why-box tut-toggle" data-section="categorical-body">
+            <summary>&#x1F4D6;&nbsp; Method: Count Bar + Stacked 100&nbsp;% Bar (bivariate vs target)</summary>
+            <div class="why-box-body">
+              <p><strong>Variable type:</strong>
+                <span class="badge badge-orange">Nominal Categorical</span>
+                SEX, EDUCATION, MARRIAGE have no inherent order.</p>
+              <p><strong>Why count bar?</strong> Shows the size of each group — essential to know before
+              comparing default rates (a group with only 50 people gives unreliable rates).</p>
+              <p><strong>Why stacked 100&nbsp;% bar?</strong> Normalises for group size so default
+              proportions are directly comparable across groups of different sizes.</p>
+              <p><strong>How to read:</strong> The green segment is "no default"; the orange segment is
+              "default". A taller orange segment → higher default risk in that group.</p>
+            </div>
+          </details>
+
+          <div class="pay-status-controls">
+            <strong>Select variable:</strong>
+            <div class="pay-var-buttons" id="categoricalButtons">
+              <button class="pay-var-btn active" data-var="Gender">
+                Gender
+              </button>
+              <button class="pay-var-btn" data-var="Education">
+                Education
+              </button>
+              <button class="pay-var-btn" data-var="Marriage">Marriage</button>
+            </div>
+          </div>
+
+          <div class="chart-grid">
+            <article class="chart-card">
+              <h3>Counts by Group</h3>
+              <canvas id="catCountChart" height="190"></canvas>
+            </article>
+            <article class="chart-card">
+              <h3>Default Composition by Group (Stacked %)</h3>
+              <canvas id="catRateChart" height="190"></canvas>
+            </article>
+
+          <div class="code-panel tut-toggle" data-section="categorical-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp1-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp1-matplotlib">Matplotlib</button>
+                <button class="code-tab" data-tab="cp1-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp1-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.express</span> <span class="ck">as</span> px
+<span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+
+cat_col = <span class="cs">'EDUCATION'</span>   <span class="cc"># or 'SEX', 'MARRIAGE'</span>
+
+<span class="cc"># 1. Count distribution</span>
+counts = df[cat_col].value_counts().reset_index()
+counts.columns = [cat_col, <span class="cs">'Count'</span>]
+fig1 = px.bar(counts, x=cat_col, y=<span class="cs">'Count'</span>,
+              color=cat_col, title=<span class="cs">f'{cat_col} Count Distribution'</span>,
+              color_discrete_sequence=px.colors.qualitative.Set2)
+fig1.show()
+
+<span class="cc"># 2. Stacked 100 % default-rate bar</span>
+grp = df.groupby(cat_col)[<span class="cs">'Default'</span>].value_counts(normalize=<span class="cs">True</span>).unstack()
+grp.columns = [<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>]
+fig2 = px.bar(grp.reset_index(), x=cat_col,
+              y=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
+              barmode=<span class="cs">'relative'</span>,
+              color_discrete_map={<span class="cs">'No Default'</span>: <span class="cs">'#2f855a'</span>, <span class="cs">'Default'</span>: <span class="cs">'#c05621'</span>},
+              title=<span class="cs">f'Default Composition by {cat_col} (%)'</span>)
+fig2.show()</code></pre></div>
+            <div id="cp1-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+<span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
+
+cat_col = <span class="cs">'EDUCATION'</span>
+counts  = df[cat_col].value_counts()
+drate   = df.groupby(cat_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+non_dr  = <span class="cn">100</span> - drate
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+<span class="cc"># Count bar</span>
+axes[<span class="cn">0</span>].bar(counts.index, counts.values, color=<span class="cs">'#0f766e'</span>)
+axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Distribution'</span>)
+axes[<span class="cn">0</span>].set_xlabel(cat_col); axes[<span class="cn">0</span>].set_ylabel(<span class="cs">'Count'</span>)
+
+<span class="cc"># Stacked 100 % bar</span>
+x = np.arange(len(drate))
+axes[<span class="cn">1</span>].bar(x, non_dr.values, label=<span class="cs">'No Default'</span>, color=<span class="cs">'#2f855a'</span>)
+axes[<span class="cn">1</span>].bar(x, drate.values, bottom=non_dr.values,
+            label=<span class="cs">'Default'</span>, color=<span class="cs">'#c05621'</span>)
+axes[<span class="cn">1</span>].set_xticks(x); axes[<span class="cn">1</span>].set_xticklabels(drate.index, rotation=<span class="cn">15</span>)
+axes[<span class="cn">1</span>].legend(); axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Rate by {cat_col}'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp1-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+cat_col = <span class="cs">'EDUCATION'</span>
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+sns.countplot(data=df, x=cat_col, ax=axes[<span class="cn">0</span>], palette=<span class="cs">'Set2'</span>,
+              order=df[cat_col].value_counts().index)
+axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Count'</span>)
+
+<span class="cc"># 100 % fill (proportion per class)</span>
+sns.histplot(data=df, x=cat_col, hue=<span class="cs">'Default'</span>,
+             multiple=<span class="cs">'fill'</span>, stat=<span class="cs">'proportion'</span>,
+             ax=axes[<span class="cn">1</span>], palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>},
+             order=df[cat_col].value_counts().index)
+axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Proportion by {cat_col}'</span>)
+axes[<span class="cn">1</span>].set_ylim(<span class="cn">0</span>, <span class="cn">1</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!--  ORDINAL VARIABLES – PAY_1 to PAY_6                            -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="ordinal-analysis">
+        <header class="section-head">
+          <h2>Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
+          <div class="section-head-actions">
+            <button class="toggle" data-target="ordinal-body" aria-expanded="true">
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="ordinal-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="ordinal-body">
+
+          <details class="why-box tut-toggle" data-section="ordinal-body">
+            <summary>&#x1F4D6;&nbsp; Why ordinal? Why not put PAY_1&ndash;6 in the numerical section?</summary>
+            <div class="why-box-body">
+              <p><strong>PAY_1–PAY_6 are ordinal categorical variables,</strong> not continuous numbers.
+              Each value is a <em>coded category</em> that represents a payment behaviour — the integer
+              codes themselves do not have equal spacing:</p>
+              <ul>
+                <li>The jump from <strong>&minus;2 → &minus;1</strong> means "went from zero consumption
+                to paid on time" — a qualitative shift.</li>
+                <li>The jump from <strong>2 → 3</strong> means "one extra month of delay" — a more
+                quantitative shift.</li>
+                <li>Using mean / standard deviation or a histogram on these codes assumes equal
+                intervals, which is statistically incorrect.</li>
+              </ul>
+              <p><strong>Correct treatment:</strong></p>
+              <ul>
+                <li><span class="badge badge-green">Count bar</span> — treat each code as a discrete
+                ordered level; use an <strong>ordered bar chart</strong> from &minus;2 to 8.</li>
+                <li><span class="badge badge-orange">Default-rate line</span> — plot the default rate as
+                a <strong>line across the ordered levels</strong> to reveal the monotonic risk trend.</li>
+                <li><span class="badge badge-blue">Pearson excluded</span> — PAY codes are <em>excluded</em>
+                from the Pearson correlation matrix. Spearman rank correlation would be appropriate
+                for ordinal-to-target association.</li>
+              </ul>
+            </div>
+          </details>
+
+          <h3 style="margin-top:16px">PAY Code Reference Scale</h3>
+          <div class="ordinal-scale">
+            <span class="ord-chip ord-neg2">&minus;2 &nbsp;No consumption</span>
+            <span class="ord-chip ord-neg1">&minus;1 &nbsp;Paid duly (on time)</span>
+            <span class="ord-chip ord-zero">&nbsp;0 &nbsp;Revolving / minimum paid</span>
+            <span class="ord-chip ord-pos">&nbsp;1 &nbsp;1-month delay</span>
+            <span class="ord-chip ord-pos">&nbsp;2 &nbsp;2-month delay</span>
+            <span class="ord-chip ord-pos">&nbsp;3 &nbsp;3-month delay</span>
+            <span class="ord-chip ord-high">&ge;4 &nbsp;Severe delay (4–8 months)</span>
+          </div>
+
+          <p style="margin-top:14px">
+            Select a PAY variable below. The <strong>count bar</strong> shows how often each
+            delay code occurs; the <strong>default-rate line</strong> shows what fraction of
+            clients with that code actually defaulted — revealing the monotonic risk gradient.
+          </p>
+
+          <div class="pay-status-controls">
+            <strong>Select variable:</strong>
+            <div class="pay-var-buttons" id="payVarButtons">
+              <button class="pay-var-btn active" data-var="PAY_1">PAY_1</button>
+              <button class="pay-var-btn" data-var="PAY_2">PAY_2</button>
+              <button class="pay-var-btn" data-var="PAY_3">PAY_3</button>
+              <button class="pay-var-btn" data-var="PAY_4">PAY_4</button>
+              <button class="pay-var-btn" data-var="PAY_5">PAY_5</button>
+              <button class="pay-var-btn" data-var="PAY_6">PAY_6</button>
+            </div>
+          </div>
+
+          <div class="chart-grid">
+            <article class="chart-card">
+              <h3>Counts by Ordinal Code</h3>
+              <canvas id="payStatusCountChart" height="190"></canvas>
+              <p class="mini-note">
+                Bar chart respects ordered scale (−2 at left → 8 at right).
+                Most clients cluster around codes −1, 0 (on time or revolving).
+              </p>
+            </article>
+            <article class="chart-card">
+              <h3>Default Rate by Ordinal Code</h3>
+              <canvas id="payStatusDefaultRateChart" height="190"></canvas>
+              <p class="mini-note">
+                Line chart shows the <strong>monotonic rise</strong> in default probability.
+                PAY code ≥ 2 is a strong default signal (&gt;55 %).
+              </p>
+            </article>
+          </div>
+
+          <div class="note" style="margin-top:12px">
+            <strong>Key finding:</strong> Default rate jumps from ~13&nbsp;% at code &minus;2
+            (no consumption) to <strong>~69–76&nbsp;%</strong> at codes 2–3 (two/three-month
+            payment delay). PAY_1 is the single strongest predictor in the dataset.
+          </div>
+
+          <div class="code-panel tut-toggle" data-section="ordinal-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp2-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp2-matplotlib">Matplotlib</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp2-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+
+pay_col = <span class="cs">'PAY_1'</span>  <span class="cc"># ordinal: -2 no-consumption … 8 eight-month delay</span>
+
+<span class="cc"># Count per ordinal level (sort by code value)</span>
+counts = df[pay_col].value_counts().sort_index()
+drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labels = counts.index.astype(str).tolist()
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
+    subplot_titles=[<span class="cs">f'{pay_col} Frequency (Ordered)'</span>,
+                    <span class="cs">f'Default Rate by {pay_col}'</span>])
+
+fig.add_trace(go.Bar(x=labels, y=counts.values,
+                     marker_color=<span class="cs">'#2f855a'</span>, name=<span class="cs">'Count'</span>),
+              row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Scatter(x=labels, y=drate.values,
+                         mode=<span class="cs">'lines+markers'</span>,
+                         marker=dict(color=<span class="cs">'#c05621'</span>, size=<span class="cn">7</span>),
+                         line=dict(color=<span class="cs">'#c05621'</span>, width=<span class="cn">2</span>),
+                         name=<span class="cs">'Default %'</span>),
+              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+
+fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>)
+fig.update_yaxes(title_text=<span class="cs">'Count'</span>, row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.update_yaxes(title_text=<span class="cs">'Default Rate (%)'</span>, row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.show()</code></pre></div>
+            <div id="cp2-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+pay_col = <span class="cs">'PAY_1'</span>
+
+counts = df[pay_col].value_counts().sort_index()
+drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labels = [str(c) for c in counts.index]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+<span class="cc"># Ordered bar for counts</span>
+ax1.bar(labels, counts.values, color=<span class="cs">'#2f855a'</span>, edgecolor=<span class="cs">'#1f5c3d'</span>)
+ax1.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+ax1.set_ylabel(<span class="cs">'Count'</span>)
+ax1.set_title(<span class="cs">f'{pay_col} Distribution (Ordered Bar)'</span>)
+
+<span class="cc"># Line chart for default rate</span>
+ax2.plot(labels, drate.values, marker=<span class="cs">'o'</span>,
+         color=<span class="cs">'#c05621'</span>, linewidth=<span class="cn">2</span>, markersize=<span class="cn">6</span>)
+ax2.fill_between(range(<span class="cn">len</span>(labels)), drate.values,
+                 alpha=<span class="cn">0.18</span>, color=<span class="cs">'#c05621'</span>)
+ax2.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+ax2.set_ylabel(<span class="cs">'Default Rate (%)'</span>)
+ax2.set_title(<span class="cs">f'Default Rate by {pay_col} (Monotonic Trend)'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="section" id="numerical-analysis">
+        <header class="section-head">
+          <h2>Numerical Variables Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="numerical-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="numerical-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="numerical-body">
+          <details class="why-box tut-toggle" data-section="numerical-body">
+            <summary>&#x1F4D6;&nbsp; Method: Binned Histogram + Default-Rate Line (bivariate vs target)</summary>
+            <div class="why-box-body">
+              <p><strong>Variable type:</strong>
+                <span class="badge badge-green">Continuous Numeric</span>
+                LIMIT_BAL, AGE, BILL_AMT_x, PAY_AMT_x are true continuous measures
+                (money amounts / age in years).</p>
+              <p><strong>Why binned histogram?</strong> Continuous variables have thousands of unique
+              values. Equal-width binning aggregates them into readable intervals while preserving
+              distribution shape, mean, and skewness.</p>
+              <p><strong>Why line chart for default rate?</strong> After binning, each bin becomes an
+              ordered group. A line chart shows how default probability changes across the value range,
+              revealing monotonic or non-linear risk patterns.</p>
+              <p><strong>Important note on PAY_AMT:</strong> A very large proportion of values are 0
+              (clients who made no payment). Bin 0 dominates. Engineer a binary
+              <em>has_paid</em> flag per month for modelling.</p>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Bill Amount Analysis (BILL_AMT_1 to BILL_AMT_6)</summary>
+            <p>
+              Distribution and default-rate trend for billing amount variables.
+            </p>
+
+            <div class="pay-status-controls">
+              <strong>Select variable:</strong>
+              <div class="pay-var-buttons" id="billAmtButtons">
+                <button class="pay-var-btn active" data-var="BILL_AMT_1">
+                  BILL_AMT_1
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_2">
+                  BILL_AMT_2
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_3">
+                  BILL_AMT_3
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_4">
+                  BILL_AMT_4
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_5">
+                  BILL_AMT_5
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_6">
+                  BILL_AMT_6
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="billAmtCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="billAmtRateChart" height="190"></canvas>
+              </article>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Payment Amount Analysis (PAY_AMT_1 to PAY_AMT_6)</summary>
+            <p>
+              Distribution and default-rate trend for payment amount variables.
+            </p>
+
+            <div class="pay-status-controls">
+              <strong>Select variable:</strong>
+              <div class="pay-var-buttons" id="payAmtButtons">
+                <button class="pay-var-btn active" data-var="PAY_AMT_1">
+                  PAY_AMT_1
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_2">
+                  PAY_AMT_2
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_3">
+                  PAY_AMT_3
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_4">
+                  PAY_AMT_4
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_5">
+                  PAY_AMT_5
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_6">
+                  PAY_AMT_6
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="payAmtCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="payAmtRateChart" height="190"></canvas>
+              </article>
+            </div>
+          </details>
+
+
+          <div class="code-panel tut-toggle" data-section="numerical-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp3a-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp3a-matplotlib">Matplotlib</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp3a-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+num_col = <span class="cs">'BILL_AMT_1'</span>  <span class="cc"># or BILL_AMT_2 … 6</span>
+
+<span class="cc"># Bin into 10 equal-width intervals</span>
+df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
+counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
+drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labs     = [str(i) for i in counts_b.index]
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
+    subplot_titles=[<span class="cs">f'{num_col} Histogram'</span>,
+                    <span class="cs">f'Default Rate by {num_col} Bin'</span>])
+fig.add_trace(go.Bar(x=labs, y=counts_b.values,
+                     marker_color=<span class="cs">'#1864ab'</span>), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Scatter(x=labs, y=drate_b.values,
+                         mode=<span class="cs">'lines+markers'</span>,
+                         line=dict(color=<span class="cs">'#d9480f'</span>, width=<span class="cn">2</span>)),
+              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.update_layout(showlegend=<span class="cs">False</span>)
+fig.show()</code></pre></div>
+            <div id="cp3a-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+num_col = <span class="cs">'BILL_AMT_1'</span>
+
+df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
+counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
+drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labs = [str(i) for i in counts_b.index]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">13</span>, <span class="cn">5</span>))
+
+ax1.bar(range(<span class="cn">len</span>(labs)), counts_b.values, color=<span class="cs">'#1864ab'</span>)
+ax1.set_xticks(range(<span class="cn">len</span>(labs)))
+ax1.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
+ax1.set_title(<span class="cs">f'{num_col} Histogram (binned)'</span>)
+
+ax2.plot(range(<span class="cn">len</span>(labs)), drate_b.values,
+         marker=<span class="cs">'o'</span>, color=<span class="cs">'#d9480f'</span>, linewidth=<span class="cn">2</span>)
+ax2.fill_between(range(<span class="cn">len</span>(labs)), drate_b.values,
+                 alpha=<span class="cn">0.15</span>, color=<span class="cs">'#d9480f'</span>)
+ax2.set_xticks(range(<span class="cn">len</span>(labs)))
+ax2.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
+ax2.set_title(<span class="cs">f'Default Rate by {num_col} Bin'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <details open>
+            <summary>Age Analysis</summary>
+            <div class="chart-grid" style="margin-top: 10px">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="ageCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="ageRateChart" height="190"></canvas>
+              </article>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Limit Balance Analysis</summary>
+            <div class="chart-grid" style="margin-top: 10px">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="limitBalanceCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="limitBalanceRateChart" height="190"></canvas>
+              </article>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" id="target-distribution">
+        <header class="section-head">
+          <h2>Target Variable Distribution</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="target-dist-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="target-dist-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="target-dist-body">
+          <p>
+            The target variable <strong>Default_Payment_Next_Month</strong>
+            indicates whether a client defaulted (<code>1</code>) or not
+            (<code>0</code>) on their next month's payment. Checking class
+            balance is the very first EDA step for any classification task — it
+            determines which evaluation metrics (F1, AUC-ROC) and resampling
+            strategies (SMOTE, class weighting) are appropriate.
+          </p>
+          <details class="why-box tut-toggle" data-section="target-dist-body">
+            <summary>&#x1F4D6;&nbsp; Method: Doughnut Chart + Bar Chart (class balance check)</summary>
+            <div class="why-box-body">
+              <p><strong>Variable type:</strong>
+                <span class="badge badge-blue">Binary Target</span>
+                Default (1 = defaulted, 0 = did not default).</p>
+              <p><strong>Why doughnut chart?</strong> The doughnut (or pie) chart is the most
+              intuitive way to show a two-class proportion. The hollow centre makes the proportion
+              labels easier to read than a full pie.</p>
+              <p><strong>Why also a bar chart?</strong> The bar chart shows <em>absolute counts</em>
+              rather than proportions, making the scale of the imbalance (23 k vs 6.6 k) immediately
+              clear. Together, both charts give the full picture.</p>
+              <p><strong>EDA implication:</strong> A ~78:22 split is a
+              <em>moderate imbalance</em>. Accuracy alone would be misleading (a dummy
+              "always predict 0" classifier scores ~78&nbsp;%). Use
+              <strong>F1-score, AUC-ROC</strong> or Precision-Recall curve for evaluation.</p>
+            </div>
+          </details>
+
+          <div class="grid" style="margin-bottom: 16px">
+            <article class="kpi">
+              <div class="label">No Default (Class 0)</div>
+              <div class="value" style="color: #2f855a">23,364</div>
+              <div class="label" style="margin-top: 4px">
+                77.88 % of clients
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Default (Class 1)</div>
+              <div class="value" style="color: #c05621">6,636</div>
+              <div class="label" style="margin-top: 4px">
+                22.12 % of clients
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Imbalance Ratio</div>
+              <div class="value">3.52 : 1</div>
+              <div class="label" style="margin-top: 4px">
+                No Default : Default
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Total Records</div>
+              <div class="value">30,000</div>
+              <div class="label" style="margin-top: 4px">
+                Apr – Sep 2005, Taiwan
+              </div>
+            </article>
+          </div>
+
+          <div class="chart-grid">
+            <article class="chart-card">
+              <h3>Class Distribution (Doughnut)</h3>
+              <canvas id="targetDoughnut" height="220"></canvas>
+            </article>
+            <article class="chart-card">
+              <h3>Class Counts (Bar)</h3>
+              <canvas id="targetBar" height="220"></canvas>
+            </article>
+          </div>
+
+
+          <div class="code-panel tut-toggle" data-section="target-dist-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp4-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp4-matplotlib">Matplotlib</button>
+                <button class="code-tab" data-tab="cp4-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp4-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+
+target_col = <span class="cs">'Default'</span>
+counts = df[target_col].value_counts().sort_index()
+labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
+colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>, specs=[[{<span class="cs">'type'</span>: <span class="cs">'domain'</span>},
+                                     {<span class="cs">'type'</span>: <span class="cs">'xy'</span>}]],
+    subplot_titles=[<span class="cs">'Doughnut: Class Proportion'</span>,
+                    <span class="cs">'Bar: Class Counts'</span>])
+
+fig.add_trace(go.Pie(labels=labels, values=counts.values,
+                     hole=<span class="cn">0.55</span>, marker_colors=colors), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Bar(x=labels, y=counts.values,
+                     marker_color=colors), row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>,
+                  title_text=<span class="cs">'Target Variable Distribution'</span>)
+fig.show()</code></pre></div>
+            <div id="cp4-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
+labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
+colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
+
+<span class="cc"># Doughnut</span>
+ax1.pie(counts.values, labels=labels, colors=colors,
+        autopct=<span class="cs">'%1.1f%%'</span>, startangle=<span class="cn">90</span>,
+        wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
+ax1.set_title(<span class="cs">'Class Distribution (Doughnut)'</span>)
+
+<span class="cc"># Bar</span>
+bars = ax2.bar(labels, counts.values, color=colors,
+               edgecolor=[<span class="cs">'#1f5c3d'</span>, <span class="cs">'#8f3f17'</span>])
+ax2.set_title(<span class="cs">'Class Counts'</span>)
+<span class="ck">for</span> bar, v <span class="ck">in</span> zip(bars, counts.values):
+    ax2.text(bar.get_x() + bar.get_width()/<span class="cn">2</span>, v + <span class="cn">200</span>,
+             f<span class="cs">'{v:,}'</span>, ha=<span class="cs">'center'</span>, fontweight=<span class="cs">'bold'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp4-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
+
+<span class="cc"># Countplot (Seaborn strength)</span>
+sns.countplot(data=df, x=<span class="cs">'Default'</span>, ax=axes[<span class="cn">0</span>],
+              palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>})
+axes[<span class="cn">0</span>].set_xticklabels([<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>])
+axes[<span class="cn">0</span>].set_title(<span class="cs">'Class Counts (Seaborn countplot)'</span>)
+<span class="ck">for</span> p <span class="ck">in</span> axes[<span class="cn">0</span>].patches:
+    axes[<span class="cn">0</span>].annotate(f<span class="cs">'{int(p.get_height()):,}'</span>,
+                     (p.get_x() + p.get_width()/<span class="cn">2</span>, p.get_height()),
+                     ha=<span class="cs">'center'</span>, va=<span class="cs">'bottom'</span>)
+
+<span class="cc"># Doughnut via matplotlib (Seaborn has no pie)</span>
+counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
+axes[<span class="cn">1</span>].pie(counts.values, labels=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
+            colors=[<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>],
+            autopct=<span class="cs">'%1.1f%%'</span>, wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
+axes[<span class="cn">1</span>].set_title(<span class="cs">'Doughnut Chart'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <div class="note" style="margin-top: 12px">
+            <strong>Imbalance finding:</strong> Only ~22 % of clients defaulted.
+            A naive classifier that always predicts "no default" achieves ~78 %
+            accuracy — making accuracy a misleading metric. Use
+            <strong>F1-score, AUC-ROC or Precision-Recall curve</strong>;
+            consider SMOTE oversampling or class-weight adjustment when training
+            models.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="correlation-analysis">
+        <header class="section-head">
+          <h2>Correlation Matrix Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="correlation-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="correlation-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="correlation-body">
+          <p>
+            Pearson correlations measured on <strong>continuous numeric</strong> features only.
+            PAY_1–6 (ordinal) are intentionally excluded — see the method explanation below.
+          </p>
+          <details class="why-box tut-toggle" data-section="correlation-body">
+            <summary>&#x1F4D6;&nbsp; Method: Pearson Correlation Heatmap (continuous features only)</summary>
+            <div class="why-box-body">
+              <p><strong>What is Pearson correlation?</strong> It measures the strength and direction
+              of the <em>linear</em> relationship between two continuous variables.
+              Values range from &minus;1 (perfect negative) to +1 (perfect positive); 0 means no
+              linear association.</p>
+              <p><strong>Why exclude PAY_1–6?</strong>
+                <span class="badge badge-blue">Ordinal ≠ Continuous</span>
+                Pearson assumes equal-interval scaling. PAY codes (−2, −1, 0, 1, … 8) are ordered
+                categories with unequal conceptual spacing. Including them would produce
+                misleading correlation values. Use <strong>Spearman rank correlation</strong>
+                for PAY variables instead.</p>
+              <p><strong>Variables included:</strong>
+                <span class="badge badge-green">Credit_Limit, Age</span>
+                <span class="badge badge-green">BILL_AMT_1–6</span>
+                <span class="badge badge-green">PAY_AMT_1–6</span>
+                <span class="badge badge-orange">Default (target)</span>
+              </p>
+              <p><strong>How to read the heatmap:</strong>
+                Deep blue = strong positive correlation; deep red = strong negative;
+                near-white = weak. Diagonal is always 1.0 (self-correlation).
+              </p>
+            </div>
+          </details>
+
+
+          <div class="code-panel tut-toggle" style="margin-top:16px" data-section="correlation-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp5-seaborn">Seaborn</button>
+                <button class="code-tab" data-tab="cp5-plotly">Plotly</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp5-seaborn" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+<span class="cc"># Only continuous numeric columns (ordinal PAY_1-6 excluded intentionally)</span>
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
+    <span class="cs">'Default'</span>
+]
+
+corr = df[num_cols].corr()  <span class="cc"># Pearson by default</span>
+
+plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">12</span>))
+sns.heatmap(corr, annot=<span class="cs">True</span>, fmt=<span class="cs">'.2f'</span>,
+            cmap=<span class="cs">'RdBu_r'</span>, center=<span class="cn">0</span>, vmin=-<span class="cn">1</span>, vmax=<span class="cn">1</span>,
+            square=<span class="cs">True</span>, linewidths=<span class="cn">0.5</span>,
+            cbar_kws={<span class="cs">'shrink'</span>: <span class="cn">0.8</span>})
+plt.title(<span class="cs">'Pearson Correlation Heatmap
+(Continuous features + Target)'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp5-plotly" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.figure_factory</span> <span class="ck">as</span> ff
+
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
+    <span class="cs">'Default'</span>
+]
+
+corr = df[num_cols].corr()
+z    = corr.values.round(<span class="cn">2</span>).tolist()
+
+fig = ff.create_annotated_heatmap(
+    z=z,
+    x=corr.columns.tolist(),
+    y=corr.index.tolist(),
+    colorscale=<span class="cs">'RdBu'</span>, zmin=-<span class="cn">1</span>, zmax=<span class="cn">1</span>,
+    reversescale=<span class="cs">True</span>)
+fig.update_layout(title=<span class="cs">'Pearson Correlation Heatmap'</span>, height=<span class="cn">700</span>)
+fig.show()</code></pre></div>
+          </div>
+          <div class="heatmap-zoom-controls" style="margin-top:20px">
+            <span>Zoom:</span>
+            <button onclick="adjustHeatmapZoom(-0.15)">&#8722;</button>
+            <span class="zoom-label" id="heatmapZoomLabel">100%</span>
+            <button onclick="adjustHeatmapZoom(0.15)">+</button>
+            <button onclick="resetHeatmapZoom()" style="font-size:0.78rem;font-weight:500">Reset</button>
+          </div>
+          <div class="heatmap-zoom-wrap">
+            <div class="matrix-scalable" id="matrixScalable">
+              <div class="matrix-wrap">
+                <table class="matrix-table" id="corrMatrixTable"></table>
+              </div>
+              <div class="matrix-legend">
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(186,66,66)"></span>
+                  <span>Strong negative (r near &minus;1)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(248,248,248);border:1px solid #e2e8f0"></span>
+                  <span>Weak correlation (r near 0)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(54,120,204)"></span>
+                  <span>Strong positive (r near +1)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="outlier-analysis">
+        <header class="section-head">
+          <h2>Outlier Detection Analysis (IQR)</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="outlier-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="outlier-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="outlier-body">
+          <p>
+            Outlier statistics computed via the <strong>IQR method</strong> on all
+            <em>continuous numeric</em> columns (ordinal PAY_1–6 excluded).
+            See method explanation below.
+          </p>
+          <details class="why-box tut-toggle" data-section="outlier-body">
+            <summary>&#x1F4D6;&nbsp; Method: IQR Outlier Detection + Box Plot visualisation</summary>
+            <div class="why-box-body">
+              <p><strong>What is IQR (Interquartile Range)?</strong>
+                IQR = Q3 &minus; Q1 (middle 50&nbsp;% spread).
+                A value is flagged as an outlier if it falls below
+                <em>Q1 &minus; 1.5 &times; IQR</em> or above <em>Q3 + 1.5 &times; IQR</em>.</p>
+              <p><strong>Why IQR, not Z-score?</strong>
+                Z-score assumes the data follows a normal distribution.
+                Financial variables like BILL_AMT and PAY_AMT are heavily
+                <em>right-skewed</em> (most bills are moderate; a few are enormous).
+                IQR is <strong>robust to skewness</strong> — it only uses the middle 50&nbsp;%
+                of data and is unaffected by the very extremes it is trying to detect.</p>
+              <p><strong>Severity classification used here:</strong></p>
+              <ul>
+                <li><span class="badge badge-green">Low</span> &lt;&nbsp;1&nbsp;% outliers — negligible impact.</li>
+                <li><span class="badge" style="background:#fff4e6;color:#9c4221;border-color:#f4b888;">Medium</span>
+                    1–7.9&nbsp;% outliers — monitor but may not need removal.</li>
+                <li><span class="badge" style="background:#fce4ec;color:#9b1c1c;border-color:#f48fb1;">High</span>
+                    &ge;&nbsp;8&nbsp;% outliers — apply RobustScaler or winsorisation before linear/distance-based models.</li>
+              </ul>
+            </div>
+          </details>
+          <div class="table-wrap">
+            <table class="outlier-format">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Outlier Count</th>
+                  <th>Percentage</th>
+                  <th>Severity</th>
+                  <th>Valid Range (IQR)</th>
+                </tr>
+              </thead>
+              <tbody id="outlierSummaryTbody"></tbody>
+            </table>
+          </div>
+
+
+          <div class="code-panel tut-toggle" style="margin-top:14px" data-section="outlier-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp6-iqr">IQR Function</button>
+                <button class="code-tab" data-tab="cp6-matplotlib">Box Plot</button>
+                <button class="code-tab" data-tab="cp6-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp6-iqr" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+<span class="ck">def</span> <span class="cp">detect_outliers_iqr</span>(df, col):
+    q1 = df[col].quantile(<span class="cn">0.25</span>)
+    q3 = df[col].quantile(<span class="cn">0.75</span>)
+    iqr = q3 - q1
+    lower = q1 - <span class="cn">1.5</span> * iqr
+    upper = q3 + <span class="cn">1.5</span> * iqr
+    mask  = (df[col] &lt; lower) | (df[col] &gt; upper)
+    <span class="ck">return</span> {
+        <span class="cs">'feature'</span>: col, <span class="cs">'Q1'</span>: q1, <span class="cs">'Q3'</span>: q3, <span class="cs">'IQR'</span>: iqr,
+        <span class="cs">'lower_bound'</span>: lower, <span class="cs">'upper_bound'</span>: upper,
+        <span class="cs">'num_outliers'</span>: mask.sum(),
+        <span class="cs">'pct_outliers'</span>: round(mask.mean() * <span class="cn">100</span>, <span class="cn">2</span>)
+    }
+
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>
+]
+
+outlier_df = pd.DataFrame([detect_outliers_iqr(df, c) <span class="ck">for</span> c <span class="ck">in</span> num_cols])
+print(outlier_df[[<span class="cs">'feature'</span>, <span class="cs">'num_outliers'</span>, <span class="cs">'pct_outliers'</span>,
+                   <span class="cs">'lower_bound'</span>, <span class="cs">'upper_bound'</span>]].to_string(index=<span class="cs">False</span>))</code></pre></div>
+            <div id="cp6-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
+            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>, <span class="cs">'Age'</span>]
+
+fig, axes = plt.subplots(<span class="cn">2</span>, <span class="cn">4</span>, figsize=(<span class="cn">16</span>, <span class="cn">8</span>))
+axes = axes.flatten()
+
+<span class="ck">for</span> i, col <span class="ck">in</span> enumerate(num_cols):
+    axes[i].boxplot(df[col].dropna(), patch_artist=<span class="cs">True</span>,
+                    boxprops={<span class="cs">'facecolor'</span>: <span class="cs">'#c6efea'</span>, <span class="cs">'color'</span>: <span class="cs">'#0f766e'</span>},
+                    medianprops={<span class="cs">'color'</span>: <span class="cs">'#c05621'</span>, <span class="cs">'linewidth'</span>: <span class="cn">2</span>},
+                    flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
+    axes[i].set_title(col, fontsize=<span class="cn">9</span>)
+    q1, q3 = df[col].quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
+    iqr = q3 - q1
+    <span class="ck">for</span> bound <span class="ck">in</span> [q1 - <span class="cn">1.5</span>*iqr, q3 + <span class="cn">1.5</span>*iqr]:
+        axes[i].axhline(bound, color=<span class="cs">'red'</span>,
+                        linestyle=<span class="cs">'--'</span>, linewidth=<span class="cn">0.8</span>, alpha=<span class="cn">0.7</span>)
+
+plt.suptitle(<span class="cs">'IQR Box Plots — Outlier Detection'</span>, fontsize=<span class="cn">12</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp6-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
+            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>]
+
+<span class="cc"># Long-form melt for seaborn boxplot</span>
+df_melt = df[num_cols].melt(var_name=<span class="cs">'Feature'</span>, value_name=<span class="cs">'Value'</span>)
+
+plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">6</span>))
+sns.boxplot(data=df_melt, x=<span class="cs">'Feature'</span>, y=<span class="cs">'Value'</span>,
+            palette=<span class="cs">'Set2'</span>, width=<span class="cn">0.5</span>,
+            flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
+plt.title(<span class="cs">'IQR Box Plots — Seaborn'</span>)
+plt.xticks(rotation=<span class="cn">25</span>, ha=<span class="cs">'right'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <details style="margin-top: 12px">
+            <summary>Show Full Outlier Export (Exact Values)</summary>
+            <pre class="mono-block" id="outlierRaw"></pre>
+          </details>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- SAMPLE ROWS BY CLASS                                            -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="sample-rows">
+        <header class="section-head">
+          <h2>Sample Rows by Target Class</h2>
+          <button
+            class="toggle"
+            data-target="sample-rows-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="sample-rows-body">
+          <p>
+            Five representative records drawn from each target class provide
+            intuitive, readable evidence of the patterns that distinguish
+            defaulters from non-defaulters. Key columns shown:
+            <em
+              >Credit_Limit, Gender, Education, Marriage, Age, PAY_1, PAY_2,
+              BILL_AMT_1, PAY_AMT_1.</em
+            >
+          </p>
+
+          <h3 style="color: #2f855a; margin-top: 14px">
+            Class 0 — No Default (5 representative samples)
+          </h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Credit_Limit</th>
+                  <th>Gender</th>
+                  <th>Education</th>
+                  <th>Marriage</th>
+                  <th>Age</th>
+                  <th>PAY_1</th>
+                  <th>PAY_2</th>
+                  <th>BILL_AMT_1</th>
+                  <th>PAY_AMT_1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>200,000</td>
+                  <td>Female</td>
+                  <td>University</td>
+                  <td>Single</td>
+                  <td>26</td>
+                  <td style="color: #2f855a; font-weight: 600">−1</td>
+                  <td style="color: #2f855a; font-weight: 600">−1</td>
+                  <td>11,320</td>
+                  <td>11,320</td>
+                </tr>
+                <tr>
+                  <td>50,000</td>
+                  <td>Male</td>
+                  <td>Grad School</td>
+                  <td>Single</td>
+                  <td>33</td>
+                  <td style="color: #2f855a; font-weight: 600">0</td>
+                  <td style="color: #2f855a; font-weight: 600">0</td>
+                  <td>31,800</td>
+                  <td>2,000</td>
+                </tr>
+                <tr>
+                  <td>100,000</td>
+                  <td>Female</td>
+                  <td>University</td>
+                  <td>Married</td>
+                  <td>38</td>
+                  <td style="color: #2f855a; font-weight: 600">−1</td>
+                  <td style="color: #2f855a; font-weight: 600">−1</td>
+                  <td>55,810</td>
+                  <td>55,810</td>
+                </tr>
+                <tr>
+                  <td>500,000</td>
+                  <td>Female</td>
+                  <td>Grad School</td>
+                  <td>Single</td>
+                  <td>30</td>
+                  <td style="color: #2f855a; font-weight: 600">−2</td>
+                  <td style="color: #2f855a; font-weight: 600">−2</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>150,000</td>
+                  <td>Male</td>
+                  <td>University</td>
+                  <td>Married</td>
+                  <td>45</td>
+                  <td style="color: #2f855a; font-weight: 600">0</td>
+                  <td style="color: #2f855a; font-weight: 600">0</td>
+                  <td>68,360</td>
+                  <td>3,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="color: #c05621; margin-top: 16px">
+            Class 1 — Default (5 representative samples)
+          </h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Credit_Limit</th>
+                  <th>Gender</th>
+                  <th>Education</th>
+                  <th>Marriage</th>
+                  <th>Age</th>
+                  <th>PAY_1</th>
+                  <th>PAY_2</th>
+                  <th>BILL_AMT_1</th>
+                  <th>PAY_AMT_1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>50,000</td>
+                  <td>Female</td>
+                  <td>High School</td>
+                  <td>Married</td>
+                  <td>25</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td>46,820</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>30,000</td>
+                  <td>Male</td>
+                  <td>University</td>
+                  <td>Married</td>
+                  <td>32</td>
+                  <td style="color: #c05621; font-weight: 600">3</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td>29,540</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>80,000</td>
+                  <td>Female</td>
+                  <td>University</td>
+                  <td>Single</td>
+                  <td>27</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td>71,200</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>20,000</td>
+                  <td>Male</td>
+                  <td>High School</td>
+                  <td>Single</td>
+                  <td>21</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td>18,960</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>120,000</td>
+                  <td>Female</td>
+                  <td>Grad School</td>
+                  <td>Married</td>
+                  <td>35</td>
+                  <td style="color: #c05621; font-weight: 600">2</td>
+                  <td style="color: #c05621; font-weight: 600">3</td>
+                  <td>117,490</td>
+                  <td>1,500</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note" style="margin-top: 12px">
+            <strong>Observable patterns:</strong> Non-default clients show
+            negative PAY codes (paid-in-full <code>−1</code> or no-consumption
+            <code>−2</code>) and non-zero payment amounts. Default clients
+            consistently display PAY codes ≥ 2 (2–3+ month payment delays), zero
+            or minimal payment amounts, and bills close to their credit limit.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- KEY INSIGHTS & CONCLUSION                                       -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="key-insights">
+        <header class="section-head">
+          <h2>Key Insights &amp; Conclusion</h2>
+          <button
+            class="toggle"
+            data-target="insights-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="insights-body">
+          <div class="card-grid">
+            <article class="card">
+              <h3>1. Class Imbalance (~78 % / ~22 %)</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Only 1 in ~4.5 clients defaulted. Accuracy is a misleading
+                optimisation target.
+              </p>
+              <div class="note">
+                Use F1-score, AUC-ROC, or Precision-Recall. Consider SMOTE
+                oversampling or class-weight adjustments when training.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>2. PAY_1 is the Strongest Single Predictor</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Default rate rises from ~13 % at PAY_1 = −2 to ~69 % at PAY_1 =
+                2, and ~76 % at PAY_1 = 3.
+              </p>
+              <div class="note">
+                Recent repayment behaviour (last 1–2 months) is the dominant
+                predictive feature by a wide margin over demographics or bill
+                amounts.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>3. Lower Credit Limit → Higher Default Risk</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Clients with credit limit ≤ NT$50 K default at ~32 % vs ~14 %
+                for those above NT$270 K.
+              </p>
+              <div class="note">
+                Credit limit acts as a proxy for creditworthiness. It is a
+                strong feature to keep in all models.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>4. Education Has Modest Signal</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Graduate school clients default at ~19 % vs high school at ~25
+                %. The "Others" category is unexpectedly low at ~7 %.
+              </p>
+              <div class="note">
+                Modest discriminatory power — best combined with payment history
+                and credit limit features.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>5. BILL_AMT Columns Are Near-Collinear</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                BILL_AMT_1–6 show pairwise Pearson r ≈ 0.80–0.95 with each other
+                — severe multicollinearity.
+              </p>
+              <div class="note">
+                For linear models: use only BILL_AMT_1 or apply PCA. Treebased
+                models (RF, XGBoost) handle this natively.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>6. Zero-Payment Months Signal Default</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Months with PAY_AMT = 0 consistently coincide with higher
+                default rates across all 6 billing periods.
+              </p>
+              <div class="note">
+                Engineer binary <em>has_paid</em> indicator features for each of
+                the 6 months — a compact and robust signal.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>7. Age Has a Weak Non-Linear Pattern</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Clients aged 20–30 and 60+ have slightly elevated default rates;
+                the 30–40 group is the safest.
+              </p>
+              <div class="note">
+                Moderate signal; useful when combined with payment features in
+                tree-based models that capture non-linear interactions.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>8. Heavy Outliers in Financial Columns</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                8–10 % outlier rate in all BILL_AMT and PAY_AMT columns by the
+                IQR method.
+              </p>
+              <div class="note">
+                Apply <strong>RobustScaler</strong> or winsorise at the 1st/99th
+                percentile before training distance-based or linear models.
+              </div>
+            </article>
+          </div>
+
+          <div
+            class="note"
+            style="
+              margin-top: 18px;
+              border-left-color: #2f855a;
+              background: #f0fdf4;
+            "
+          >
+            <strong>Overall Conclusion:</strong> Payment history (PAY_1–PAY_6)
+            dominates predictive power — PAY_1 alone separates default and
+            non-default clients more than any other variable. Demographics
+            (education, age, gender) add modest, independent signal. Bill and
+            payment amount features are informative but suffer from heavy
+            right-skew and high inter-correlation within each group. Recommended
+            next steps: (1) handle class imbalance via SMOTE or class weights,
+            (2) engineer <em>has_paid</em> binary flags per month, (3) reduce
+            BILL_AMT dimensionality via PCA, and (4) benchmark
+            <strong>Random Forest and XGBoost</strong> — tree-based ensembles
+            that handle outliers, collinearity, and non-linearity natively
+            without extensive pre-processing.
+          </div>
+        </div>
+      </section>
+
+      <p class="footer">
+        Built as a static companion report for assignment EDA notebook:
+        eda_taiwan_credit_tabular.ipynb
+      </p>
+    </main>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+    <script>
+      function setSectionVisibility(button, expanded) {
+        const targetId = button.getAttribute("data-target");
+        const section = document.getElementById(targetId);
+        if (!section) {
+          return;
+        }
+        section.classList.toggle("hidden", !expanded);
+        button.setAttribute("aria-expanded", String(expanded));
+      }
+
+      const toggleButtons = document.querySelectorAll(".toggle");
+      toggleButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const expanded = button.getAttribute("aria-expanded") !== "true";
+          setSectionVisibility(button, expanded);
+        });
+      });
+
+      const expandAllBtn = document.getElementById("expand-all");
+      if (expandAllBtn) {
+        expandAllBtn.addEventListener("click", () => {
+          toggleButtons.forEach((button) => setSectionVisibility(button, true));
+        });
+      }
+
+      const collapseAllBtn = document.getElementById("collapse-all");
+      if (collapseAllBtn) {
+        collapseAllBtn.addEventListener("click", () => {
+          toggleButtons.forEach((button) =>
+            setSectionVisibility(button, false),
+          );
+        });
+      }
+
+      const payStatusData = {
+        PAY_1: {
+          counts: {
+            "-2": 2759,
+            "-1": 5686,
+            0: 14737,
+            1: 3688,
+            2: 2667,
+            3: 322,
+            4: 76,
+            5: 26,
+            6: 11,
+            7: 9,
+            8: 19,
+          },
+          default_rates: {
+            "-2": 0.13229430953243929,
+            "-1": 0.16778051354203308,
+            0: 0.12811291307593134,
+            1: 0.33947939262472887,
+            2: 0.6914135733033371,
+            3: 0.7577639751552795,
+            4: 0.6842105263157895,
+            5: 0.5,
+            6: 0.5454545454545454,
+            7: 0.7777777777777778,
+            8: 0.5789473684210527,
+          },
+        },
+        PAY_2: {
+          counts: {
+            "-2": 3782,
+            "-1": 6050,
+            0: 15730,
+            1: 28,
+            2: 3927,
+            3: 326,
+            4: 99,
+            5: 25,
+            6: 12,
+            7: 20,
+            8: 1,
+          },
+          default_rates: {
+            "-2": 0.18270756213643574,
+            "-1": 0.1596694214876033,
+            0: 0.15912269548633184,
+            1: 0.17857142857142858,
+            2: 0.5561497326203209,
+            3: 0.6165644171779141,
+            4: 0.5050505050505051,
+            5: 0.6,
+            6: 0.75,
+            7: 0.6,
+            8: 0,
+          },
+        },
+        PAY_3: {
+          counts: {
+            "-2": 4085,
+            "-1": 5938,
+            0: 15764,
+            1: 4,
+            2: 3819,
+            3: 240,
+            4: 76,
+            5: 21,
+            6: 23,
+            7: 27,
+            8: 3,
+          },
+          default_rates: {
+            "-2": 0.18531211750305998,
+            "-1": 0.1559447625463119,
+            0: 0.17451154529307283,
+            1: 0.25,
+            2: 0.515579994763027,
+            3: 0.575,
+            4: 0.5789473684210527,
+            5: 0.5714285714285714,
+            6: 0.6086956521739131,
+            7: 0.8148148148148148,
+            8: 0.6666666666666666,
+          },
+        },
+        PAY_4: {
+          counts: {
+            "-2": 4348,
+            "-1": 5687,
+            0: 16455,
+            1: 2,
+            2: 3159,
+            3: 180,
+            4: 69,
+            5: 35,
+            6: 5,
+            7: 58,
+            8: 2,
+          },
+          default_rates: {
+            "-2": 0.1925022999080037,
+            "-1": 0.1589590293652189,
+            0: 0.1832877544819204,
+            1: 0.5,
+            2: 0.5232668566001899,
+            3: 0.6111111111111112,
+            4: 0.6666666666666666,
+            5: 0.5142857142857142,
+            6: 0.4,
+            7: 0.8275862068965517,
+            8: 0.5,
+          },
+        },
+        PAY_5: {
+          counts: {
+            "-2": 4546,
+            "-1": 5539,
+            0: 16947,
+            2: 2626,
+            3: 178,
+            4: 84,
+            5: 17,
+            6: 4,
+            7: 58,
+            8: 1,
+          },
+          default_rates: {
+            "-2": 0.1968763748350198,
+            "-1": 0.1619425889149666,
+            0: 0.18852894317578334,
+            2: 0.5418888042650419,
+            3: 0.6348314606741573,
+            4: 0.6071428571428571,
+            5: 0.5882352941176471,
+            6: 0.75,
+            7: 0.8275862068965517,
+            8: 1,
+          },
+        },
+        PAY_6: {
+          counts: {
+            "-2": 4895,
+            "-1": 5740,
+            0: 16286,
+            2: 2766,
+            3: 184,
+            4: 49,
+            5: 13,
+            6: 19,
+            7: 46,
+            8: 2,
+          },
+          default_rates: {
+            "-2": 0.2004085801838611,
+            "-1": 0.16986062717770034,
+            0: 0.18844406238487044,
+            2: 0.5065075921908894,
+            3: 0.6413043478260869,
+            4: 0.6326530612244898,
+            5: 0.5384615384615384,
+            6: 0.7368421052631579,
+            7: 0.8260869565217391,
+            8: 1,
+          },
+        },
+      };
+
+      let payStatusCountChart;
+      let payStatusDefaultRateChart;
+      let billAmtCountChart;
+      let billAmtRateChart;
+      let payAmtCountChart;
+      let payAmtRateChart;
+
+      const billAmtData = {
+        BILL_AMT_1: {
+          bins: [
+            -165580.0, -52570.899999999994, 60438.20000000001,
+            173447.30000000005, 286456.4, 399465.5, 512474.6000000001,
+            625483.7000000001, 738492.8, 851501.9, 964511.0,
+          ],
+          counts: [2, 21885, 6007, 1534, 397, 143, 27, 3, 1, 1],
+          bin_default_rates: [
+            0.0, 0.22837559972583962, 0.20176460795738305, 0.19165580182529335,
+            0.21158690176322417, 0.2517482517482518, 0.4444444444444444, 0.0,
+            0.0, 0.0,
+          ],
+        },
+        BILL_AMT_2: {
+          bins: [
+            -69777.0, 35593.8, 140964.6, 246335.40000000002, 351706.2, 457077.0,
+            562447.8, 667818.6, 773189.4, 878560.2000000001, 983931.0,
+          ],
+          counts: [18123, 9040, 2038, 534, 190, 62, 10, 2, 0, 1],
+          bin_default_rates: [
+            0.22948739171218893, 0.21128318584070796, 0.18792934249263984,
+            0.20786516853932585, 0.24736842105263157, 0.3709677419354839, 0.3,
+            0.0, 0.0,
+          ],
+        },
+        BILL_AMT_3: {
+          bins: [
+            -157264.0, 24871.29999999999, 207006.59999999998, 389141.8999999999,
+            571277.2, 753412.5, 935547.7999999998, 1117683.0999999999,
+            1299818.4, 1481953.7, 1664089.0,
+          ],
+          counts: [16188, 12676, 985, 140, 9, 1, 0, 0, 0, 1],
+          bin_default_rates: [
+            0.22430195206325673, 0.21773430104133795, 0.2131979695431472,
+            0.2357142857142857, 0.2222222222222222, 0.0, 0.0,
+          ],
+        },
+        BILL_AMT_4: {
+          bins: [
+            -170000.0, -63841.399999999994, 42317.20000000001,
+            148475.80000000005, 254634.40000000002, 360793.0, 466951.6000000001,
+            573110.2000000001, 679268.8, 785427.4, 891586.0,
+          ],
+          counts: [3, 20540, 7364, 1551, 387, 116, 35, 2, 1, 1],
+          bin_default_rates: [
+            0.3333333333333333, 0.22648490749756572, 0.20994024986420423,
+            0.19600257898130238, 0.2351421188630491, 0.25862068965517243,
+            0.34285714285714286, 0.0, 0.0, 0.0,
+          ],
+        },
+        BILL_AMT_5: {
+          bins: [
+            -81334.0, 19516.5, 120367.0, 221217.5, 322068.0, 422918.5, 523769.0,
+            624619.5, 725470.0, 826320.5, 927171.0,
+          ],
+          counts: [15900, 11260, 2177, 475, 133, 48, 5, 0, 1, 1],
+          bin_default_rates: [
+            0.21955974842767295, 0.22735346358792186, 0.19430408819476344,
+            0.2336842105263158, 0.2556390977443609, 0.3125, 0.4, 0.0, 0.0,
+          ],
+        },
+        BILL_AMT_6: {
+          bins: [
+            -339603.0, -209476.3, -79349.6, 50777.09999999998, 180903.8,
+            311030.5, 441157.19999999995, 571283.9, 701410.6, 831537.3,
+            961664.0,
+          ],
+          counts: [1, 3, 22819, 6045, 940, 160, 30, 1, 0, 1],
+          bin_default_rates: [
+            1.0, 0.3333333333333333, 0.22582058810640257, 0.20198511166253103,
+            0.22234042553191488, 0.2625, 0.3, 0.0, 0.0,
+          ],
+        },
+      };
+
+      const payAmtData = {
+        PAY_AMT_1: {
+          bins: [
+            0.0, 87355.2, 174710.4, 262065.59999999998, 349420.8, 436776.0,
+            524131.19999999995, 611486.4, 698841.6, 786196.7999999999, 873552.0,
+          ],
+          counts: [29802, 142, 41, 9, 3, 2, 0, 0, 0, 1],
+          bin_default_rates: [
+            0.2222334071538823, 0.06338028169014084, 0.07317073170731707,
+            0.1111111111111111, 0.0, 0.0, 0.0,
+          ],
+        },
+        PAY_AMT_2: {
+          bins: [
+            0.0, 168425.9, 336851.8, 505277.69999999995, 673703.6, 842129.5,
+            1010555.3999999999, 1178981.3, 1347407.2, 1515833.0999999999,
+            1684259.0,
+          ],
+          counts: [29920, 64, 11, 1, 0, 0, 1, 2, 0, 1],
+          bin_default_rates: [
+            0.2215909090909091, 0.0625, 0.18181818181818182, 0.0, 0.0, 0.0, 0.0,
+          ],
+        },
+        PAY_AMT_3: {
+          bins: [
+            0.0, 89604.0, 179208.0, 268812.0, 358416.0, 448020.0, 537624.0,
+            627228.0, 716832.0, 806436.0, 896040.0,
+          ],
+          counts: [29779, 172, 29, 12, 5, 1, 0, 0, 0, 2],
+          bin_default_rates: [
+            0.2220356627153363, 0.09302325581395349, 0.20689655172413793,
+            0.08333333333333333, 0.0, 1.0, 0.0,
+          ],
+        },
+        PAY_AMT_4: {
+          bins: [
+            0.0, 62100.0, 124200.0, 186300.0, 248400.0, 310500.0, 372600.0,
+            434700.0, 496800.0, 558900.0, 621000.0,
+          ],
+          counts: [29674, 227, 61, 20, 9, 4, 2, 0, 2, 1],
+          bin_default_rates: [
+            0.22231583204151784, 0.13215859030837004, 0.09836065573770492, 0.05,
+            0.1111111111111111, 0.0, 0.5, 0.0, 0.0,
+          ],
+        },
+        PAY_AMT_5: {
+          bins: [
+            0.0, 42652.9, 85305.8, 127958.70000000001, 170611.6, 213264.5,
+            255917.40000000002, 298570.3, 341223.2, 383876.10000000003,
+            426529.0,
+          ],
+          counts: [29491, 293, 119, 45, 27, 8, 4, 9, 1, 3],
+          bin_default_rates: [
+            0.22315282628598557, 0.08873720136518772, 0.12605042016806722,
+            0.17777777777777778, 0.07407407407407407, 0.0, 0.5,
+            0.2222222222222222, 0.0, 0.0,
+          ],
+        },
+        PAY_AMT_6: {
+          bins: [
+            0.0, 52866.6, 105733.2, 158599.8, 211466.4, 264333.0, 317199.6,
+            370066.2, 422932.8, 475799.39999999997, 528666.0,
+          ],
+          counts: [29513, 289, 93, 70, 19, 7, 2, 4, 1, 2],
+          bin_default_rates: [
+            0.22288483041371598, 0.11418685121107267, 0.11827956989247312,
+            0.11428571428571428, 0.21052631578947367, 0.14285714285714285, 0.5,
+            0.0, 0.0, 0.0,
+          ],
+        },
+      };
+
+      const categoricalData = {
+        Gender: {
+          counts: {
+            Female: 18112,
+            Male: 11888,
+          },
+          default_rates: {
+            Male: 0.2416722745625841,
+            Female: 0.20776280918727916,
+          },
+        },
+        Education: {
+          counts: {
+            University: 14030,
+            "Graduate School": 10585,
+            "High School": 4917,
+            Others: 468,
+          },
+          default_rates: {
+            "Graduate School": 0.19234766178554558,
+            University: 0.23734853884533144,
+            "High School": 0.2515761643278422,
+            Others: 0.07051282051282051,
+          },
+        },
+        Marriage: {
+          counts: {
+            Single: 15964,
+            Married: 13659,
+            Others: 377,
+          },
+          default_rates: {
+            Married: 0.23471703638626545,
+            Single: 0.20928338762214985,
+            Others: 0.23607427055702918,
+          },
+        },
+      };
+
+      const ageLimitData = {
+        Age: {
+          counts: {
+            "(20, 30]": 11013,
+            "(30, 40]": 10713,
+            "(40, 50]": 6005,
+            "(50, 60]": 1997,
+            "(60, 70]": 257,
+            "(70, 80]": 15,
+          },
+          default_rates: {
+            "(20, 30]": 0.22437119767547445,
+            "(30, 40]": 0.20433118640903575,
+            "(40, 50]": 0.23297252289758535,
+            "(50, 60]": 0.25237856785177765,
+            "(60, 70]": 0.26459143968871596,
+            "(70, 80]": 0.3333333333333333,
+          },
+        },
+        Credit_Limit: {
+          counts: {
+            "(9999.999, 50000.0]": 7676,
+            "(50000.0, 100000.0]": 4822,
+            "(100000.0, 180000.0]": 6123,
+            "(180000.0, 270000.0]": 5421,
+            "(270000.0, 1000000.0]": 5958,
+          },
+          default_rates: {
+            "(9999.999, 50000.0]": 0.31787389265242316,
+            "(50000.0, 100000.0]": 0.25798423890501865,
+            "(100000.0, 180000.0]": 0.19859545974195655,
+            "(180000.0, 270000.0]": 0.16860357867552112,
+            "(270000.0, 1000000.0]": 0.1379657603222558,
+          },
+        },
+      };
+
+      const correlationMatrix = {
+        Credit_Limit: {
+          Credit_Limit: 1.0,
+          Age: 0.14471279755733674,
+          BILL_AMT_1: 0.28542986496498995,
+          BILL_AMT_2: 0.27831436399776105,
+          BILL_AMT_3: 0.28323578358168416,
+          BILL_AMT_4: 0.29398762371598486,
+          BILL_AMT_5: 0.29556233765823164,
+          BILL_AMT_6: 0.29038895064794745,
+          PAY_AMT_1: 0.1952360529634244,
+          PAY_AMT_2: 0.1784078223164973,
+          PAY_AMT_3: 0.21016689062889535,
+          PAY_AMT_4: 0.20324219663115492,
+          PAY_AMT_5: 0.2172012828133836,
+          PAY_AMT_6: 0.2195924568437657,
+          Default_Payment_Next_Month: -0.1535198763935072,
+        },
+        Age: {
+          Credit_Limit: 0.14471279755733674,
+          Age: 1.0,
+          BILL_AMT_1: 0.05623853326056659,
+          BILL_AMT_2: 0.05428307435034244,
+          BILL_AMT_3: 0.053709705178660236,
+          BILL_AMT_4: 0.051353093243321435,
+          BILL_AMT_5: 0.04934504811261178,
+          BILL_AMT_6: 0.047612677990511255,
+          PAY_AMT_1: 0.026147584320263133,
+          PAY_AMT_2: 0.02178545266125092,
+          PAY_AMT_3: 0.029248455168514688,
+          PAY_AMT_4: 0.021379548021180656,
+          PAY_AMT_5: 0.022850388309497267,
+          PAY_AMT_6: 0.019478099386539407,
+          Default_Payment_Next_Month: 0.013889834301962887,
+        },
+        BILL_AMT_1: {
+          Credit_Limit: 0.28542986496498995,
+          Age: 0.05623853326056659,
+          BILL_AMT_1: 1.0,
+          BILL_AMT_2: 0.9514836727518136,
+          BILL_AMT_3: 0.8922785291271761,
+          BILL_AMT_4: 0.8602721890293095,
+          BILL_AMT_5: 0.8297786058330013,
+          BILL_AMT_6: 0.8026501885528455,
+          PAY_AMT_1: 0.14026972085164469,
+          PAY_AMT_2: 0.09934902821756314,
+          PAY_AMT_3: 0.1568788739435882,
+          PAY_AMT_4: 0.15829262287509616,
+          PAY_AMT_5: 0.16701579931927374,
+          PAY_AMT_6: 0.1793321597372894,
+          Default_Payment_Next_Month: -0.019644197143221562,
+        },
+        BILL_AMT_2: {
+          Credit_Limit: 0.27831436399776105,
+          Age: 0.05428307435034244,
+          BILL_AMT_1: 0.9514836727518136,
+          BILL_AMT_2: 1.0,
+          BILL_AMT_3: 0.9283262592714855,
+          BILL_AMT_4: 0.8924822912577209,
+          BILL_AMT_5: 0.859778307271445,
+          BILL_AMT_6: 0.8315935591018213,
+          PAY_AMT_1: 0.28035777499354964,
+          PAY_AMT_2: 0.10084454817019381,
+          PAY_AMT_3: 0.15070932728058334,
+          PAY_AMT_4: 0.14738747677004937,
+          PAY_AMT_5: 0.1579467703072856,
+          PAY_AMT_6: 0.1742466383641642,
+          Default_Payment_Next_Month: -0.014193218088215756,
+        },
+        BILL_AMT_3: {
+          Credit_Limit: 0.28323578358168416,
+          Age: 0.053709705178660236,
+          BILL_AMT_1: 0.8922785291271761,
+          BILL_AMT_2: 0.9283262592714855,
+          BILL_AMT_3: 1.0,
+          BILL_AMT_4: 0.9239694565909823,
+          BILL_AMT_5: 0.8839096973620155,
+          BILL_AMT_6: 0.8533200905940468,
+          PAY_AMT_1: 0.2443282925021749,
+          PAY_AMT_2: 0.3169298907228755,
+          PAY_AMT_3: 0.13000192810221994,
+          PAY_AMT_4: 0.1433934635301674,
+          PAY_AMT_5: 0.17970145388753297,
+          PAY_AMT_6: 0.18231614731876752,
+          Default_Payment_Next_Month: -0.014075518043214726,
+        },
+        BILL_AMT_4: {
+          Credit_Limit: 0.29398762371598486,
+          Age: 0.051353093243321435,
+          BILL_AMT_1: 0.8602721890293095,
+          BILL_AMT_2: 0.8924822912577209,
+          BILL_AMT_3: 0.9239694565909823,
+          BILL_AMT_4: 1.0,
+          BILL_AMT_5: 0.9401344040880004,
+          BILL_AMT_6: 0.9009409547978421,
+          PAY_AMT_1: 0.23300521833561183,
+          PAY_AMT_2: 0.2075578157767153,
+          PAY_AMT_3: 0.30001350663464926,
+          PAY_AMT_4: 0.13017989097539862,
+          PAY_AMT_5: 0.16042143759751823,
+          PAY_AMT_6: 0.177626842167707,
+          Default_Payment_Next_Month: -0.010156495880289674,
+        },
+        BILL_AMT_5: {
+          Credit_Limit: 0.29556233765823164,
+          Age: 0.04934504811261178,
+          BILL_AMT_1: 0.8297786058330013,
+          BILL_AMT_2: 0.859778307271445,
+          BILL_AMT_3: 0.8839096973620155,
+          BILL_AMT_4: 0.9401344040880004,
+          BILL_AMT_5: 1.0,
+          BILL_AMT_6: 0.9461968070521957,
+          PAY_AMT_1: 0.21702449197271978,
+          PAY_AMT_2: 0.18124087226811628,
+          PAY_AMT_3: 0.2522963771623056,
+          PAY_AMT_4: 0.2931074940330574,
+          PAY_AMT_5: 0.14156224627895747,
+          PAY_AMT_6: 0.16417381293214936,
+          Default_Payment_Next_Month: -0.006760463841014779,
+        },
+        BILL_AMT_6: {
+          Credit_Limit: 0.29038895064794745,
+          Age: 0.047612677990511255,
+          BILL_AMT_1: 0.8026501885528455,
+          BILL_AMT_2: 0.8315935591018213,
+          BILL_AMT_3: 0.8533200905940468,
+          BILL_AMT_4: 0.9009409547978421,
+          BILL_AMT_5: 0.9461968070521957,
+          BILL_AMT_6: 1.0,
+          PAY_AMT_1: 0.19995880056317872,
+          PAY_AMT_2: 0.17265750393493942,
+          PAY_AMT_3: 0.23376162831590355,
+          PAY_AMT_4: 0.2502262023557074,
+          PAY_AMT_5: 0.30771722306216837,
+          PAY_AMT_6: 0.11548278672248785,
+          Default_Payment_Next_Month: -0.005372314914815558,
+        },
+        PAY_AMT_1: {
+          Credit_Limit: 0.1952360529634244,
+          Age: 0.026147584320263133,
+          BILL_AMT_1: 0.14026972085164469,
+          BILL_AMT_2: 0.28035777499354964,
+          BILL_AMT_3: 0.2443282925021749,
+          BILL_AMT_4: 0.23300521833561183,
+          BILL_AMT_5: 0.21702449197271978,
+          BILL_AMT_6: 0.19995880056317872,
+          PAY_AMT_1: 1.0,
+          PAY_AMT_2: 0.2855733116095307,
+          PAY_AMT_3: 0.25218707969900256,
+          PAY_AMT_4: 0.19955311652025678,
+          PAY_AMT_5: 0.1484541244531646,
+          PAY_AMT_6: 0.18573077121905512,
+          Default_Payment_Next_Month: -0.07292297483273101,
+        },
+        PAY_AMT_2: {
+          Credit_Limit: 0.1784078223164973,
+          Age: 0.02178545266125092,
+          BILL_AMT_1: 0.09934902821756314,
+          BILL_AMT_2: 0.10084454817019381,
+          BILL_AMT_3: 0.3169298907228755,
+          BILL_AMT_4: 0.2075578157767153,
+          BILL_AMT_5: 0.18124087226811628,
+          BILL_AMT_6: 0.17265750393493942,
+          PAY_AMT_1: 0.2855733116095307,
+          PAY_AMT_2: 1.0,
+          PAY_AMT_3: 0.24476766314248918,
+          PAY_AMT_4: 0.1801027491565579,
+          PAY_AMT_5: 0.18090381980427023,
+          PAY_AMT_6: 0.15763007188628225,
+          Default_Payment_Next_Month: -0.05857472113911883,
+        },
+        PAY_AMT_3: {
+          Credit_Limit: 0.21016689062889535,
+          Age: 0.029248455168514688,
+          BILL_AMT_1: 0.1568788739435882,
+          BILL_AMT_2: 0.15070932728058334,
+          BILL_AMT_3: 0.13000192810221994,
+          BILL_AMT_4: 0.30001350663464926,
+          BILL_AMT_5: 0.2522963771623056,
+          BILL_AMT_6: 0.23376162831590355,
+          PAY_AMT_1: 0.25218707969900256,
+          PAY_AMT_2: 0.24476766314248918,
+          PAY_AMT_3: 1.0,
+          PAY_AMT_4: 0.21632073358866033,
+          PAY_AMT_5: 0.15920804961720497,
+          PAY_AMT_6: 0.16273497955215543,
+          Default_Payment_Next_Month: -0.056245155273894655,
+        },
+        PAY_AMT_4: {
+          Credit_Limit: 0.20324219663115492,
+          Age: 0.021379548021180656,
+          BILL_AMT_1: 0.15829262287509616,
+          BILL_AMT_2: 0.14738747677004937,
+          BILL_AMT_3: 0.1433934635301674,
+          BILL_AMT_4: 0.13017989097539862,
+          BILL_AMT_5: 0.2931074940330574,
+          BILL_AMT_6: 0.2502262023557074,
+          PAY_AMT_1: 0.19955311652025678,
+          PAY_AMT_2: 0.1801027491565579,
+          PAY_AMT_3: 0.21632073358866033,
+          PAY_AMT_4: 1.0,
+          PAY_AMT_5: 0.15182402255698577,
+          PAY_AMT_6: 0.1578275930187455,
+          Default_Payment_Next_Month: -0.056821977084156386,
+        },
+        PAY_AMT_5: {
+          Credit_Limit: 0.2172012828133836,
+          Age: 0.022850388309497267,
+          BILL_AMT_1: 0.16701579931927374,
+          BILL_AMT_2: 0.1579467703072856,
+          BILL_AMT_3: 0.17970145388753297,
+          BILL_AMT_4: 0.16042143759751823,
+          BILL_AMT_5: 0.14156224627895747,
+          BILL_AMT_6: 0.30771722306216837,
+          PAY_AMT_1: 0.1484541244531646,
+          PAY_AMT_2: 0.18090381980427023,
+          PAY_AMT_3: 0.15920804961720497,
+          PAY_AMT_4: 0.15182402255698577,
+          PAY_AMT_5: 1.0,
+          PAY_AMT_6: 0.15488913315287947,
+          Default_Payment_Next_Month: -0.055118898933596575,
+        },
+        PAY_AMT_6: {
+          Credit_Limit: 0.2195924568437657,
+          Age: 0.019478099386539407,
+          BILL_AMT_1: 0.1793321597372894,
+          BILL_AMT_2: 0.1742466383641642,
+          BILL_AMT_3: 0.18231614731876752,
+          BILL_AMT_4: 0.177626842167707,
+          BILL_AMT_5: 0.16417381293214936,
+          BILL_AMT_6: 0.11548278672248785,
+          PAY_AMT_1: 0.18573077121905512,
+          PAY_AMT_2: 0.15763007188628225,
+          PAY_AMT_3: 0.16273497955215543,
+          PAY_AMT_4: 0.1578275930187455,
+          PAY_AMT_5: 0.15488913315287947,
+          PAY_AMT_6: 1.0,
+          Default_Payment_Next_Month: -0.053179320636030425,
+        },
+        Default_Payment_Next_Month: {
+          Credit_Limit: -0.1535198763935072,
+          Age: 0.013889834301962887,
+          BILL_AMT_1: -0.019644197143221562,
+          BILL_AMT_2: -0.014193218088215756,
+          BILL_AMT_3: -0.014075518043214726,
+          BILL_AMT_4: -0.010156495880289674,
+          BILL_AMT_5: -0.006760463841014779,
+          BILL_AMT_6: -0.005372314914815558,
+          PAY_AMT_1: -0.07292297483273101,
+          PAY_AMT_2: -0.05857472113911883,
+          PAY_AMT_3: -0.056245155273894655,
+          PAY_AMT_4: -0.056821977084156386,
+          PAY_AMT_5: -0.055118898933596575,
+          PAY_AMT_6: -0.053179320636030425,
+          Default_Payment_Next_Month: 1.0,
+        },
+      };
+
+      const outlierStats = {
+        Credit_Limit: {
+          num_outliers: 167,
+          percentage_outliers: 0.56,
+          lower_bound: -235000.0,
+          upper_bound: 525000.0,
+          Q1: 50000.0,
+          Q3: 240000.0,
+          IQR: 190000.0,
+        },
+        Age: {
+          num_outliers: 272,
+          percentage_outliers: 0.91,
+          lower_bound: 8.5,
+          upper_bound: 60.5,
+          Q1: 28.0,
+          Q3: 41.0,
+          IQR: 13.0,
+        },
+        BILL_AMT_1: {
+          num_outliers: 2400,
+          percentage_outliers: 8.0,
+          lower_bound: -91739.625,
+          upper_bound: 162389.375,
+          Q1: 3558.75,
+          Q3: 67091.0,
+          IQR: 63532.25,
+        },
+        BILL_AMT_2: {
+          num_outliers: 2395,
+          percentage_outliers: 7.98,
+          lower_bound: -88547.5,
+          upper_bound: 155538.5,
+          Q1: 2984.75,
+          Q3: 64006.25,
+          IQR: 61021.5,
+        },
+        BILL_AMT_3: {
+          num_outliers: 2469,
+          percentage_outliers: 8.23,
+          lower_bound: -83581.5,
+          upper_bound: 146412.5,
+          Q1: 2666.25,
+          Q3: 60164.75,
+          IQR: 57498.5,
+        },
+        BILL_AMT_4: {
+          num_outliers: 2622,
+          percentage_outliers: 8.74,
+          lower_bound: -75942.125,
+          upper_bound: 132774.875,
+          Q1: 2326.75,
+          Q3: 54506.0,
+          IQR: 52179.25,
+        },
+        BILL_AMT_5: {
+          num_outliers: 2725,
+          percentage_outliers: 9.08,
+          lower_bound: -70878.25,
+          upper_bound: 122831.75,
+          Q1: 1763.0,
+          Q3: 50190.5,
+          IQR: 48427.5,
+        },
+        BILL_AMT_6: {
+          num_outliers: 2693,
+          percentage_outliers: 8.98,
+          lower_bound: -70657.375,
+          upper_bound: 121111.625,
+          Q1: 1256.0,
+          Q3: 49198.25,
+          IQR: 47942.25,
+        },
+        PAY_AMT_1: {
+          num_outliers: 2745,
+          percentage_outliers: 9.15,
+          lower_bound: -5009.0,
+          upper_bound: 11015.0,
+          Q1: 1000.0,
+          Q3: 5006.0,
+          IQR: 4006.0,
+        },
+        PAY_AMT_2: {
+          num_outliers: 2714,
+          percentage_outliers: 9.05,
+          lower_bound: -5417.5,
+          upper_bound: 11250.5,
+          Q1: 833.0,
+          Q3: 5000.0,
+          IQR: 4167.0,
+        },
+        PAY_AMT_3: {
+          num_outliers: 2598,
+          percentage_outliers: 8.66,
+          lower_bound: -5782.5,
+          upper_bound: 10677.5,
+          Q1: 390.0,
+          Q3: 4505.0,
+          IQR: 4115.0,
+        },
+        PAY_AMT_4: {
+          num_outliers: 2994,
+          percentage_outliers: 9.98,
+          lower_bound: -5279.875,
+          upper_bound: 9589.125,
+          Q1: 296.0,
+          Q3: 4013.25,
+          IQR: 3717.25,
+        },
+        PAY_AMT_5: {
+          num_outliers: 2945,
+          percentage_outliers: 9.82,
+          lower_bound: -5416.0,
+          upper_bound: 9700.0,
+          Q1: 252.5,
+          Q3: 4031.5,
+          IQR: 3779.0,
+        },
+        PAY_AMT_6: {
+          num_outliers: 2958,
+          percentage_outliers: 9.86,
+          lower_bound: -5705.625,
+          upper_bound: 9823.375,
+          Q1: 117.75,
+          Q3: 4000.0,
+          IQR: 3882.25,
+        },
+      };
+
+      function formatMetric(value, digits = 6) {
+        return Number(value)
+          .toFixed(digits)
+          .replace(/\.?0+$/, "");
+      }
+
+      function formatNumber(value, digits = 2) {
+        return Number(value).toLocaleString("en-US", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        });
+      }
+
+      function corrColor(value) {
+        const clamped = Math.max(-1, Math.min(1, Number(value)));
+        if (clamped >= 0) {
+          const intensity = Math.round(255 - clamped * 201);
+          return `rgb(${intensity}, ${intensity}, 255)`;
+        }
+        const intensity = Math.round(255 - Math.abs(clamped) * 201);
+        return `rgb(255, ${intensity}, ${intensity})`;
+      }
+
+      function renderCorrelationHeatmap() {
+        const matrixTable = document.getElementById("corrMatrixTable");
+        if (!matrixTable) {
+          return;
+        }
+
+        const keys = Object.keys(correlationMatrix);
+        const headerCells = keys.map((key) => `<th>${key}</th>`).join("");
+
+        const bodyRows = keys
+          .map((rowKey) => {
+            const rowCells = keys
+              .map((colKey) => {
+                const value = correlationMatrix[rowKey][colKey];
+                const valueText = formatMetric(value, 6);
+                const bg = corrColor(value);
+                return `<td style="background:${bg}" title="${rowKey} vs ${colKey}: ${valueText}">${valueText}</td>`;
+              })
+              .join("");
+
+            return `<tr><th class="row-head">${rowKey}</th>${rowCells}</tr>`;
+          })
+          .join("");
+
+        matrixTable.innerHTML = `
+          <thead>
+            <tr>
+              <th class="row-head">Variable</th>
+              ${headerCells}
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyRows}
+          </tbody>
+        `;
+      }
+
+      function renderCorrelationTables() {
+        const targetKey = "Default_Payment_Next_Month";
+        const corrTargetTbody = document.getElementById("corrTargetTbody");
+        const corrPairTbody = document.getElementById("corrPairTbody");
+        const corrMatrixRaw = document.getElementById("corrMatrixRaw");
+
+        if (!corrTargetTbody || !corrPairTbody || !corrMatrixRaw) {
+          return;
+        }
+
+        const allVars = Object.keys(correlationMatrix);
+        const targetRows = allVars
+          .filter((v) => v !== targetKey)
+          .map((v) => {
+            const corr = correlationMatrix[v][targetKey];
+            return { variable: v, corr, abs: Math.abs(corr) };
+          })
+          .sort((a, b) => b.abs - a.abs);
+
+        corrTargetTbody.innerHTML = targetRows
+          .map(
+            (row) => `
+            <tr>
+              <td>${row.variable}</td>
+              <td>${formatMetric(row.corr, 15)}</td>
+              <td>${formatMetric(row.abs, 15)}</td>
+            </tr>`,
+          )
+          .join("");
+
+        const featureVars = allVars.filter((v) => v !== targetKey);
+        const pairRows = [];
+        for (let i = 0; i < featureVars.length; i += 1) {
+          for (let j = i + 1; j < featureVars.length; j += 1) {
+            const a = featureVars[i];
+            const b = featureVars[j];
+            const corr = correlationMatrix[a][b];
+            pairRows.push({ a, b, corr, abs: Math.abs(corr) });
+          }
+        }
+
+        pairRows.sort((x, y) => y.abs - x.abs);
+        corrPairTbody.innerHTML = pairRows
+          .slice(0, 15)
+          .map(
+            (row) => `
+            <tr>
+              <td>${row.a}</td>
+              <td>${row.b}</td>
+              <td>${formatMetric(row.corr, 15)}</td>
+              <td>${formatMetric(row.abs, 15)}</td>
+            </tr>`,
+          )
+          .join("");
+
+        corrMatrixRaw.textContent = JSON.stringify(correlationMatrix, null, 2);
+      }
+
+      function renderOutlierTable() {
+        const outlierStatsTbody = document.getElementById(
+          "outlierSummaryTbody",
+        );
+        const outlierRaw = document.getElementById("outlierRaw");
+        if (!outlierStatsTbody || !outlierRaw) {
+          return;
+        }
+
+        const rows = Object.entries(outlierStats);
+        outlierStatsTbody.innerHTML = rows
+          .map(([variable, stats]) => {
+            const pct = Number(stats.percentage_outliers);
+            let severityClass = "severity-low";
+            let severityText = "✓ Low";
+            if (pct >= 8) {
+              severityClass = "severity-high";
+              severityText = "⚠ High";
+            } else if (pct >= 1) {
+              severityClass = "severity-medium";
+              severityText = "⚠ Medium";
+            }
+
+            return `
+            <tr>
+              <td>${variable}</td>
+              <td>${Number(stats.num_outliers).toLocaleString("en-US")}</td>
+              <td>${formatMetric(stats.percentage_outliers, 2)}%</td>
+              <td><span class="${severityClass}">${severityText}</span></td>
+              <td>[${formatNumber(stats.lower_bound)}, ${formatNumber(stats.upper_bound)}]</td>
+            </tr>`;
+          })
+          .join("");
+
+        outlierRaw.textContent = JSON.stringify(outlierStats, null, 2);
+      }
+
+      let catCountChart;
+      let catRateChart;
+
+      function renderPayStatus(variable) {
+        const data = payStatusData[variable];
+        const labels = Object.keys(data.counts).sort(
+          (a, b) => Number(a) - Number(b),
+        );
+        const counts = labels.map((k) => data.counts[k]);
+        const ratesPct = labels.map((k) =>
+          Number((data.default_rates[k] * 100).toFixed(2)),
+        );
+
+        const countCtx = document.getElementById("payStatusCountChart");
+        if (payStatusCountChart) {
+          payStatusCountChart.destroy();
+        }
+        payStatusCountChart = new Chart(countCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Count",
+                data: counts,
+                backgroundColor: "#2f855a",
+                borderColor: "#1f5c3d",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        const rateCtx = document.getElementById("payStatusDefaultRateChart");
+        if (payStatusDefaultRateChart) {
+          payStatusDefaultRateChart.destroy();
+        }
+        payStatusDefaultRateChart = new Chart(rateCtx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Default rate (%)",
+                data: ratesPct,
+                borderColor: "#c05621",
+                backgroundColor: "rgba(192, 86, 33, 0.15)",
+                tension: 0.2,
+                fill: true,
+                pointRadius: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, suggestedMax: 100 } },
+          },
+        });
+      }
+
+      function buildBinLabels(bins, countsLen) {
+        return Array.from({ length: countsLen }, (_, i) => {
+          const left = bins[i];
+          const right = bins[i + 1];
+          return `${left.toFixed(0)} to ${right.toFixed(0)}`;
+        });
+      }
+
+      function renderBinnedAnalysis(
+        dataObj,
+        variable,
+        chartRefs,
+        countCanvasId,
+        rateCanvasId,
+      ) {
+        const data = dataObj[variable];
+        const labels = buildBinLabels(data.bins, data.counts.length);
+        const ratesPct = data.bin_default_rates.map((x) =>
+          Number((x * 100).toFixed(2)),
+        );
+
+        const countCtx = document.getElementById(countCanvasId);
+        if (chartRefs.count) {
+          chartRefs.count.destroy();
+        }
+        chartRefs.count = new Chart(countCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Count",
+                data: data.counts,
+                backgroundColor: "#1864ab",
+                borderColor: "#0b497e",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { maxRotation: 45, minRotation: 25 } },
+            },
+          },
+        });
+
+        const rateCtx = document.getElementById(rateCanvasId);
+        if (chartRefs.rate) {
+          chartRefs.rate.destroy();
+        }
+        chartRefs.rate = new Chart(rateCtx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Default rate (%)",
+                data: ratesPct,
+                borderColor: "#d9480f",
+                backgroundColor: "rgba(217, 72, 15, 0.14)",
+                tension: 0.22,
+                fill: true,
+                pointRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { maxRotation: 45, minRotation: 25 } },
+              y: { beginAtZero: true, suggestedMax: 100 },
+            },
+          },
+        });
+      }
+
+      function renderCategorical(variable) {
+        const data = categoricalData[variable];
+        const labels = Object.keys(data.counts);
+        const counts = labels.map((k) => data.counts[k]);
+        const defaultPct = labels.map((k) =>
+          Number((((data.default_rates || {})[k] ?? 0) * 100).toFixed(2)),
+        );
+        const nonDefaultPct = defaultPct.map((v) =>
+          Number((100 - v).toFixed(2)),
+        );
+
+        const countCtx = document.getElementById("catCountChart");
+        if (catCountChart) {
+          catCountChart.destroy();
+        }
+        catCountChart = new Chart(countCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Count",
+                data: counts,
+                backgroundColor: ["#0f766e", "#1864ab", "#d97706", "#2f855a"],
+                borderColor: "#1f3d34",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        const rateCtx = document.getElementById("catRateChart");
+        if (catRateChart) {
+          catRateChart.destroy();
+        }
+        catRateChart = new Chart(rateCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Non-default (%)",
+                data: nonDefaultPct,
+                backgroundColor: "#2f855a",
+                borderColor: "#1f5c3d",
+                borderWidth: 1,
+              },
+              {
+                label: "Default (%)",
+                data: defaultPct,
+                backgroundColor: "#c05621",
+                borderColor: "#8f3f17",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: {
+              x: { stacked: true },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                suggestedMax: 100,
+                max: 100,
+              },
+            },
+          },
+        });
+      }
+
+      function renderSingleGroupAnalysis(
+        variableKey,
+        countCanvasId,
+        rateCanvasId,
+      ) {
+        const data = ageLimitData[variableKey];
+        const labels = Object.keys(data.counts);
+        const counts = labels.map((k) => data.counts[k]);
+        const ratePct = labels.map((k) =>
+          Number((data.default_rates[k] * 100).toFixed(2)),
+        );
+
+        new Chart(document.getElementById(countCanvasId), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Count",
+                data: counts,
+                backgroundColor: "#1864ab",
+                borderColor: "#0b497e",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { ticks: { maxRotation: 35, minRotation: 15 } } },
+          },
+        });
+
+        new Chart(document.getElementById(rateCanvasId), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Default rate (%)",
+                data: ratePct,
+                borderColor: "#d9480f",
+                backgroundColor: "rgba(217, 72, 15, 0.14)",
+                fill: true,
+                tension: 0.2,
+                pointRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, suggestedMax: 100 } },
+          },
+        });
+      }
+
+      const payButtons = document.querySelectorAll(
+        "#payVarButtons .pay-var-btn",
+      );
+      if (payButtons.length > 0) {
+        payButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            payButtons.forEach((b) => b.classList.remove("active"));
+            button.classList.add("active");
+            renderPayStatus(button.getAttribute("data-var"));
+          });
+        });
+        renderPayStatus("PAY_1");
+      }
+
+      const billButtons = document.querySelectorAll(
+        "#billAmtButtons .pay-var-btn",
+      );
+      const billCharts = { count: null, rate: null };
+      if (billButtons.length > 0) {
+        billButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            billButtons.forEach((b) => b.classList.remove("active"));
+            button.classList.add("active");
+            renderBinnedAnalysis(
+              billAmtData,
+              button.getAttribute("data-var"),
+              billCharts,
+              "billAmtCountChart",
+              "billAmtRateChart",
+            );
+          });
+        });
+        renderBinnedAnalysis(
+          billAmtData,
+          "BILL_AMT_1",
+          billCharts,
+          "billAmtCountChart",
+          "billAmtRateChart",
+        );
+      }
+
+      const payAmtButtons = document.querySelectorAll(
+        "#payAmtButtons .pay-var-btn",
+      );
+      const payAmtCharts = { count: null, rate: null };
+      if (payAmtButtons.length > 0) {
+        payAmtButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            payAmtButtons.forEach((b) => b.classList.remove("active"));
+            button.classList.add("active");
+            renderBinnedAnalysis(
+              payAmtData,
+              button.getAttribute("data-var"),
+              payAmtCharts,
+              "payAmtCountChart",
+              "payAmtRateChart",
+            );
+          });
+        });
+        renderBinnedAnalysis(
+          payAmtData,
+          "PAY_AMT_1",
+          payAmtCharts,
+          "payAmtCountChart",
+          "payAmtRateChart",
+        );
+      }
+
+      const catButtons = document.querySelectorAll(
+        "#categoricalButtons .pay-var-btn",
+      );
+      if (catButtons.length > 0) {
+        catButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            catButtons.forEach((b) => b.classList.remove("active"));
+            button.classList.add("active");
+            renderCategorical(button.getAttribute("data-var"));
+          });
+        });
+        renderCategorical("Gender");
+      }
+
+      renderSingleGroupAnalysis("Age", "ageCountChart", "ageRateChart");
+      renderSingleGroupAnalysis(
+        "Credit_Limit",
+        "limitBalanceCountChart",
+        "limitBalanceRateChart",
+      );
+
+      function renderTargetDistribution() {
+        const labels = ["No Default (0)", "Default (1)"];
+        const counts = [23364, 6636];
+        const bgColors = ["#2f855a", "#c05621"];
+        const borderColors = ["#1f5c3d", "#8f3f17"];
+
+        const doughnutCtx = document.getElementById("targetDoughnut");
+        if (doughnutCtx) {
+          new Chart(doughnutCtx, {
+            type: "doughnut",
+            data: {
+              labels,
+              datasets: [
+                {
+                  data: counts,
+                  backgroundColor: bgColors,
+                  borderColor: borderColors,
+                  borderWidth: 2,
+                  hoverOffset: 10,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              cutout: "55%",
+              plugins: {
+                legend: { position: "bottom" },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => {
+                      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                      const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                      return ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${pct}%)`;
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        const barCtx = document.getElementById("targetBar");
+        if (barCtx) {
+          new Chart(barCtx, {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Count",
+                  data: counts,
+                  backgroundColor: bgColors,
+                  borderColor: borderColors,
+                  borderWidth: 1.5,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: (v) => v.toLocaleString(),
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+
+      renderCorrelationHeatmap();
+
+      // ── Tutorial toggle ───────────────────────────────────────────────
+      document.querySelectorAll('.btn-tutorial').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var bodyId  = btn.getAttribute('data-tutorial');
+          var body    = document.getElementById(bodyId);
+          if (!body) return;
+          var isActive = btn.classList.toggle('tut-active');
+          body.querySelectorAll('.tut-toggle').forEach(function(el) {
+            el.classList.toggle('tut-visible', isActive);
+          });
+          btn.innerHTML = isActive
+            ? '&#x2716;&nbsp;Hide Tutorial'
+            : '&#x1F4D6;&nbsp;Tutorial';
+        });
+      });
+
+      // ── Heatmap zoom ──────────────────────────────────────────────────
+      var _heatmapScale = 1.0;
+      function adjustHeatmapZoom(delta) {
+        _heatmapScale = Math.min(2.5, Math.max(0.3, _heatmapScale + delta));
+        var el  = document.getElementById('matrixScalable');
+        var lbl = document.getElementById('heatmapZoomLabel');
+        if (el)  el.style.transform  = 'scale(' + _heatmapScale + ')';
+        if (lbl) lbl.textContent = Math.round(_heatmapScale * 100) + '%';
+      }
+      function resetHeatmapZoom() {
+        _heatmapScale = 1.0;
+        var el  = document.getElementById('matrixScalable');
+        var lbl = document.getElementById('heatmapZoomLabel');
+        if (el)  el.style.transform  = 'scale(1)';
+        if (lbl) lbl.textContent = '100%';
+      }
+
+      // ── Code-panel tab switching ──────────────────────────────────────
+      document.querySelectorAll('.code-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var panel = tab.closest('.code-panel');
+          panel.querySelectorAll('.code-tab').forEach(function(t) {
+            t.classList.remove('active');
+          });
+          panel.querySelectorAll('.code-tab-pane').forEach(function(p) {
+            p.classList.remove('active');
+          });
+          tab.classList.add('active');
+          var pane = document.getElementById(tab.getAttribute('data-tab'));
+          if (pane) pane.classList.add('active');
+        });
+      });
+
+      // ── Copy button ────────────────────────────────────────────────────
+      document.querySelectorAll('.code-copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var panel = btn.closest('.code-panel');
+          var pane  = panel.querySelector('.code-tab-pane.active code');
+          if (!pane) return;
+          var text  = pane.textContent.trim();
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function() {
+              btn.textContent = '\u2713 Copied!';
+              setTimeout(function() { btn.innerHTML = '\u{1F4CB}\u00A0Copy'; }, 1800);
+            }).catch(function() {
+              btn.textContent = '\u2717 Error';
+              setTimeout(function() { btn.innerHTML = '\u{1F4CB}\u00A0Copy'; }, 1800);
+            });
+          }
+        });
+      });
+
+      // ── highlight.js ───────────────────────────────────────────────────
+      if (typeof hljs !== 'undefined') {
+        document.querySelectorAll('pre code.language-python').forEach(function(block) {
+          hljs.highlightElement(block);
+        });
+      }
+
+      renderOutlierTable();
+      renderTargetDistribution();
+    </script>
+  </body>
+</html>
