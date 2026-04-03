@@ -1,8 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment 1</title>
-    <link rel="stylesheet" href="style.css">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Assignment 1</title>
+        <style>
+            :root {
+                --bg: #f7faf7;
+                --paper: #ffffff;
+                --ink: #1a2c1d;
+                --muted: #506455;
+                --line: #d3e1d5;
+                --accent: #1f8f5f;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--ink);
+                background:
+                    radial-gradient(circle at 10% 10%, #dff7e8 0%, rgba(223, 247, 232, 0) 32%),
+                    radial-gradient(circle at 90% 15%, #d9f0ff 0%, rgba(217, 240, 255, 0) 30%),
+                    var(--bg);
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 28px 18px 44px;
+            }
+
+            .hero,
+            .card {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+            }
+
+            .hero {
+                padding: 24px;
+            }
+
+            h1 {
+                margin: 0 0 10px;
+            }
+
+            p {
+                margin: 0;
+                color: var(--muted);
+                line-height: 1.6;
+            }
+
+            .grid {
+                margin-top: 18px;
+                display: grid;
+                gap: 12px;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .card {
+                display: block;
+                text-decoration: none;
+                color: inherit;
+                padding: 16px;
+            }
+
+            .card:hover {
+                border-color: #8bcaa9;
+            }
+
+            .title {
+                margin: 0 0 6px;
+                color: var(--accent);
+                font-size: 1.04rem;
+                font-weight: 700;
+            }
+
+            .top-link {
+                display: inline-block;
+                margin-top: 14px;
+                color: #165e41;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .top-link:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <section class="hero">
+                <h1>Assignment 1</h1>
+                <p>Choose an EDA report below.</p>
+                <a class="top-link" href="../">Back to Home</a>
+            </section>
+
+            <section class="grid" aria-label="EDA reports">
+                <a class="card" href="EDA/mbti_text_classification/">
+                    <p class="title">MBTI Text Classification</p>
+                    <p>Exploratory analysis for MBTI personality text dataset.</p>
+                </a>
+
+                <a class="card" href="EDA/pokemon_classification/">
+                    <p class="title">Pokemon Classification</p>
+                    <p>EDA for image dataset quality, class balance, and split checks.</p>
+                </a>
+
+                <a class="card" href="EDA/taiwan_credit_tabula_classifiaction/">
+                    <p class="title">Taiwan Credit Default</p>
+                    <p>EDA for tabular features, class distribution, and data quality.</p>
+                </a>
+            </section>
+        </main>
+    </body>
 </html>

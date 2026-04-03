@@ -1,8 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P4DSAI</title>
-    <link rel="stylesheet" href="style.css">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>P4DSAI</title>
+        <style>
+            :root {
+                --bg: #f2f5fa;
+                --paper: #ffffff;
+                --ink: #1a2433;
+                --muted: #5f6b7a;
+                --line: #d5dfeb;
+                --accent: #1f6feb;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--ink);
+                background:
+                    radial-gradient(circle at 10% 10%, #dfe9ff 0%, rgba(223, 233, 255, 0) 30%),
+                    radial-gradient(circle at 90% 15%, #d9f0ff 0%, rgba(217, 240, 255, 0) 28%),
+                    var(--bg);
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 28px 18px 44px;
+            }
+
+            .hero {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 18px;
+                padding: 24px;
+            }
+
+            h1 {
+                margin: 0 0 10px;
+            }
+
+            p {
+                margin: 0;
+                color: var(--muted);
+                line-height: 1.6;
+            }
+
+            .grid {
+                margin-top: 18px;
+                display: grid;
+                gap: 12px;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .card {
+                display: block;
+                text-decoration: none;
+                color: inherit;
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 16px;
+            }
+
+            .card:hover {
+                border-color: #9bb6e7;
+            }
+
+            .title {
+                margin: 0 0 6px;
+                color: var(--accent);
+                font-weight: 700;
+            }
+
+            .muted {
+                color: var(--muted);
+                font-size: 0.94rem;
+            }
+
+            .footer {
+                margin-top: 16px;
+                font-size: 0.88rem;
+                color: var(--muted);
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <section class="hero">
+                <h1>P4DSAI Course Assignments</h1>
+                <p>This site hosts assignment pages and EDA reports for the P4DSAI course.</p>
+            </section>
+
+            <section class="grid" aria-label="Site navigation">
+                <a class="card" href="assignment1/">
+                    <p class="title">Assignment 1</p>
+                    <p class="muted">Open EDA reports: MBTI, Pokemon, and Taiwan Credit.</p>
+                </a>
+
+                <a class="card" href="assignment2/">
+                    <p class="title">Assignment 2</p>
+                    <p class="muted">Open Assignment 2 page and related deliverables.</p>
+                </a>
+            </section>
+
+            <p class="footer">Published with GitHub Pages.</p>
+        </main>
+    </body>
 </html>
