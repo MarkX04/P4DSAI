@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2"></script>
     <style>
       :root {
         --bg: #fffaf5;
@@ -853,6 +854,349 @@ Top 10 classes by image count:
         </div>
       </section>
 
+      <!-- ═══════════════════ MISSING VALUES ═══════════════════ -->
+      <section class="section" id="missing-values">
+        <header class="section-head">
+          <h2>&#128269; Missing Values Audit</h2>
+          <button
+            class="toggle"
+            data-target="missing-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="missing-body">
+          <div
+            class="grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))"
+          >
+            <div class="kpi">
+              <div class="label">Rows with Any Missing</div>
+              <div class="value" style="color: var(--success)">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Critical Columns Checked</div>
+              <div class="value">11</div>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 14px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th style="text-align: center">Missing Count</th>
+                  <th style="text-align: center">Missing %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>class_name</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>file_path</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>ext</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>file_size_kb</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>width</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>height</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>mode</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>brightness</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>contrast</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>aspect_ratio</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>megapixels</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            All 11 critical metadata columns are fully populated with zero
+            missing values across all 2,503 records.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ IMAGE PROPERTIES ═══════════════════ -->
+      <section class="section" id="image-properties">
+        <header class="section-head">
+          <h2>&#128247; Image Properties</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="imgprop-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="imgprop-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="imgprop-body">
+          <div class="grid">
+            <div class="kpi">
+              <div class="label">Valid Images</div>
+              <div class="value">2,503</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Corrupted Files</div>
+              <div class="value" style="color: var(--success)">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Resolution</div>
+              <div class="value">310 &times; 315</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg File Size</div>
+              <div class="value">23.78 KB</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Brightness</div>
+              <div class="value">199.8</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Contrast</div>
+              <div class="value">74.3</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Aspect Ratio</div>
+              <div class="value">1.027</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Color Mode</div>
+              <div class="value">RGB (100%)</div>
+            </div>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>Resolution Scatter (Width vs Height)</h3>
+              <canvas id="resolutionChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Aspect Ratio Distribution</h3>
+              <canvas id="aspectChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>File Size Distribution</h3>
+              <canvas id="fileSizeChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Brightness vs Contrast</h3>
+              <canvas id="brightnessChart"></canvas>
+            </div>
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="imgprop-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="imgprop-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="imgprop-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="imgprop-py">
+              <pre>
+meta_records = []
+bad_files = []
+
+<span class="ck">for</span> fp <span class="ck">in</span> tqdm(df[<span class="cs">"file_path"</span>], desc=<span class="cs">"Reading image metadata"</span>):
+    <span class="ck">try</span>:
+        <span class="ck">with</span> Image.open(fp) <span class="ck">as</span> img:
+            width, height = img.size
+            mode = img.mode
+            arr = np.asarray(img.convert(<span class="cs">"RGB"</span>), dtype=np.float32)
+            mean_rgb = arr.reshape(-<span class="cn">1</span>, <span class="cn">3</span>).mean(axis=<span class="cn">0</span>)
+            brightness = arr.mean()
+            contrast = arr.std()
+    <span class="ck">except</span> (UnidentifiedImageError, OSError) <span class="ck">as</span> err:
+        bad_files.append((fp, str(err)))
+
+df[<span class="cs">"aspect_ratio"</span>] = df[<span class="cs">"width"</span>] / df[<span class="cs">"height"</span>]
+df[<span class="cs">"megapixels"</span>] = (df[<span class="cs">"width"</span>] * df[<span class="cs">"height"</span>]) / <span class="cn">1_000_000</span></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ FORMAT & OUTLIERS ═══════════════════ -->
+      <section class="section" id="format-outliers">
+        <header class="section-head">
+          <h2>&#128200; File Format, Color Mode &amp; Outliers</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="outlier-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="outlier-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="outlier-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>File Extension Distribution</h3>
+              <div class="bar-wrap">
+                <div class="bar">
+                  <div
+                    class="fill"
+                    style="width: 100%; background: var(--accent)"
+                  >
+                    .jpg &mdash; 2,503 (100%)
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Color Mode Distribution</h3>
+              <div class="bar-wrap">
+                <div class="bar">
+                  <div
+                    class="fill"
+                    style="width: 100%; background: var(--accent-2)"
+                  >
+                    RGB &mdash; 2,503 (100%)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 16px">Outlier Rates (IQR Rule)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Outlier Rate</th>
+                  <th>Assessment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>File Size</td>
+                  <td style="text-align: center">0.16%</td>
+                  <td style="color: var(--success)">&#9989; Very Low</td>
+                </tr>
+                <tr>
+                  <td>Megapixels</td>
+                  <td style="text-align: center">0.00%</td>
+                  <td style="color: var(--success)">&#9989; None</td>
+                </tr>
+                <tr>
+                  <td>Aspect Ratio</td>
+                  <td style="text-align: center">3.84%</td>
+                  <td style="color: var(--accent-3)">
+                    &#9888;&#65039; Moderate – normalize in preprocessing
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>File Size Box Plot</h3>
+              <canvas id="fileSizeBoxChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Aspect Ratio Box Plot</h3>
+              <canvas id="aspectBoxChart"></canvas>
+            </div>
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="outlier-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="outlier-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="outlier-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="outlier-py">
+              <pre>
+<span class="ck">def</span> <span class="cm">iqr_outlier_mask</span>(series):
+    q1, q3 = series.quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
+    iqr = q3 - q1
+    lower = q1 - <span class="cn">1.5</span> * iqr
+    upper = q3 + <span class="cn">1.5</span> * iqr
+    <span class="ck">return</span> (series &lt; lower) | (series &gt; upper)
+
+outlier_flags = pd.DataFrame({
+    <span class="cs">"file_size_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"file_size_kb"</span>]),
+    <span class="cs">"megapixel_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"megapixels"</span>]),
+    <span class="cs">"aspect_ratio_outlier"</span>: iqr_outlier_mask(df[<span class="cs">"aspect_ratio"</span>]),
+})
+outlier_summary = outlier_flags.mean().mul(<span class="cn">100</span>).round(<span class="cn">2</span>)</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════════════════ CLASS IMBALANCE ═══════════════════ -->
       <section class="section" id="class-imbalance">
         <header class="section-head">
@@ -984,482 +1328,158 @@ axes[<span class="cn">1</span>].barh(bottom_classes[<span class="cs">"class_name
         </div>
       </section>
 
-      <!-- ═══════════════════ IMAGE PROPERTIES ═══════════════════ -->
-      <section class="section" id="image-properties">
+      <!-- ═══════════════════ SPLIT SIMULATION ═══════════════════ -->
+      <section class="section" id="split-simulation">
         <header class="section-head">
-          <h2>&#128247; Image Properties</h2>
+          <h2>&#128256; Split Simulation (Train / Val / Test)</h2>
           <div class="section-head-buttons">
-            <button
-              class="tutorial-btn"
-              data-panel="imgprop-code"
-              type="button"
-            >
+            <button class="tutorial-btn" data-panel="split-code" type="button">
               &#128187; Tutorial
             </button>
             <button
               class="toggle"
-              data-target="imgprop-body"
+              data-target="split-body"
               aria-expanded="true"
             >
               Toggle Section
             </button>
           </div>
         </header>
-        <div class="section-body" id="imgprop-body">
+        <div class="section-body" id="split-body">
           <div class="grid">
             <div class="kpi">
-              <div class="label">Valid Images</div>
-              <div class="value">2,503</div>
+              <div class="label">Train</div>
+              <div class="value">1,366 (54.57%)</div>
             </div>
             <div class="kpi">
-              <div class="label">Corrupted Files</div>
-              <div class="value" style="color: var(--success)">0</div>
+              <div class="label">Validation</div>
+              <div class="value">239 (9.55%)</div>
             </div>
             <div class="kpi">
-              <div class="label">Avg Resolution</div>
-              <div class="value">310 &times; 315</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Avg File Size</div>
-              <div class="value">23.78 KB</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Avg Brightness</div>
-              <div class="value">199.8</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Avg Contrast</div>
-              <div class="value">74.3</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Avg Aspect Ratio</div>
-              <div class="value">1.027</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Color Mode</div>
-              <div class="value">RGB (100%)</div>
+              <div class="label">Test</div>
+              <div class="value">898 (35.88%)</div>
             </div>
           </div>
 
           <div class="chart-grid" style="margin-top: 14px">
             <div class="chart-card">
-              <h3>Resolution Scatter (Width vs Height)</h3>
-              <canvas id="resolutionChart"></canvas>
+              <h3>Overall Split Counts</h3>
+              <canvas id="splitBarChart"></canvas>
             </div>
             <div class="chart-card">
-              <h3>Aspect Ratio Distribution</h3>
-              <canvas id="aspectChart"></canvas>
+              <h3>Split Coverage Risk</h3>
+              <canvas id="splitRiskChart"></canvas>
             </div>
           </div>
 
-          <div class="chart-grid" style="margin-top: 14px">
-            <div class="chart-card">
-              <h3>File Size Distribution</h3>
-              <canvas id="fileSizeChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Brightness vs Contrast</h3>
-              <canvas id="brightnessChart"></canvas>
-            </div>
-          </div>
-
-          <!-- code panel -->
-          <div class="code-panel" id="imgprop-code">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-pane="imgprop-py">
-                  Python
-                </button>
-              </div>
-              <button class="code-copy-btn" data-target="imgprop-py">
-                Copy
-              </button>
-            </div>
-            <div class="code-tab-pane active" id="imgprop-py">
-              <pre>
-meta_records = []
-bad_files = []
-
-<span class="ck">for</span> fp <span class="ck">in</span> tqdm(df[<span class="cs">"file_path"</span>], desc=<span class="cs">"Reading image metadata"</span>):
-    <span class="ck">try</span>:
-        <span class="ck">with</span> Image.open(fp) <span class="ck">as</span> img:
-            width, height = img.size
-            mode = img.mode
-            arr = np.asarray(img.convert(<span class="cs">"RGB"</span>), dtype=np.float32)
-            mean_rgb = arr.reshape(-<span class="cn">1</span>, <span class="cn">3</span>).mean(axis=<span class="cn">0</span>)
-            brightness = arr.mean()
-            contrast = arr.std()
-    <span class="ck">except</span> (UnidentifiedImageError, OSError) <span class="ck">as</span> err:
-        bad_files.append((fp, str(err)))
-
-df[<span class="cs">"aspect_ratio"</span>] = df[<span class="cs">"width"</span>] / df[<span class="cs">"height"</span>]
-df[<span class="cs">"megapixels"</span>] = (df[<span class="cs">"width"</span>] * df[<span class="cs">"height"</span>]) / <span class="cn">1_000_000</span></pre>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════ MISSING VALUES ═══════════════════ -->
-      <section class="section" id="missing-values">
-        <header class="section-head">
-          <h2>&#128269; Missing Values Audit</h2>
-          <button
-            class="toggle"
-            data-target="missing-body"
-            aria-expanded="true"
-          >
-            Toggle Section
-          </button>
-        </header>
-        <div class="section-body" id="missing-body">
-          <div
-            class="grid"
-            style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))"
-          >
-            <div class="kpi">
-              <div class="label">Rows with Any Missing</div>
-              <div class="value" style="color: var(--success)">0</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Critical Columns Checked</div>
-              <div class="value">11</div>
-            </div>
-          </div>
-
-          <div class="table-wrap" style="margin-top: 14px">
-            <table>
-              <thead>
-                <tr>
-                  <th>Column</th>
-                  <th style="text-align: center">Missing Count</th>
-                  <th style="text-align: center">Missing %</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>class_name</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>file_path</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>ext</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>file_size_kb</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>width</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>height</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>mode</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>brightness</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>contrast</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>aspect_ratio</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-                <tr>
-                  <td>megapixels</td>
-                  <td style="text-align: center">0</td>
-                  <td style="text-align: center">0.00%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="note">
-            All 11 critical metadata columns are fully populated with zero
-            missing values across all 2,503 records.
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════ FORMAT & OUTLIERS ═══════════════════ -->
-      <section class="section" id="format-outliers">
-        <header class="section-head">
-          <h2>&#128200; File Format, Color Mode &amp; Outliers</h2>
-          <div class="section-head-buttons">
-            <button
-              class="tutorial-btn"
-              data-panel="outlier-code"
-              type="button"
-            >
-              &#128187; Tutorial
-            </button>
-            <button
-              class="toggle"
-              data-target="outlier-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-          </div>
-        </header>
-        <div class="section-body" id="outlier-body">
-          <div class="card-grid">
-            <div class="card">
-              <h3>File Extension Distribution</h3>
-              <div class="bar-wrap">
-                <div class="bar">
-                  <div
-                    class="fill"
-                    style="width: 100%; background: var(--accent)"
-                  >
-                    .jpg &mdash; 2,503 (100%)
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <h3>Color Mode Distribution</h3>
-              <div class="bar-wrap">
-                <div class="bar">
-                  <div
-                    class="fill"
-                    style="width: 100%; background: var(--accent-2)"
-                  >
-                    RGB &mdash; 2,503 (100%)
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <h3 style="margin-top: 16px">Outlier Rates (IQR Rule)</h3>
+          <h3 style="margin-top: 16px">Split Coverage Audit</h3>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Metric</th>
-                  <th style="text-align: center">Outlier Rate</th>
-                  <th>Assessment</th>
+                  <th style="text-align: center">Value</th>
+                  <th>Severity</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>File Size</td>
-                  <td style="text-align: center">0.16%</td>
-                  <td style="color: var(--success)">&#9989; Very Low</td>
+                  <td>Total classes</td>
+                  <td style="text-align: center">898</td>
+                  <td>—</td>
                 </tr>
                 <tr>
-                  <td>Megapixels</td>
-                  <td style="text-align: center">0.00%</td>
-                  <td style="color: var(--success)">&#9989; None</td>
+                  <td>Classes with no validation sample</td>
+                  <td style="text-align: center; color: var(--warn)">
+                    <strong>659</strong>
+                  </td>
+                  <td style="color: var(--warn)">&#128308; High</td>
                 </tr>
                 <tr>
-                  <td>Aspect Ratio</td>
-                  <td style="text-align: center">3.84%</td>
-                  <td style="color: var(--accent-3)">
-                    &#9888;&#65039; Moderate – normalize in preprocessing
+                  <td>Classes with no test sample</td>
+                  <td style="text-align: center">0</td>
+                  <td style="color: var(--success)">&#128994; None</td>
+                </tr>
+                <tr>
+                  <td>Classes with &le;1 train sample</td>
+                  <td style="text-align: center; color: var(--warn)">
+                    <strong>520</strong>
+                  </td>
+                  <td style="color: var(--warn)">&#128308; High</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Leakage Risk Check</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Duplicate groups evaluated</td>
+                  <td style="text-align: center">1</td>
+                </tr>
+                <tr>
+                  <td>Leaking groups across &ge;2 splits</td>
+                  <td style="text-align: center; color: var(--success)">0</td>
+                </tr>
+                <tr>
+                  <td>Leakage rate</td>
+                  <td style="text-align: center; color: var(--success)">
+                    0.00%
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div class="chart-grid" style="margin-top: 14px">
-            <div class="chart-card">
-              <h3>File Size Box Plot</h3>
-              <canvas id="fileSizeBoxChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Aspect Ratio Box Plot</h3>
-              <canvas id="aspectBoxChart"></canvas>
-            </div>
+          <div class="note">
+            <strong>Important:</strong> The validation split is severely
+            under-represented for most classes: 659 classes (73.4%) have zero
+            validation samples. This is a direct consequence of the extreme
+            long-tail distribution. Consider k-fold cross-validation or few-shot
+            learning strategies instead of a fixed split.
           </div>
 
           <!-- code panel -->
-          <div class="code-panel" id="outlier-code">
+          <div class="code-panel" id="split-code">
             <div class="code-panel-header">
               <div class="code-tabs">
-                <button class="code-tab active" data-pane="outlier-py">
+                <button class="code-tab active" data-pane="split-py">
                   Python
                 </button>
               </div>
-              <button class="code-copy-btn" data-target="outlier-py">
-                Copy
-              </button>
+              <button class="code-copy-btn" data-target="split-py">Copy</button>
             </div>
-            <div class="code-tab-pane active" id="outlier-py">
+            <div class="code-tab-pane active" id="split-py">
               <pre>
-<span class="ck">def</span> <span class="cm">iqr_outlier_mask</span>(series):
-    q1, q3 = series.quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
-    iqr = q3 - q1
-    lower = q1 - <span class="cn">1.5</span> * iqr
-    upper = q3 + <span class="cn">1.5</span> * iqr
-    <span class="ck">return</span> (series &lt; lower) | (series &gt; upper)
+<span class="ck">def</span> <span class="cm">per_class_split</span>(group):
+    idx = group.index.tolist()
+    random.shuffle(idx)
+    n = len(idx)
 
-outlier_flags = pd.DataFrame({
-    <span class="cs">"file_size_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"file_size_kb"</span>]),
-    <span class="cs">"megapixel_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"megapixels"</span>]),
-    <span class="cs">"aspect_ratio_outlier"</span>: iqr_outlier_mask(df[<span class="cs">"aspect_ratio"</span>]),
-})
-outlier_summary = outlier_flags.mean().mul(<span class="cn">100</span>).round(<span class="cn">2</span>)</pre>
+    <span class="ck">if</span> n == <span class="cn">1</span>:
+        split = [<span class="cs">"test"</span>]
+    <span class="ck">elif</span> n == <span class="cn">2</span>:
+        split = [<span class="cs">"train"</span>, <span class="cs">"test"</span>]
+    <span class="ck">elif</span> n == <span class="cn">3</span>:
+        split = [<span class="cs">"train"</span>, <span class="cs">"train"</span>, <span class="cs">"test"</span>]
+    <span class="ck">else</span>:
+        n_train = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.7</span>)))
+        n_val   = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.15</span>)))
+        n_test  = n - n_train - n_val
+        <span class="cc"># ensure at least 1 test sample</span>
+        ...
+    <span class="ck">return</span> pd.Series(split, index=idx)
+
+split_col = df.groupby(<span class="cs">"class_name"</span>).apply(per_class_split)</pre>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════ CLASS-LEVEL STATS ═══════════════════ -->
-      <section class="section" id="class-level-stats">
-        <header class="section-head">
-          <h2>&#127912; Color Space &amp; Class-Level Statistics</h2>
-          <button
-            class="toggle"
-            data-target="classlvl-body"
-            aria-expanded="true"
-          >
-            Toggle Section
-          </button>
-        </header>
-        <div class="section-body" id="classlvl-body">
-          <p>
-            Top 12 classes enriched with average geometry and visual statistics:
-          </p>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Class</th>
-                  <th style="text-align: center">Count</th>
-                  <th style="text-align: center">Avg Width</th>
-                  <th style="text-align: center">Avg Height</th>
-                  <th style="text-align: center">Avg Brightness</th>
-                  <th style="text-align: center">Avg Contrast</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Venusaur</strong></td>
-                  <td style="text-align: center">8</td>
-                  <td style="text-align: center">345</td>
-                  <td style="text-align: center">272</td>
-                  <td style="text-align: center">175.7</td>
-                  <td style="text-align: center">82.1</td>
-                </tr>
-                <tr>
-                  <td><strong>Necrozma</strong></td>
-                  <td style="text-align: center">7</td>
-                  <td style="text-align: center">327</td>
-                  <td style="text-align: center">268</td>
-                  <td style="text-align: center">203.4</td>
-                  <td style="text-align: center">79.6</td>
-                </tr>
-                <tr>
-                  <td><strong>Aerodactyl</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">340</td>
-                  <td style="text-align: center">261</td>
-                  <td style="text-align: center">223.2</td>
-                  <td style="text-align: center">58.2</td>
-                </tr>
-                <tr>
-                  <td><strong>Unown</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">221</td>
-                  <td style="text-align: center">311</td>
-                  <td style="text-align: center">177.4</td>
-                  <td style="text-align: center">90.4</td>
-                </tr>
-                <tr>
-                  <td><strong>Vivillon</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">312</td>
-                  <td style="text-align: center">294</td>
-                  <td style="text-align: center">173.9</td>
-                  <td style="text-align: center">93.4</td>
-                </tr>
-                <tr>
-                  <td><strong>Kangaskhan</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">338</td>
-                  <td style="text-align: center">342</td>
-                  <td style="text-align: center">199.3</td>
-                  <td style="text-align: center">67.2</td>
-                </tr>
-                <tr>
-                  <td><strong>Zygarde</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">334</td>
-                  <td style="text-align: center">329</td>
-                  <td style="text-align: center">173.9</td>
-                  <td style="text-align: center">91.9</td>
-                </tr>
-                <tr>
-                  <td><strong>Beedrill</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">330</td>
-                  <td style="text-align: center">337</td>
-                  <td style="text-align: center">217.2</td>
-                  <td style="text-align: center">69.4</td>
-                </tr>
-                <tr>
-                  <td><strong>Graveler</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">340</td>
-                  <td style="text-align: center">205</td>
-                  <td style="text-align: center">196.9</td>
-                  <td style="text-align: center">69.9</td>
-                </tr>
-                <tr>
-                  <td><strong>Grimer</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">340</td>
-                  <td style="text-align: center">305</td>
-                  <td style="text-align: center">187.7</td>
-                  <td style="text-align: center">73.8</td>
-                </tr>
-                <tr>
-                  <td><strong>Golem</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">328</td>
-                  <td style="text-align: center">333</td>
-                  <td style="text-align: center">173.9</td>
-                  <td style="text-align: center">79.2</td>
-                </tr>
-                <tr>
-                  <td><strong>Marowak</strong></td>
-                  <td style="text-align: center">6</td>
-                  <td style="text-align: center">305</td>
-                  <td style="text-align: center">348</td>
-                  <td style="text-align: center">214.9</td>
-                  <td style="text-align: center">64.7</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="note">
-            Resolution varies across top classes. Unown stands out with a
-            narrower width (221px) and taller aspect. Brightness ranges from
-            173.9 (Vivillon/Zygarde/Golem) to 223.2 (Aerodactyl), suggesting
-            differences in background or art style.
           </div>
         </div>
       </section>
@@ -1625,157 +1645,246 @@ dup_groups = hash_df.groupby(<span class="cs">"md5"</span>).filter(<span class="
         </div>
       </section>
 
-      <!-- ═══════════════════ SPLIT SIMULATION ═══════════════════ -->
-      <section class="section" id="split-simulation">
+      <!-- ═══════════════════ CLASS-LEVEL STATS ═══════════════════ -->
+      <section class="section" id="class-level-stats">
         <header class="section-head">
-          <h2>&#128256; Split Simulation (Train / Val / Test)</h2>
-          <div class="section-head-buttons">
-            <button class="tutorial-btn" data-panel="split-code" type="button">
-              &#128187; Tutorial
-            </button>
-            <button
-              class="toggle"
-              data-target="split-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-          </div>
+          <h2>&#127912; Color Space &amp; Class-Level Statistics</h2>
+          <button
+            class="toggle"
+            data-target="classlvl-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
         </header>
-        <div class="section-body" id="split-body">
-          <div class="grid">
-            <div class="kpi">
-              <div class="label">Train</div>
-              <div class="value">1,366 (54.57%)</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Validation</div>
-              <div class="value">239 (9.55%)</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Test</div>
-              <div class="value">898 (35.88%)</div>
-            </div>
-          </div>
-
-          <div class="chart-grid" style="margin-top: 14px">
+        <div class="section-body" id="classlvl-body">
+          <p>
+            The notebook maps 700 randomly-sampled images in RGB color space
+            (Plotly 3D scatter). The 2D chart below reproduces this with actual
+            mean-channel values for a 300-image sample, each point rendered in
+            its true RGB color. The grouped histogram shows channel
+            distributions across all 2,503 images.
+          </p>
+          <div class="chart-grid" style="margin-top: 12px">
             <div class="chart-card">
-              <h3>Overall Split Counts</h3>
-              <canvas id="splitBarChart"></canvas>
+              <h3>Mean R / G / B — 3D color space (300-image sample)</h3>
+              <div id="rgbScatter3D" style="width: 100%; height: 420px"></div>
             </div>
             <div class="chart-card">
-              <h3>Split Coverage Risk</h3>
-              <canvas id="splitRiskChart"></canvas>
+              <h3>RGB Channel Distribution (all 2,503 images)</h3>
+              <canvas id="rgbChannelChart"></canvas>
             </div>
           </div>
-
-          <h3 style="margin-top: 16px">Split Coverage Audit</h3>
+          <div class="note" style="margin-top: 12px; margin-bottom: 16px">
+            All three channels cluster between 160–240, confirming predominantly
+            bright (pastel / white-background) Pokémon sprites. The Blue channel
+            has a slightly wider low-end tail than Red/Green, reflecting
+            cooler-toned sprites.
+          </div>
+          <h3 style="margin-top: 16px">
+            Class-Level Descriptive Statistics (Top 12)
+          </h3>
+          <p>
+            Top 12 classes enriched with average geometry and visual statistics:
+          </p>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Metric</th>
-                  <th style="text-align: center">Value</th>
-                  <th>Severity</th>
+                  <th>Class</th>
+                  <th style="text-align: center">Count</th>
+                  <th style="text-align: center">Avg Width</th>
+                  <th style="text-align: center">Avg Height</th>
+                  <th style="text-align: center">Avg Brightness</th>
+                  <th style="text-align: center">Avg Contrast</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Total classes</td>
-                  <td style="text-align: center">898</td>
-                  <td>—</td>
+                  <td><strong>Venusaur</strong></td>
+                  <td style="text-align: center">8</td>
+                  <td style="text-align: center">345</td>
+                  <td style="text-align: center">272</td>
+                  <td style="text-align: center">175.7</td>
+                  <td style="text-align: center">82.1</td>
                 </tr>
                 <tr>
-                  <td>Classes with no validation sample</td>
-                  <td style="text-align: center; color: var(--warn)">
-                    <strong>659</strong>
-                  </td>
-                  <td style="color: var(--warn)">&#128308; High</td>
+                  <td><strong>Necrozma</strong></td>
+                  <td style="text-align: center">7</td>
+                  <td style="text-align: center">327</td>
+                  <td style="text-align: center">268</td>
+                  <td style="text-align: center">203.4</td>
+                  <td style="text-align: center">79.6</td>
                 </tr>
                 <tr>
-                  <td>Classes with no test sample</td>
-                  <td style="text-align: center">0</td>
-                  <td style="color: var(--success)">&#128994; None</td>
+                  <td><strong>Aerodactyl</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">261</td>
+                  <td style="text-align: center">223.2</td>
+                  <td style="text-align: center">58.2</td>
                 </tr>
                 <tr>
-                  <td>Classes with &le;1 train sample</td>
-                  <td style="text-align: center; color: var(--warn)">
-                    <strong>520</strong>
-                  </td>
-                  <td style="color: var(--warn)">&#128308; High</td>
+                  <td><strong>Unown</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">221</td>
+                  <td style="text-align: center">311</td>
+                  <td style="text-align: center">177.4</td>
+                  <td style="text-align: center">90.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Vivillon</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">312</td>
+                  <td style="text-align: center">294</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">93.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Kangaskhan</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">338</td>
+                  <td style="text-align: center">342</td>
+                  <td style="text-align: center">199.3</td>
+                  <td style="text-align: center">67.2</td>
+                </tr>
+                <tr>
+                  <td><strong>Zygarde</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">334</td>
+                  <td style="text-align: center">329</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">91.9</td>
+                </tr>
+                <tr>
+                  <td><strong>Beedrill</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">330</td>
+                  <td style="text-align: center">337</td>
+                  <td style="text-align: center">217.2</td>
+                  <td style="text-align: center">69.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Graveler</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">205</td>
+                  <td style="text-align: center">196.9</td>
+                  <td style="text-align: center">69.9</td>
+                </tr>
+                <tr>
+                  <td><strong>Grimer</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">305</td>
+                  <td style="text-align: center">187.7</td>
+                  <td style="text-align: center">73.8</td>
+                </tr>
+                <tr>
+                  <td><strong>Golem</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">328</td>
+                  <td style="text-align: center">333</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">79.2</td>
+                </tr>
+                <tr>
+                  <td><strong>Marowak</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">305</td>
+                  <td style="text-align: center">348</td>
+                  <td style="text-align: center">214.9</td>
+                  <td style="text-align: center">64.7</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <h3 style="margin-top: 16px">Leakage Risk Check</h3>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th style="text-align: center">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Duplicate groups evaluated</td>
-                  <td style="text-align: center">1</td>
-                </tr>
-                <tr>
-                  <td>Leaking groups across &ge;2 splits</td>
-                  <td style="text-align: center; color: var(--success)">0</td>
-                </tr>
-                <tr>
-                  <td>Leakage rate</td>
-                  <td style="text-align: center; color: var(--success)">
-                    0.00%
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
           <div class="note">
-            <strong>Important:</strong> The validation split is severely
-            under-represented for most classes: 659 classes (73.4%) have zero
-            validation samples. This is a direct consequence of the extreme
-            long-tail distribution. Consider k-fold cross-validation or few-shot
-            learning strategies instead of a fixed split.
+            Resolution varies across top classes. Unown stands out with a
+            narrower width (221px) and taller aspect. Brightness ranges from
+            173.9 (Vivillon/Zygarde/Golem) to 223.2 (Aerodactyl), suggesting
+            differences in background or art style.
           </div>
+        </div>
+      </section>
 
-          <!-- code panel -->
-          <div class="code-panel" id="split-code">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-pane="split-py">
-                  Python
-                </button>
-              </div>
-              <button class="code-copy-btn" data-target="split-py">Copy</button>
+      <!-- ═══════════════════ KEY FINDINGS ═══════════════════ -->
+      <section class="section" id="key-findings">
+        <header class="section-head">
+          <h2>&#128161; Key Findings</h2>
+          <button
+            class="toggle"
+            data-target="findings-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="findings-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>&#128308; Extreme Long-Tail Distribution</h3>
+              <p>
+                898 classes for 2,503 images. 520 classes (57.9%) have &le;2
+                images. The largest class (Venusaur) has just 8 images. Standard
+                train/val/test splits are impractical for most classes.
+              </p>
             </div>
-            <div class="code-tab-pane active" id="split-py">
-              <pre>
-<span class="ck">def</span> <span class="cm">per_class_split</span>(group):
-    idx = group.index.tolist()
-    random.shuffle(idx)
-    n = len(idx)
-
-    <span class="ck">if</span> n == <span class="cn">1</span>:
-        split = [<span class="cs">"test"</span>]
-    <span class="ck">elif</span> n == <span class="cn">2</span>:
-        split = [<span class="cs">"train"</span>, <span class="cs">"test"</span>]
-    <span class="ck">elif</span> n == <span class="cn">3</span>:
-        split = [<span class="cs">"train"</span>, <span class="cs">"train"</span>, <span class="cs">"test"</span>]
-    <span class="ck">else</span>:
-        n_train = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.7</span>)))
-        n_val   = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.15</span>)))
-        n_test  = n - n_train - n_val
-        <span class="cc"># ensure at least 1 test sample</span>
-        ...
-    <span class="ck">return</span> pd.Series(split, index=idx)
-
-split_col = df.groupby(<span class="cs">"class_name"</span>).apply(per_class_split)</pre>
+            <div class="card">
+              <h3>&#128994; Format Consistency</h3>
+              <p>
+                All 2,503 images are <code>.jpg</code> and decoded as
+                <code>RGB</code>. No format conversion or channel handling is
+                needed in the preprocessing pipeline.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128994; Clean Metadata</h3>
+              <p>
+                Zero missing values across all 11 critical columns. No corrupted
+                or unreadable files detected (0/2,503).
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Aspect Ratio Outliers</h3>
+              <p>
+                While file size and megapixel outlier rates are near zero,
+                aspect ratio outliers reach 3.84%. These images should be
+                padded/resized carefully during preprocessing.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Cross-Class Duplicate</h3>
+              <p>
+                1 duplicate hash group spanning <strong>Appletun</strong> ↔
+                <strong>Flapple</strong> (cross-class). This indicates label
+                ambiguity/noise for visually similar Pok&eacute;mon and needs
+                manual review.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128308; Split Coverage Gaps</h3>
+              <p>
+                659 classes have no validation sample. 520 classes have &le;1
+                training sample. Consider k-fold cross-validation or few-shot
+                learning approaches for this dataset.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128994; No Split Leakage</h3>
+              <p>
+                0 duplicate hash groups leak across splits. The current
+                simulation is leakage-free, though group-aware splitting remains
+                recommended for production safety.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Image Geometry Variation</h3>
+              <p>
+                Resolutions range from 108&times;110 to 360&times;400. Average
+                is ~310&times;315 but varies per class. Standardized resizing is
+                essential for model input.
+              </p>
             </div>
           </div>
         </div>
@@ -1875,88 +1984,6 @@ axes = axes.flatten()
 plt.suptitle(<span class="cs">"One Sample Image from Top Classes"</span>, fontsize=<span class="cn">16</span>, y=<span class="cn">1.02</span>)
 plt.tight_layout()
 plt.show()</pre>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════ KEY FINDINGS ═══════════════════ -->
-      <section class="section" id="key-findings">
-        <header class="section-head">
-          <h2>&#128161; Key Findings</h2>
-          <button
-            class="toggle"
-            data-target="findings-body"
-            aria-expanded="true"
-          >
-            Toggle Section
-          </button>
-        </header>
-        <div class="section-body" id="findings-body">
-          <div class="card-grid">
-            <div class="card">
-              <h3>&#128308; Extreme Long-Tail Distribution</h3>
-              <p>
-                898 classes for 2,503 images. 520 classes (57.9%) have &le;2
-                images. The largest class (Venusaur) has just 8 images. Standard
-                train/val/test splits are impractical for most classes.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128994; Format Consistency</h3>
-              <p>
-                All 2,503 images are <code>.jpg</code> and decoded as
-                <code>RGB</code>. No format conversion or channel handling is
-                needed in the preprocessing pipeline.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128994; Clean Metadata</h3>
-              <p>
-                Zero missing values across all 11 critical columns. No corrupted
-                or unreadable files detected (0/2,503).
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128993; Aspect Ratio Outliers</h3>
-              <p>
-                While file size and megapixel outlier rates are near zero,
-                aspect ratio outliers reach 3.84%. These images should be
-                padded/resized carefully during preprocessing.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128993; Cross-Class Duplicate</h3>
-              <p>
-                1 duplicate hash group spanning <strong>Appletun</strong> ↔
-                <strong>Flapple</strong> (cross-class). This indicates label
-                ambiguity/noise for visually similar Pok&eacute;mon and needs
-                manual review.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128308; Split Coverage Gaps</h3>
-              <p>
-                659 classes have no validation sample. 520 classes have &le;1
-                training sample. Consider k-fold cross-validation or few-shot
-                learning approaches for this dataset.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128994; No Split Leakage</h3>
-              <p>
-                0 duplicate hash groups leak across splits. The current
-                simulation is leakage-free, though group-aware splitting remains
-                recommended for production safety.
-              </p>
-            </div>
-            <div class="card">
-              <h3>&#128993; Image Geometry Variation</h3>
-              <p>
-                Resolutions range from 108&times;110 to 360&times;400. Average
-                is ~310&times;315 but varies per class. Standardized resizing is
-                essential for model input.
-              </p>
             </div>
           </div>
         </div>
@@ -2174,22 +2201,309 @@ plt.show()</pre>
 
       /* Resolution Scatter */
       {
-        /* synthetic representative scatter data extracted from dataset stats */
-        const resData = [];
-        const rng = (seed) => {
-          let s = seed;
-          return () => {
-            s = (s * 16807) % 2147483647;
-            return s / 2147483647;
-          };
-        };
-        const r = rng(42);
-        for (let i = 0; i < 300; i++) {
-          resData.push({
-            x: 108 + Math.floor(r() * 252),
-            y: 110 + Math.floor(r() * 290),
-          });
-        }
+        /* Actual sample of 300 image dimensions from the dataset */
+        const resData = [
+          [264, 400],
+          [360, 382],
+          [300, 233],
+          [234, 302],
+          [360, 326],
+          [360, 362],
+          [300, 282],
+          [278, 300],
+          [360, 291],
+          [360, 261],
+          [285, 300],
+          [344, 400],
+          [300, 280],
+          [360, 360],
+          [360, 394],
+          [209, 300],
+          [327, 400],
+          [251, 400],
+          [203, 300],
+          [360, 328],
+          [360, 355],
+          [360, 189],
+          [300, 273],
+          [360, 372],
+          [360, 368],
+          [207, 300],
+          [287, 300],
+          [300, 298],
+          [276, 302],
+          [278, 400],
+          [300, 256],
+          [300, 293],
+          [339, 400],
+          [300, 281],
+          [188, 300],
+          [342, 400],
+          [333, 400],
+          [360, 339],
+          [360, 230],
+          [360, 385],
+          [360, 331],
+          [360, 280],
+          [360, 282],
+          [302, 400],
+          [360, 310],
+          [286, 400],
+          [219, 400],
+          [285, 300],
+          [300, 243],
+          [300, 298],
+          [300, 226],
+          [221, 302],
+          [360, 358],
+          [360, 131],
+          [255, 302],
+          [360, 344],
+          [360, 389],
+          [286, 300],
+          [360, 344],
+          [222, 300],
+          [360, 369],
+          [302, 290],
+          [283, 400],
+          [264, 300],
+          [267, 400],
+          [320, 400],
+          [290, 400],
+          [360, 393],
+          [360, 243],
+          [360, 281],
+          [360, 317],
+          [293, 300],
+          [360, 290],
+          [300, 262],
+          [360, 313],
+          [360, 244],
+          [360, 244],
+          [269, 300],
+          [236, 400],
+          [300, 246],
+          [300, 298],
+          [360, 113],
+          [360, 383],
+          [360, 399],
+          [332, 400],
+          [360, 301],
+          [360, 358],
+          [360, 329],
+          [351, 400],
+          [360, 340],
+          [360, 355],
+          [108, 240],
+          [242, 302],
+          [300, 222],
+          [242, 300],
+          [360, 368],
+          [360, 301],
+          [300, 269],
+          [360, 329],
+          [360, 332],
+          [231, 300],
+          [285, 400],
+          [360, 312],
+          [302, 262],
+          [360, 365],
+          [360, 275],
+          [315, 400],
+          [300, 291],
+          [245, 300],
+          [223, 232],
+          [360, 322],
+          [300, 291],
+          [352, 367],
+          [278, 300],
+          [300, 229],
+          [210, 400],
+          [275, 286],
+          [360, 345],
+          [300, 265],
+          [360, 259],
+          [360, 336],
+          [360, 396],
+          [228, 302],
+          [335, 400],
+          [183, 300],
+          [360, 307],
+          [328, 400],
+          [360, 376],
+          [360, 302],
+          [360, 276],
+          [226, 300],
+          [267, 300],
+          [158, 300],
+          [275, 300],
+          [240, 226],
+          [360, 294],
+          [360, 388],
+          [360, 215],
+          [360, 388],
+          [360, 291],
+          [299, 300],
+          [360, 351],
+          [261, 300],
+          [311, 400],
+          [338, 400],
+          [300, 264],
+          [360, 255],
+          [262, 300],
+          [360, 241],
+          [196, 218],
+          [360, 278],
+          [240, 400],
+          [259, 400],
+          [300, 288],
+          [360, 328],
+          [179, 300],
+          [254, 400],
+          [360, 315],
+          [294, 400],
+          [300, 256],
+          [360, 329],
+          [360, 369],
+          [313, 400],
+          [360, 261],
+          [360, 183],
+          [269, 300],
+          [261, 400],
+          [300, 214],
+          [360, 246],
+          [360, 354],
+          [213, 300],
+          [339, 400],
+          [300, 296],
+          [228, 300],
+          [295, 300],
+          [360, 395],
+          [360, 357],
+          [225, 224],
+          [301, 400],
+          [289, 300],
+          [360, 297],
+          [256, 300],
+          [282, 302],
+          [309, 400],
+          [360, 351],
+          [360, 388],
+          [360, 175],
+          [360, 268],
+          [300, 265],
+          [343, 400],
+          [360, 276],
+          [360, 341],
+          [360, 337],
+          [236, 302],
+          [300, 266],
+          [249, 300],
+          [204, 300],
+          [243, 400],
+          [360, 284],
+          [360, 262],
+          [360, 339],
+          [300, 296],
+          [360, 220],
+          [274, 300],
+          [263, 302],
+          [360, 378],
+          [360, 335],
+          [314, 400],
+          [251, 400],
+          [360, 296],
+          [360, 354],
+          [256, 300],
+          [360, 294],
+          [360, 282],
+          [300, 269],
+          [360, 289],
+          [360, 263],
+          [360, 318],
+          [300, 284],
+          [300, 278],
+          [360, 399],
+          [196, 400],
+          [360, 320],
+          [300, 246],
+          [175, 208],
+          [360, 399],
+          [336, 400],
+          [360, 389],
+          [360, 256],
+          [356, 400],
+          [317, 400],
+          [285, 300],
+          [302, 248],
+          [300, 222],
+          [360, 270],
+          [360, 393],
+          [294, 300],
+          [289, 300],
+          [360, 311],
+          [192, 300],
+          [360, 253],
+          [355, 386],
+          [342, 400],
+          [360, 332],
+          [163, 235],
+          [245, 299],
+          [333, 400],
+          [300, 260],
+          [233, 400],
+          [206, 204],
+          [291, 400],
+          [234, 302],
+          [360, 327],
+          [306, 337],
+          [319, 400],
+          [360, 386],
+          [300, 293],
+          [226, 300],
+          [278, 302],
+          [360, 282],
+          [300, 261],
+          [302, 302],
+          [360, 366],
+          [258, 300],
+          [285, 400],
+          [360, 294],
+          [252, 400],
+          [360, 225],
+          [360, 384],
+          [241, 300],
+          [254, 300],
+          [266, 300],
+          [350, 400],
+          [360, 339],
+          [360, 190],
+          [360, 218],
+          [302, 288],
+          [360, 315],
+          [300, 259],
+          [190, 300],
+          [289, 300],
+          [360, 302],
+          [333, 400],
+          [360, 319],
+          [300, 208],
+          [360, 294],
+          [248, 300],
+          [360, 246],
+          [300, 242],
+          [360, 342],
+          [219, 300],
+          [360, 283],
+          [360, 282],
+          [300, 233],
+          [360, 365],
+          [360, 219],
+          [302, 302],
+          [302, 280],
+          [300, 293],
+          [243, 210],
+        ].map(([x, y]) => ({ x, y }));
         new Chart(document.getElementById("resolutionChart"), {
           type: "scatter",
           data: {
@@ -2223,6 +2537,7 @@ plt.show()</pre>
       /* Aspect Ratio Distribution */
       {
         const arLabels = [
+          "<0.5",
           "0.5-0.7",
           "0.7-0.8",
           "0.8-0.9",
@@ -2233,7 +2548,7 @@ plt.show()</pre>
           "1.4-1.6",
           "1.6+",
         ];
-        const arCounts = [12, 48, 185, 720, 680, 420, 310, 98, 30];
+        const arCounts = [15, 223, 267, 365, 435, 393, 273, 295, 122, 115];
         new Chart(document.getElementById("aspectChart"), {
           type: "bar",
           data: {
@@ -2276,7 +2591,7 @@ plt.show()</pre>
           "50-55",
           "55-60",
         ];
-        const fsCounts = [2, 65, 280, 520, 480, 400, 320, 210, 120, 65, 30, 11];
+        const fsCounts = [0, 42, 504, 520, 320, 426, 369, 197, 96, 21, 4, 4];
         new Chart(document.getElementById("fileSizeChart"), {
           type: "bar",
           data: {
@@ -2303,21 +2618,309 @@ plt.show()</pre>
 
       /* Brightness vs Contrast Scatter */
       {
-        const bcData = [];
-        const rng2 = (seed) => {
-          let s = seed;
-          return () => {
-            s = (s * 48271) % 2147483647;
-            return s / 2147483647;
-          };
-        };
-        const r2 = rng2(42);
-        for (let i = 0; i < 300; i++) {
-          bcData.push({
-            x: 80 + r2() * 175,
-            y: 20 + r2() * 120,
-          });
-        }
+        /* Actual brightness/contrast pairs from 300-image sample */
+        const bcData = [
+          [217.5, 52.5],
+          [227.1, 46.4],
+          [191.9, 94.0],
+          [187.8, 86.9],
+          [206.7, 75.2],
+          [201.3, 63.6],
+          [219.3, 73.5],
+          [207.0, 87.8],
+          [211.4, 52.3],
+          [204.2, 70.2],
+          [198.3, 83.6],
+          [237.6, 43.6],
+          [167.8, 100.7],
+          [227.1, 53.5],
+          [217.7, 63.0],
+          [210.8, 75.8],
+          [209.3, 63.3],
+          [207.5, 74.5],
+          [191.9, 84.3],
+          [201.6, 73.9],
+          [197.7, 86.0],
+          [205.3, 78.5],
+          [209.6, 61.4],
+          [208.0, 68.4],
+          [208.5, 72.1],
+          [173.3, 91.3],
+          [205.0, 86.1],
+          [192.2, 90.9],
+          [190.1, 94.4],
+          [184.5, 83.5],
+          [177.2, 88.7],
+          [170.5, 96.2],
+          [212.2, 61.9],
+          [211.1, 65.0],
+          [163.8, 94.0],
+          [135.0, 101.5],
+          [171.0, 87.9],
+          [220.0, 59.1],
+          [204.4, 65.4],
+          [204.3, 74.8],
+          [223.3, 47.6],
+          [178.7, 77.8],
+          [176.5, 76.5],
+          [198.5, 73.9],
+          [185.0, 79.2],
+          [242.5, 37.3],
+          [196.2, 77.1],
+          [218.2, 65.7],
+          [183.6, 87.8],
+          [204.7, 68.3],
+          [215.7, 66.7],
+          [201.6, 88.1],
+          [170.8, 88.1],
+          [189.2, 87.9],
+          [161.1, 102.6],
+          [228.4, 49.0],
+          [204.6, 80.0],
+          [201.9, 78.4],
+          [212.4, 61.0],
+          [201.0, 78.7],
+          [197.3, 61.7],
+          [204.5, 86.8],
+          [210.8, 66.2],
+          [187.7, 93.1],
+          [185.2, 84.3],
+          [159.4, 82.2],
+          [213.6, 66.6],
+          [217.8, 67.0],
+          [195.4, 75.4],
+          [206.2, 75.8],
+          [163.0, 91.7],
+          [180.3, 92.3],
+          [232.9, 45.3],
+          [184.5, 72.7],
+          [220.5, 66.1],
+          [217.7, 66.3],
+          [195.7, 72.1],
+          [190.1, 90.6],
+          [217.6, 57.6],
+          [192.8, 87.3],
+          [179.2, 94.5],
+          [204.3, 58.0],
+          [218.8, 55.0],
+          [170.4, 69.8],
+          [243.2, 31.4],
+          [182.6, 75.1],
+          [214.4, 70.8],
+          [214.8, 64.4],
+          [223.9, 64.0],
+          [188.7, 77.4],
+          [217.7, 59.6],
+          [220.3, 54.9],
+          [226.9, 66.8],
+          [229.1, 64.3],
+          [147.2, 98.8],
+          [222.7, 54.6],
+          [196.0, 73.5],
+          [233.5, 49.6],
+          [182.6, 92.7],
+          [223.6, 60.7],
+          [210.5, 77.4],
+          [218.1, 60.7],
+          [217.2, 59.5],
+          [189.2, 80.5],
+          [187.1, 73.5],
+          [182.0, 91.3],
+          [217.7, 58.8],
+          [185.1, 97.3],
+          [175.4, 94.0],
+          [216.0, 67.0],
+          [193.5, 76.9],
+          [213.6, 77.2],
+          [189.0, 89.1],
+          [226.0, 64.2],
+          [194.0, 85.7],
+          [220.5, 64.7],
+          [198.4, 65.6],
+          [194.3, 82.5],
+          [202.7, 72.3],
+          [201.8, 76.8],
+          [175.2, 67.6],
+          [225.6, 52.3],
+          [186.1, 91.1],
+          [200.4, 65.0],
+          [201.8, 78.9],
+          [188.7, 83.1],
+          [217.3, 74.5],
+          [210.4, 62.2],
+          [220.9, 56.5],
+          [192.8, 81.4],
+          [189.6, 77.9],
+          [228.1, 59.9],
+          [197.6, 69.6],
+          [205.8, 63.6],
+          [222.3, 61.9],
+          [204.9, 81.8],
+          [215.8, 60.8],
+          [216.2, 62.6],
+          [218.5, 58.5],
+          [186.5, 66.9],
+          [187.7, 90.0],
+          [200.5, 68.4],
+          [172.6, 87.5],
+          [216.6, 71.3],
+          [174.2, 88.3],
+          [211.8, 73.5],
+          [182.8, 79.0],
+          [201.2, 88.0],
+          [209.3, 65.2],
+          [211.2, 67.6],
+          [183.1, 84.9],
+          [195.6, 82.1],
+          [182.0, 81.8],
+          [187.3, 79.2],
+          [220.1, 69.3],
+          [191.8, 89.6],
+          [201.9, 70.2],
+          [195.7, 72.0],
+          [218.6, 65.4],
+          [215.5, 73.9],
+          [203.9, 66.0],
+          [190.6, 84.6],
+          [186.7, 75.9],
+          [154.6, 89.1],
+          [224.7, 59.5],
+          [177.6, 84.6],
+          [230.8, 49.7],
+          [191.3, 92.1],
+          [196.6, 86.0],
+          [213.0, 66.6],
+          [205.5, 82.3],
+          [197.2, 70.9],
+          [210.1, 73.8],
+          [211.1, 70.5],
+          [190.4, 94.8],
+          [157.3, 84.6],
+          [213.9, 66.5],
+          [217.4, 58.8],
+          [208.0, 61.5],
+          [192.0, 88.1],
+          [207.4, 61.0],
+          [198.1, 72.9],
+          [167.9, 104.7],
+          [185.8, 82.8],
+          [200.1, 47.7],
+          [225.4, 50.4],
+          [216.8, 55.4],
+          [227.7, 57.6],
+          [173.2, 88.5],
+          [218.3, 55.2],
+          [206.1, 68.4],
+          [219.9, 65.8],
+          [171.2, 82.0],
+          [178.7, 86.5],
+          [183.5, 73.0],
+          [197.3, 84.3],
+          [211.8, 71.9],
+          [221.1, 62.9],
+          [194.2, 82.6],
+          [192.9, 67.6],
+          [223.5, 52.2],
+          [155.4, 93.0],
+          [236.7, 50.0],
+          [172.9, 97.8],
+          [192.8, 90.8],
+          [189.1, 88.4],
+          [224.7, 55.2],
+          [198.8, 74.6],
+          [197.6, 86.2],
+          [202.4, 76.2],
+          [166.7, 92.7],
+          [221.7, 64.7],
+          [226.4, 54.7],
+          [201.2, 73.5],
+          [198.2, 80.3],
+          [197.2, 77.2],
+          [163.4, 93.4],
+          [156.9, 85.5],
+          [198.3, 89.5],
+          [191.9, 81.6],
+          [187.7, 89.0],
+          [191.6, 82.7],
+          [196.7, 73.9],
+          [236.2, 49.5],
+          [191.0, 83.1],
+          [201.2, 72.1],
+          [205.1, 78.4],
+          [217.0, 64.1],
+          [229.7, 49.2],
+          [174.9, 98.9],
+          [219.1, 69.0],
+          [216.6, 74.9],
+          [190.8, 84.5],
+          [200.6, 83.6],
+          [209.0, 82.0],
+          [209.2, 63.5],
+          [152.5, 96.8],
+          [171.4, 84.0],
+          [197.4, 78.1],
+          [216.5, 67.2],
+          [209.4, 77.9],
+          [223.0, 56.2],
+          [197.1, 71.7],
+          [207.1, 85.5],
+          [218.9, 64.4],
+          [201.1, 79.4],
+          [218.8, 64.6],
+          [212.3, 67.9],
+          [219.7, 55.1],
+          [197.8, 82.9],
+          [229.6, 49.4],
+          [160.3, 100.0],
+          [221.9, 56.4],
+          [197.7, 67.4],
+          [163.7, 95.1],
+          [217.0, 65.6],
+          [175.5, 84.0],
+          [216.8, 75.9],
+          [206.3, 87.1],
+          [219.9, 61.5],
+          [219.1, 68.3],
+          [151.2, 89.9],
+          [209.3, 69.6],
+          [161.8, 85.7],
+          [139.3, 99.9],
+          [204.9, 77.7],
+          [239.5, 44.1],
+          [220.4, 52.2],
+          [216.6, 54.6],
+          [213.6, 64.2],
+          [211.7, 73.6],
+          [194.4, 93.1],
+          [218.4, 67.7],
+          [203.9, 66.3],
+          [220.5, 58.7],
+          [192.4, 78.6],
+          [177.2, 94.9],
+          [214.3, 67.4],
+          [221.5, 64.4],
+          [183.8, 94.0],
+          [215.0, 64.2],
+          [194.1, 68.0],
+          [218.2, 64.6],
+          [209.5, 71.1],
+          [190.2, 88.3],
+          [201.6, 70.1],
+          [195.5, 79.7],
+          [220.3, 61.5],
+          [178.2, 88.1],
+          [208.3, 69.9],
+          [190.1, 89.2],
+          [210.0, 70.0],
+          [179.4, 78.4],
+          [204.6, 77.6],
+          [197.2, 75.5],
+          [190.8, 75.9],
+          [205.4, 82.2],
+          [178.7, 90.8],
+          [211.5, 79.6],
+          [224.8, 58.4],
+        ].map(([x, y]) => ({ x, y }));
         new Chart(document.getElementById("brightnessChart"), {
           type: "scatter",
           data: {
@@ -2383,12 +2986,12 @@ plt.show()</pre>
           datasets: [
             {
               label: "Q1–Q3",
-              data: [1.5 - 0.85],
+              data: [1.1538 - 0.83],
               backgroundColor: C.bgLight,
               borderColor: C.amber,
               borderWidth: 2,
               borderRadius: 6,
-              base: 0.85,
+              base: 0.83,
             },
           ],
         },
@@ -2399,12 +3002,413 @@ plt.show()</pre>
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: () => "Avg: 1.027  Most images near 1:1 aspect ratio",
+                label: () =>
+                  "Q1: 0.83  Median: 0.99  Q3: 1.15  Min: 0.37  Max: 3.19  Avg: 1.03",
               },
             },
           },
           scales: {
-            x: { min: 0.4, max: 2.0, title: { display: true, text: "W/H" } },
+            x: { min: 0.3, max: 3.3, title: { display: true, text: "W/H" } },
+          },
+        },
+      });
+
+      /* Color Space: RGB 3D scatter (Plotly) */
+      {
+        const rgbRaw = [
+          [208.2, 220.4, 224.0],
+          [217.6, 233.2, 230.4],
+          [144.2, 205.8, 225.9],
+          [198.3, 185.5, 179.8],
+          [200.8, 213.6, 205.6],
+          [211.7, 187.0, 205.1],
+          [210.2, 225.2, 222.3],
+          [224.1, 216.5, 180.5],
+          [226.7, 200.6, 206.8],
+          [185.5, 206.3, 220.9],
+          [192.5, 201.6, 200.7],
+          [235.8, 238.5, 238.6],
+          [191.1, 174.4, 137.7],
+          [236.4, 228.2, 216.7],
+          [217.1, 213.2, 222.6],
+          [196.5, 216.9, 218.9],
+          [212.0, 215.3, 200.7],
+          [210.1, 219.1, 193.2],
+          [212.2, 187.9, 175.6],
+          [197.3, 205.2, 202.4],
+          [205.5, 197.5, 190.1],
+          [192.4, 208.1, 215.5],
+          [222.3, 198.6, 207.9],
+          [210.3, 206.6, 207.0],
+          [211.2, 207.6, 206.7],
+          [164.8, 180.8, 174.2],
+          [215.7, 199.9, 199.3],
+          [212.2, 199.2, 165.1],
+          [177.8, 191.1, 201.3],
+          [177.1, 183.1, 193.4],
+          [179.5, 178.7, 173.3],
+          [149.5, 187.9, 174.0],
+          [212.4, 207.4, 216.8],
+          [203.4, 209.5, 220.3],
+          [164.7, 180.1, 146.6],
+          [137.5, 134.2, 133.4],
+          [177.3, 169.6, 166.1],
+          [234.9, 220.6, 204.4],
+          [211.2, 199.5, 202.5],
+          [220.5, 199.1, 193.4],
+          [237.3, 218.9, 213.8],
+          [190.0, 204.3, 141.9],
+          [185.2, 174.3, 169.9],
+          [202.9, 198.2, 194.5],
+          [171.4, 181.6, 202.0],
+          [238.6, 243.9, 245.0],
+          [205.6, 192.3, 190.7],
+          [218.3, 213.5, 222.7],
+          [194.9, 187.3, 168.6],
+          [197.5, 202.6, 213.9],
+          [213.6, 211.3, 222.2],
+          [199.1, 201.9, 203.8],
+          [174.7, 165.3, 172.6],
+          [211.1, 179.5, 176.9],
+          [175.2, 156.6, 151.4],
+          [231.3, 224.0, 230.1],
+          [207.9, 208.5, 197.5],
+          [205.6, 200.6, 199.6],
+          [203.3, 210.7, 223.1],
+          [194.6, 204.0, 204.4],
+          [207.6, 196.9, 187.3],
+          [209.3, 205.4, 198.7],
+          [207.0, 213.6, 211.7],
+          [207.0, 181.3, 174.7],
+          [204.0, 180.0, 171.7],
+          [132.8, 169.0, 176.5],
+          [220.6, 212.1, 208.2],
+          [235.9, 230.0, 187.4],
+          [199.8, 200.1, 186.3],
+          [229.8, 202.0, 186.8],
+          [160.9, 164.2, 164.0],
+          [181.0, 177.0, 183.0],
+          [234.6, 229.4, 234.7],
+          [182.3, 176.3, 195.0],
+          [227.2, 217.8, 216.5],
+          [237.5, 210.4, 205.1],
+          [193.8, 205.9, 187.3],
+          [230.5, 185.1, 154.6],
+          [227.6, 223.9, 201.2],
+          [214.3, 196.4, 167.7],
+          [180.2, 183.2, 174.2],
+          [232.2, 202.2, 178.4],
+          [219.6, 216.9, 219.8],
+          [192.8, 166.4, 152.1],
+          [246.7, 240.3, 242.6],
+          [186.3, 187.8, 173.7],
+          [229.0, 206.5, 207.7],
+          [210.0, 220.3, 214.1],
+          [230.2, 225.7, 215.7],
+          [218.9, 179.8, 167.5],
+          [206.2, 218.8, 228.1],
+          [227.8, 213.9, 219.3],
+          [226.6, 227.1, 226.9],
+          [219.7, 231.9, 235.7],
+          [98.4, 166.2, 176.8],
+          [230.9, 221.8, 215.3],
+          [196.0, 195.6, 196.3],
+          [229.4, 232.8, 238.1],
+          [179.0, 181.7, 187.0],
+          [223.6, 222.2, 225.1],
+          [210.4, 216.6, 204.5],
+          [220.6, 226.5, 207.3],
+          [203.6, 218.9, 229.1],
+          [186.5, 191.1, 190.0],
+          [171.7, 183.9, 205.7],
+          [192.2, 177.7, 176.1],
+          [212.5, 215.9, 224.7],
+          [167.7, 186.4, 201.2],
+          [176.1, 189.8, 160.5],
+          [220.4, 210.7, 216.9],
+          [209.7, 193.3, 177.6],
+          [234.4, 219.6, 186.7],
+          [199.5, 186.2, 181.3],
+          [230.8, 222.8, 224.3],
+          [193.2, 194.7, 194.2],
+          [221.4, 224.8, 215.3],
+          [189.1, 198.8, 207.1],
+          [211.4, 192.3, 179.2],
+          [189.7, 204.1, 214.2],
+          [198.3, 210.2, 196.8],
+          [157.9, 192.0, 175.6],
+          [220.5, 229.1, 227.1],
+          [195.6, 190.4, 172.2],
+          [197.0, 195.9, 208.2],
+          [214.1, 204.1, 187.1],
+          [227.0, 174.0, 165.1],
+          [217.8, 217.9, 216.1],
+          [207.7, 206.8, 216.9],
+          [226.9, 221.7, 214.1],
+          [183.8, 191.8, 202.9],
+          [192.8, 191.7, 184.4],
+          [233.7, 224.0, 226.6],
+          [200.4, 194.1, 198.2],
+          [225.4, 192.3, 199.7],
+          [208.5, 223.7, 234.6],
+          [230.6, 199.8, 184.2],
+          [212.3, 220.3, 214.7],
+          [201.9, 222.8, 224.0],
+          [226.1, 222.2, 207.3],
+          [205.8, 179.6, 173.9],
+          [217.6, 179.6, 166.0],
+          [226.8, 192.3, 182.4],
+          [161.5, 177.8, 178.6],
+          [221.5, 214.7, 213.5],
+          [169.9, 174.5, 178.2],
+          [189.7, 216.8, 229.0],
+          [166.7, 179.7, 202.2],
+          [214.1, 204.0, 185.5],
+          [209.9, 207.9, 210.2],
+          [238.2, 201.8, 193.6],
+          [182.6, 178.9, 187.8],
+          [197.1, 195.6, 194.0],
+          [179.5, 187.1, 179.5],
+          [188.7, 187.9, 185.4],
+          [214.8, 222.1, 223.5],
+          [182.4, 201.1, 191.8],
+          [225.7, 205.7, 174.5],
+          [193.5, 195.5, 198.0],
+          [234.5, 234.3, 187.0],
+          [225.9, 212.2, 208.3],
+          [183.8, 208.0, 220.0],
+          [194.3, 196.5, 181.0],
+          [183.6, 185.3, 191.1],
+          [165.6, 146.4, 151.9],
+          [224.7, 225.0, 224.4],
+          [159.9, 179.3, 193.7],
+          [232.8, 229.8, 229.8],
+          [196.4, 189.2, 188.2],
+          [198.9, 193.0, 197.9],
+          [210.1, 212.6, 216.4],
+          [227.4, 211.8, 177.4],
+          [188.8, 195.8, 207.1],
+          [188.8, 215.1, 226.5],
+          [229.1, 215.2, 189.2],
+          [144.6, 204.7, 221.9],
+          [164.9, 151.2, 155.7],
+          [232.7, 207.7, 201.5],
+          [210.2, 216.9, 225.0],
+          [223.7, 197.6, 202.8],
+          [176.8, 203.8, 195.3],
+          [206.3, 206.3, 209.7],
+          [201.6, 207.8, 185.0],
+          [170.1, 167.1, 166.5],
+          [182.3, 181.3, 193.8],
+          [196.5, 215.8, 188.0],
+          [236.7, 223.2, 216.4],
+          [214.5, 217.0, 218.8],
+          [223.7, 229.3, 230.2],
+          [182.8, 174.9, 161.9],
+          [211.4, 223.7, 219.8],
+          [218.5, 209.9, 189.9],
+          [208.2, 223.5, 227.9],
+          [174.9, 167.5, 171.2],
+          [169.1, 189.3, 177.6],
+          [172.9, 176.1, 201.4],
+          [201.9, 192.5, 197.7],
+          [225.3, 213.3, 196.9],
+          [229.9, 222.0, 211.3],
+          [196.0, 189.3, 197.4],
+          [209.9, 191.0, 177.8],
+          [226.3, 221.2, 222.9],
+          [145.1, 150.1, 171.1],
+          [243.7, 235.3, 231.2],
+          [171.4, 174.3, 172.9],
+          [202.5, 186.0, 189.8],
+          [190.6, 188.3, 188.4],
+          [230.0, 226.0, 218.1],
+          [208.2, 196.5, 191.8],
+          [215.4, 200.5, 177.0],
+          [199.0, 206.5, 201.7],
+          [163.2, 173.4, 163.5],
+          [225.1, 216.3, 223.8],
+          [240.3, 225.5, 213.3],
+          [201.7, 202.4, 199.5],
+          [198.9, 197.9, 197.9],
+          [202.9, 218.6, 170.0],
+          [160.4, 166.2, 163.5],
+          [156.7, 154.8, 159.3],
+          [225.2, 193.8, 175.9],
+          [187.9, 188.2, 199.6],
+          [182.4, 187.9, 192.8],
+          [193.0, 178.7, 203.1],
+          [219.6, 196.5, 174.0],
+          [232.7, 236.5, 239.5],
+          [206.6, 207.8, 158.6],
+          [207.9, 201.6, 194.2],
+          [219.7, 209.8, 185.7],
+          [226.2, 225.4, 199.4],
+          [235.4, 229.3, 224.3],
+          [197.3, 165.5, 161.8],
+          [223.8, 219.6, 214.0],
+          [200.4, 220.9, 228.5],
+          [188.9, 193.6, 189.9],
+          [196.2, 214.4, 191.2],
+          [205.2, 209.7, 212.1],
+          [207.7, 212.1, 207.9],
+          [150.1, 162.3, 145.0],
+          [192.9, 173.4, 148.1],
+          [201.1, 193.0, 198.1],
+          [218.8, 210.9, 219.6],
+          [209.2, 209.3, 209.9],
+          [233.7, 225.6, 209.7],
+          [196.8, 188.7, 205.9],
+          [210.5, 208.3, 202.4],
+          [233.4, 220.4, 202.9],
+          [218.1, 194.2, 191.0],
+          [214.8, 217.5, 224.3],
+          [212.8, 212.4, 211.6],
+          [220.9, 215.3, 222.9],
+          [224.1, 191.3, 178.0],
+          [223.1, 228.7, 236.9],
+          [147.2, 171.8, 161.9],
+          [218.6, 220.2, 226.9],
+          [191.5, 207.6, 194.1],
+          [186.2, 153.5, 151.2],
+          [219.7, 214.8, 216.4],
+          [158.5, 184.8, 183.0],
+          [202.4, 224.8, 223.1],
+          [198.8, 208.2, 211.8],
+          [218.0, 219.5, 222.1],
+          [224.1, 216.8, 216.5],
+          [167.9, 145.3, 140.5],
+          [218.7, 208.3, 200.8],
+          [160.1, 142.1, 183.2],
+          [151.0, 132.9, 134.1],
+          [199.4, 203.1, 212.1],
+          [236.5, 241.1, 241.0],
+          [217.9, 225.1, 218.3],
+          [239.9, 196.8, 213.1],
+          [228.8, 209.5, 202.5],
+          [205.0, 212.5, 217.7],
+          [217.1, 189.6, 176.6],
+          [231.1, 219.3, 204.9],
+          [214.7, 205.8, 191.1],
+          [220.8, 228.7, 211.9],
+          [186.6, 192.1, 198.5],
+          [178.4, 177.3, 175.9],
+          [231.6, 215.7, 195.5],
+          [223.3, 220.2, 221.1],
+          [174.9, 191.4, 185.2],
+          [213.1, 216.7, 215.3],
+          [197.8, 191.8, 192.8],
+          [220.9, 219.4, 214.2],
+          [214.3, 213.9, 200.3],
+          [190.0, 205.7, 174.7],
+          [210.0, 204.9, 189.9],
+          [211.2, 192.6, 182.7],
+          [230.2, 224.1, 206.7],
+          [154.7, 187.5, 192.3],
+          [203.0, 209.2, 212.6],
+          [198.6, 185.7, 186.0],
+          [219.6, 217.1, 193.3],
+          [202.1, 172.2, 163.9],
+          [196.3, 206.1, 211.5],
+          [220.1, 198.9, 172.6],
+          [197.0, 200.7, 174.7],
+          [210.1, 209.0, 197.2],
+          [173.7, 179.8, 182.7],
+          [210.1, 212.1, 212.3],
+          [227.8, 220.4, 226.2],
+        ];
+        const rArr = rgbRaw.map(([r]) => r);
+        const gArr = rgbRaw.map(([, g]) => g);
+        const bArr = rgbRaw.map(([, , b]) => b);
+        /* Brightness = mean of R, G, B channels */
+        const brightness = rgbRaw.map(([r, g, b]) => (r + g + b) / 3);
+        const hoverText = rgbRaw.map(
+          ([r, g, b]) =>
+            `R: ${r.toFixed(1)}<br>G: ${g.toFixed(1)}<br>B: ${b.toFixed(1)}<br>Brightness: ${((r + g + b) / 3).toFixed(1)}`,
+        );
+        Plotly.newPlot(
+          "rgbScatter3D",
+          [
+            {
+              type: "scatter3d",
+              mode: "markers",
+              x: rArr,
+              y: gArr,
+              z: bArr,
+              text: hoverText,
+              hovertemplate: "%{text}<extra></extra>",
+              marker: {
+                size: 4,
+                color: brightness,
+                colorscale: "Viridis",
+                cmin: 120,
+                cmax: 250,
+                opacity: 0.85,
+                line: { width: 0 },
+                colorbar: {
+                  title: { text: "Brightness", side: "right" },
+                  thickness: 16,
+                  len: 0.7,
+                  tickfont: { size: 11 },
+                },
+              },
+            },
+          ],
+          {
+            margin: { l: 0, r: 60, t: 30, b: 0 },
+            paper_bgcolor: "rgba(0,0,0,0)",
+            scene: {
+              xaxis: { title: "Mean Red", range: [80, 255] },
+              yaxis: { title: "Mean Green", range: [120, 255] },
+              zaxis: { title: "Mean Blue", range: [120, 255] },
+              bgcolor: "rgba(0,0,0,0)",
+            },
+            showlegend: false,
+          },
+          { responsive: true, displayModeBar: false },
+        );
+      }
+
+      /* Color Space: RGB Channel Distribution (all 2,503 images) */
+      new Chart(document.getElementById("rgbChannelChart"), {
+        type: "bar",
+        data: {
+          labels: [
+            "60-80",
+            "80-100",
+            "100-120",
+            "120-140",
+            "140-160",
+            "160-180",
+            "180-200",
+            "200-220",
+            "220-240",
+            "240+",
+          ],
+          datasets: [
+            {
+              label: "Red",
+              data: [0, 1, 3, 25, 83, 262, 588, 866, 631, 44],
+              backgroundColor: "rgba(231,76,60,0.65)",
+            },
+            {
+              label: "Green",
+              data: [0, 0, 2, 13, 88, 294, 722, 933, 429, 22],
+              backgroundColor: "rgba(39,174,96,0.65)",
+            },
+            {
+              label: "Blue",
+              data: [0, 1, 4, 42, 156, 426, 760, 746, 335, 33],
+              backgroundColor: "rgba(41,128,185,0.65)",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true, position: "top" } },
+          scales: {
+            x: { title: { display: true, text: "Mean Channel Value" } },
+            y: { title: { display: true, text: "Number of Images" } },
           },
         },
       });
