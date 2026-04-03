@@ -903,13 +903,8 @@
                 </tr>
                 <tr>
                   <td><strong>Categorical Features</strong></td>
-                  <td>Category frequencies &amp; default rate per group</td>
+                  <td>Category frequencies &amp; default rate per group (Gender, Education, Marriage, PAY_1&ndash;6 status codes)</td>
                   <td>Value counts, mode, default rate</td>
-                </tr>
-                <tr>
-                  <td><strong>Ordinal Features</strong></td>
-                  <td>Repayment status distribution by delay code</td>
-                  <td>Count &amp; default rate per PAY code</td>
                 </tr>
                 <tr>
                   <td><strong>Numerical Features</strong></td>
@@ -1036,35 +1031,35 @@
                 </tr>
                 <tr>
                   <td>PAY_1</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>
-                    Repayment status in month 1. Negative or zero indicates paid
-                    duly; positive values indicate delay months.
+                    Repayment status in month 1. Discrete status codes: &minus;2 no consumption,
+                    &minus;1 paid duly, 0 revolving, 1&ndash;8 months of delay.
                   </td>
                 </tr>
                 <tr>
                   <td>PAY_2</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>Repayment status in month 2.</td>
                 </tr>
                 <tr>
                   <td>PAY_3</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>Repayment status in month 3.</td>
                 </tr>
                 <tr>
                   <td>PAY_4</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>Repayment status in month 4.</td>
                 </tr>
                 <tr>
                   <td>PAY_5</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>Repayment status in month 5.</td>
                 </tr>
                 <tr>
                   <td>PAY_6</td>
-                  <td><span class="type-pill type-ordinal">Ordinal</span></td>
+                  <td><span class="type-pill type-categorical">Categorical</span></td>
                   <td>Repayment status in month 6.</td>
                 </tr>
                 <tr>
@@ -1505,8 +1500,8 @@ plt.tight_layout(); plt.show()</code></pre></div>
         </header>
         <div class="section-body" id="categorical-body">
           <p>
-            Distribution counts and default-rate comparison for major
-            categorical variables.
+            Distribution counts and default-rate comparison for categorical variables
+            (Gender, Education, Marriage) and Pay Status codes (PAY_1&ndash;PAY_6).
           </p>
 
           <div class="pay-status-controls">
@@ -1616,80 +1611,75 @@ axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Proportion 
 axes[<span class="cn">1</span>].set_ylim(<span class="cn">0</span>, <span class="cn">1</span>)
 
 plt.tight_layout(); plt.show()</code></pre></div>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- ORDINAL VARIABLES — PAY_1 TO PAY_6                           -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="ordinal-analysis">
-        <header class="section-head">
-          <h2>📶 Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
-          <div class="section-head-actions">
-            <button class="toggle" data-target="ordinal-body" aria-expanded="true">
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="ordinal-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="ordinal-body">
-
-          <h3 style="margin-top:16px">PAY Code Reference Scale</h3>
-          <div class="ordinal-scale">
-            <span class="ord-chip ord-neg2">&minus;2 &nbsp;No consumption</span>
-            <span class="ord-chip ord-neg1">&minus;1 &nbsp;Paid duly (on time)</span>
-            <span class="ord-chip ord-zero">&nbsp;0 &nbsp;Revolving / minimum paid</span>
-            <span class="ord-chip ord-pos">&nbsp;1 &nbsp;1-month delay</span>
-            <span class="ord-chip ord-pos">&nbsp;2 &nbsp;2-month delay</span>
-            <span class="ord-chip ord-pos">&nbsp;3 &nbsp;3-month delay</span>
-            <span class="ord-chip ord-high">&ge;4 &nbsp;Severe delay (4–8 months)</span>
           </div>
 
-          <p style="margin-top:14px">
-            Select a PAY variable below. The <strong>count bar</strong> shows how often each
-            delay code occurs; the <strong>default-rate line</strong> shows what fraction of
-            clients with that code actually defaulted — revealing the monotonic risk gradient.
-          </p>
+          <details open>
+            <summary>Pay Status Analysis (PAY_1 &ndash; PAY_6)</summary>
+            <p style="margin-top:10px">
+              PAY_1&ndash;PAY_6 record the monthly repayment status using a fixed set of discrete codes.
+              Although the codes appear numeric, they represent <strong>named categories</strong>
+              (e.g., &ldquo;paid duly&rdquo;, &ldquo;revolving&rdquo;, &ldquo;2-month delay&rdquo;)
+              with no meaningful continuous distance between them &mdash; so they are treated as
+              <strong>categorical</strong> in this analysis.
+            </p>
 
-          <div class="pay-status-controls">
-            <strong>Select variable:</strong>
-            <div class="pay-var-buttons" id="payVarButtons">
-              <button class="pay-var-btn active" data-var="PAY_1">PAY_1</button>
-              <button class="pay-var-btn" data-var="PAY_2">PAY_2</button>
-              <button class="pay-var-btn" data-var="PAY_3">PAY_3</button>
-              <button class="pay-var-btn" data-var="PAY_4">PAY_4</button>
-              <button class="pay-var-btn" data-var="PAY_5">PAY_5</button>
-              <button class="pay-var-btn" data-var="PAY_6">PAY_6</button>
+            <h4 style="margin-top:14px;margin-bottom:8px">Status Code Reference</h4>
+            <div class="ordinal-scale">
+              <span class="ord-chip ord-neg2">&minus;2 &nbsp;No consumption</span>
+              <span class="ord-chip ord-neg1">&minus;1 &nbsp;Paid duly (on time)</span>
+              <span class="ord-chip ord-zero">&nbsp;0 &nbsp;Revolving / minimum paid</span>
+              <span class="ord-chip ord-pos">&nbsp;1 &nbsp;1-month delay</span>
+              <span class="ord-chip ord-pos">&nbsp;2 &nbsp;2-month delay</span>
+              <span class="ord-chip ord-pos">&nbsp;3 &nbsp;3-month delay</span>
+              <span class="ord-chip ord-high">&ge;4 &nbsp;Severe delay (4&ndash;8 months)</span>
             </div>
-          </div>
 
-          <div class="chart-grid">
-            <article class="chart-card">
-              <h3>Counts by Ordinal Code</h3>
-              <canvas id="payStatusCountChart" height="190"></canvas>
-              <p class="mini-note">
-                Bar chart respects ordered scale (−2 at left → 8 at right).
-                Most clients cluster around codes −1, 0 (on time or revolving).
-              </p>
-            </article>
-            <article class="chart-card">
-              <h3>Default Rate by Ordinal Code</h3>
-              <canvas id="payStatusDefaultRateChart" height="190"></canvas>
-              <p class="mini-note">
-                Line chart shows the <strong>monotonic rise</strong> in default probability.
-                PAY code ≥ 2 is a strong default signal (&gt;55 %).
-              </p>
-            </article>
-          </div>
+            <p style="margin-top:12px">
+              Select a PAY variable below. The <strong>count bar</strong> shows how often each
+              status code appears; the <strong>default-rate bar</strong> shows what fraction of
+              clients with that code defaulted &mdash; revealing a sharp risk gap between
+              on-time and delayed-payment groups.
+            </p>
 
-          <div class="note" style="margin-top:12px">
-            <strong>Key finding:</strong> Default rate jumps from ~13&nbsp;% at code &minus;2
-            (no consumption) to <strong>~69–76&nbsp;%</strong> at codes 2–3 (two/three-month
-            payment delay). PAY_1 is the single strongest predictor in the dataset.
-          </div>
+            <div class="pay-status-controls">
+              <strong>Select variable:</strong>
+              <div class="pay-var-buttons" id="payVarButtons">
+                <button class="pay-var-btn active" data-var="PAY_1">PAY_1</button>
+                <button class="pay-var-btn" data-var="PAY_2">PAY_2</button>
+                <button class="pay-var-btn" data-var="PAY_3">PAY_3</button>
+                <button class="pay-var-btn" data-var="PAY_4">PAY_4</button>
+                <button class="pay-var-btn" data-var="PAY_5">PAY_5</button>
+                <button class="pay-var-btn" data-var="PAY_6">PAY_6</button>
+              </div>
+            </div>
 
-          <div class="code-panel tut-toggle" data-section="ordinal-body">
+            <div class="chart-grid">
+              <article class="chart-card">
+                <h3>Counts by Status Code</h3>
+                <canvas id="payStatusCountChart" height="190"></canvas>
+                <p class="mini-note">
+                  Clients cluster heavily around codes &minus;1 and 0 (on time or revolving).
+                  High-delay codes (&ge;2) are rare but carry far greater default risk.
+                </p>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Status Code</h3>
+                <canvas id="payStatusDefaultRateChart" height="190"></canvas>
+                <p class="mini-note">
+                  <strong>Bar chart</strong> shows default rate per status code.
+                  PAY code &ge; 2 is a strong default signal (&gt;55 %).
+                </p>
+              </article>
+            </div>
+
+            <div class="note" style="margin-top:12px">
+              <strong>Key finding:</strong> Default rate jumps from ~13&nbsp;% at code &minus;2
+              (no consumption) to <strong>~69&ndash;76&nbsp;%</strong> at codes 2&ndash;3
+              (two/three-month payment delay). PAY_1 is the single strongest predictor in the dataset.
+            </div>
+          </details>
+
+          <div class="code-panel tut-toggle" data-section="categorical-body">
             <div class="code-panel-header">
               <div class="code-tabs">
                 <button class="code-tab active" data-tab="cp2-plotly">Plotly</button>
@@ -1700,30 +1690,27 @@ plt.tight_layout(); plt.show()</code></pre></div>
             <div id="cp2-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
 <span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
 
-pay_col = <span class="cs">'PAY_1'</span>  <span class="cc"># ordinal: -2 no-consumption … 8 eight-month delay</span>
+pay_col = <span class="cs">'PAY_1'</span>  <span class="cc"># categorical: -2 no-consumption … 8 eight-month delay</span>
 
-<span class="cc"># Count per ordinal level (sort by code value)</span>
+<span class="cc"># Count per status code (sort by code value)</span>
 counts = df[pay_col].value_counts().sort_index()
 drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
 labels = counts.index.astype(str).tolist()
 
 fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
-    subplot_titles=[<span class="cs">f'{pay_col} Frequency (Ordered)'</span>,
+    subplot_titles=[<span class="cs">f'{pay_col} Frequency'</span>,
                     <span class="cs">f'Default Rate by {pay_col}'</span>])
 
 fig.add_trace(go.Bar(x=labels, y=counts.values,
-                     marker_color=<span class="cs">'#2f855a'</span>, name=<span class="cs">'Count'</span>),
+                     marker_color=<span class="cs">'steelblue'</span>, name=<span class="cs">'Count'</span>),
               row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.add_trace(go.Scatter(x=labels, y=drate.values,
-                         mode=<span class="cs">'lines+markers'</span>,
-                         marker=dict(color=<span class="cs">'#c05621'</span>, size=<span class="cn">7</span>),
-                         line=dict(color=<span class="cs">'#c05621'</span>, width=<span class="cn">2</span>),
-                         name=<span class="cs">'Default %'</span>),
+fig.add_trace(go.Bar(x=labels, y=drate.values,
+                     marker_color=<span class="cs">'salmon'</span>, name=<span class="cs">'Default %'</span>),
               row=<span class="cn">1</span>, col=<span class="cn">2</span>)
 
 fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>)
 fig.update_yaxes(title_text=<span class="cs">'Count'</span>, row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.update_yaxes(title_text=<span class="cs">'Default Rate (%)'</span>, row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.update_yaxes(title_text=<span class="cs">'Default Rate (%)'</span>, range=[<span class="cn">0</span>, <span class="cn">100</span>], row=<span class="cn">1</span>, col=<span class="cn">2</span>)
 fig.show()</code></pre></div>
             <div id="cp2-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
 
@@ -1731,24 +1718,22 @@ pay_col = <span class="cs">'PAY_1'</span>
 
 counts = df[pay_col].value_counts().sort_index()
 drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labels = [str(c) for c in counts.index]
+labels = [str(c) <span class="ck">for</span> c <span class="ck">in</span> counts.index]
 
 fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
 
-<span class="cc"># Ordered bar for counts</span>
-ax1.bar(labels, counts.values, color=<span class="cs">'#2f855a'</span>, edgecolor=<span class="cs">'#1f5c3d'</span>)
-ax1.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+<span class="cc"># Bar for counts</span>
+ax1.bar(labels, counts.values, color=<span class="cs">'steelblue'</span>, edgecolor=<span class="cs">'white'</span>)
+ax1.set_xlabel(<span class="cs">f'{pay_col} Status Code'</span>)
 ax1.set_ylabel(<span class="cs">'Count'</span>)
-ax1.set_title(<span class="cs">f'{pay_col} Distribution (Ordered Bar)'</span>)
+ax1.set_title(<span class="cs">f'{pay_col} Distribution'</span>)
 
-<span class="cc"># Line chart for default rate</span>
-ax2.plot(labels, drate.values, marker=<span class="cs">'o'</span>,
-         color=<span class="cs">'#c05621'</span>, linewidth=<span class="cn">2</span>, markersize=<span class="cn">6</span>)
-ax2.fill_between(range(<span class="cn">len</span>(labels)), drate.values,
-                 alpha=<span class="cn">0.18</span>, color=<span class="cs">'#c05621'</span>)
-ax2.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+<span class="cc"># Bar chart for default rate</span>
+ax2.bar(labels, drate.values, color=<span class="cs">'salmon'</span>)
+ax2.set_xlabel(<span class="cs">f'{pay_col} Status Code'</span>)
 ax2.set_ylabel(<span class="cs">'Default Rate (%)'</span>)
-ax2.set_title(<span class="cs">f'Default Rate by {pay_col} (Monotonic Trend)'</span>)
+ax2.set_ylim(<span class="cn">0</span>, <span class="cn">100</span>)
+ax2.set_title(<span class="cs">f'Default Rate by {pay_col}'</span>)
 
 plt.tight_layout(); plt.show()</code></pre></div>
           </div>
@@ -1827,6 +1812,11 @@ plt.tight_layout(); plt.show()</code></pre></div>
             <summary>Payment Amount Analysis (PAY_AMT_1 to PAY_AMT_6)</summary>
             <p>
               Distribution and default-rate trend for payment amount variables.
+              A <strong>log&#x2081;&#x2080;(amt&thinsp;+&thinsp;1)</strong> transformation is applied
+              below to reveal the shape of non-zero payments, which span several orders of magnitude
+              (NT$1 to ~NT$870&thinsp;K). Adding 1 before taking the log safely handles zero values,
+              and shifting the distribution to a near-normal shape is useful for distance-based models
+              and visualisation.
             </p>
 
             <div class="pay-status-controls">
@@ -1863,10 +1853,27 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 <canvas id="payAmtRateChart" height="190"></canvas>
               </article>
             </div>
+            <div class="chart-grid" style="margin-top:12px">
+              <article class="chart-card">
+                <h3>Log&#x2081;&#x2080;(amt&thinsp;+&thinsp;1) Distribution
+                  <span style="font-weight:400;font-size:0.82em">(non-zero payments only)</span>
+                </h3>
+                <canvas id="payAmtLogChart" height="200"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Composition by Payment Group</h3>
+                <canvas id="payAmtTargetChart" height="200"></canvas>
+              </article>
+            </div>
             <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> 27&ndash;30 % of clients made <strong>zero payment</strong>
-              in each given month. These clients default at ~32&ndash;35 % vs ~17&ndash;19 % for clients who made
-              any payment &mdash; a clear binary split.</div>
+              <strong>Chart finding:</strong> 17&ndash;24 % of clients made <strong>zero payment</strong>
+              in each given month. These clients default at ~29&ndash;36 % vs ~19&ndash;20 % for clients who made
+              any payment &mdash; a strong binary split.
+              The log-scale histogram of non-zero payments shows a <strong>roughly bell-shaped</strong>
+              distribution centred around log&#x2081;&#x2080;&thinsp;&asymp;&thinsp;3.1&ndash;3.4
+              (NT$1&thinsp;000&ndash;2&thinsp;500), confirming the heavy right-skew present in raw values.
+              The stacked bar confirms the <strong>~15&ndash;16 pp gap</strong> in default rate between
+              zero-payment and paid groups is consistent across all six months.</div>
           </details>
 
 
@@ -2003,7 +2010,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
             <div id="cp5-seaborn" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
 <span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
 
-<span class="cc"># Only continuous numeric columns (ordinal PAY_1-6 excluded intentionally)</span>
+<span class="cc"># Only continuous numeric columns (categorical PAY_1-6 excluded intentionally)</span>
 num_cols = [
     <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
     <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
@@ -2060,7 +2067,7 @@ fig.show()</code></pre></div>
               <li><strong>PAY_AMT_1&ndash;6</strong>: pairwise r &asymp; 0.50&ndash;0.76 &mdash; moderate collinearity. PAY_AMT_1 (most recent) has the strongest negative correlation with default.</li>
               <li><strong>Credit_Limit vs Default</strong>: r &asymp; &minus;0.15 &mdash; the strongest continuous feature correlation.</li>
               <li><strong>Age vs Default</strong>: r &asymp; 0.01 &mdash; essentially uncorrelated (non-linear pattern not captured by Pearson).</li>
-              <li><strong>Note</strong>: PAY_1&ndash;6 ordinal features (excluded here) have far stronger association with the target &mdash; measured separately via Cram&eacute;r&rsquo;s V (see Section 3.6 below).</li>
+              <li><strong>Note</strong>: PAY_1&ndash;6 categorical features (excluded here) have far stronger association with the target &mdash; measured separately via Cram&eacute;r&rsquo;s V (see Section 3.6 below).</li>
             </ul>
           </div>
 
@@ -2810,6 +2817,50 @@ print(mi_series)</code></pre></div>
             0.11428571428571428, 0.21052631578947367, 0.14285714285714285, 0.5,
             0.0, 0.0, 0.0,
           ],
+        },
+      };
+
+      // Binary group breakdown: zero payment vs paid, with default/no-default counts
+      const payAmtGroupData = {
+        PAY_AMT_1: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1887, 4749], nodefault_counts: [3362, 20002] },
+        PAY_AMT_2: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1799, 4837], nodefault_counts: [3597, 19767] },
+        PAY_AMT_3: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1931, 4705], nodefault_counts: [4037, 19327] },
+        PAY_AMT_4: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1993, 4643], nodefault_counts: [4415, 18949] },
+        PAY_AMT_5: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1970, 4666], nodefault_counts: [4733, 18631] },
+        PAY_AMT_6: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [2078, 4558], nodefault_counts: [5095, 18269] },
+      };
+
+      // log₁₀(amt+1) histogram data for non-zero payments (20 equal-width bins)
+      const payAmtLogData = {
+        PAY_AMT_1: {
+          edges: [0.301, 0.583, 0.8651, 1.1471, 1.4291, 1.7111, 1.9931, 2.2751, 2.5571, 2.8391, 3.1212, 3.4032, 3.6852, 3.9672, 4.2492, 4.5312, 4.8132, 5.0953, 5.3773, 5.6593, 5.9413],
+          counts: [23, 60, 51, 40, 38, 49, 164, 479, 810, 2549, 6874, 5229, 4544, 2275, 861, 392, 209, 79, 22, 3],
+          zero_pct: 17.50,
+        },
+        PAY_AMT_2: {
+          edges: [0.301, 0.5973, 0.8936, 1.1898, 1.4861, 1.7824, 2.0786, 2.3749, 2.6712, 2.9675, 3.2637, 3.56, 3.8563, 4.1525, 4.4488, 4.7451, 5.0413, 5.3376, 5.6339, 5.9301, 6.2264],
+          counts: [35, 62, 58, 57, 32, 77, 228, 854, 840, 5537, 6853, 5080, 2800, 1166, 508, 248, 124, 40, 1, 4],
+          zero_pct: 17.99,
+        },
+        PAY_AMT_3: {
+          edges: [0.301, 0.5836, 0.8662, 1.1487, 1.4313, 1.7139, 1.9964, 2.279, 2.5615, 2.8441, 3.1267, 3.4092, 3.6918, 3.9744, 4.2569, 4.5395, 4.8221, 5.1046, 5.3872, 5.6698, 5.9523],
+          counts: [32, 61, 70, 46, 66, 69, 214, 717, 1481, 3956, 5643, 4490, 3863, 1862, 787, 359, 206, 88, 19, 3],
+          zero_pct: 19.89,
+        },
+        PAY_AMT_4: {
+          edges: [0.301, 0.5756, 0.8502, 1.1248, 1.3994, 1.674, 1.9486, 2.2233, 2.4979, 2.7725, 3.0471, 3.3217, 3.5963, 3.8709, 4.1455, 4.4201, 4.6947, 4.9693, 5.2439, 5.5185, 5.7931],
+          counts: [44, 61, 51, 62, 62, 89, 286, 579, 1716, 4124, 4454, 4086, 4151, 2028, 893, 458, 273, 130, 38, 7],
+          zero_pct: 21.36,
+        },
+        PAY_AMT_5: {
+          edges: [0.301, 0.5675, 0.8339, 1.1004, 1.3668, 1.6333, 1.8997, 2.1662, 2.4326, 2.699, 2.9655, 3.2319, 3.4984, 3.7648, 4.0313, 4.2977, 4.5642, 4.8306, 5.0971, 5.3635, 5.6299],
+          counts: [34, 34, 37, 53, 50, 54, 162, 420, 1319, 2235, 4526, 5292, 4067, 2691, 1068, 644, 326, 182, 83, 20],
+          zero_pct: 22.34,
+        },
+        PAY_AMT_6: {
+          edges: [0.301, 0.5721, 0.8432, 1.1144, 1.3855, 1.6566, 1.9277, 2.1988, 2.4699, 2.741, 3.0121, 3.2832, 3.5543, 3.8254, 4.0965, 4.3676, 4.6388, 4.9099, 5.181, 5.4521, 5.7232],
+          counts: [29, 33, 35, 35, 34, 66, 196, 465, 1605, 3520, 3146, 5324, 4100, 2197, 936, 490, 308, 190, 106, 12],
+          zero_pct: 23.91,
         },
       };
 
@@ -3738,6 +3789,117 @@ print(mi_series)</code></pre></div>
         });
       }
 
+      let payAmtTargetChart = null;
+      function renderPayAmtTargetChart(variable) {
+        const d = payAmtGroupData[variable];
+        const totals = d.default_counts.map((dc, i) => dc + d.nodefault_counts[i]);
+        const defPct  = d.default_counts.map((dc, i) => Number(((dc / totals[i]) * 100).toFixed(2)));
+        const nodefPct = defPct.map((v) => Number((100 - v).toFixed(2)));
+        const ctx = document.getElementById("payAmtTargetChart");
+        if (payAmtTargetChart) payAmtTargetChart.destroy();
+        payAmtTargetChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: d.groups,
+            datasets: [
+              {
+                label: "No Default (0)",
+                data: nodefPct,
+                backgroundColor: "#2f855a",
+                borderColor: "#1f5c3d",
+                borderWidth: 1,
+              },
+              {
+                label: "Default (1)",
+                data: defPct,
+                backgroundColor: "#c05621",
+                borderColor: "#8f3f17",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: "bottom" },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) =>
+                    ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} %`,
+                },
+              },
+            },
+            scales: {
+              x: { stacked: true },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                max: 100,
+                title: { display: true, text: "Share (%)" },
+              },
+            },
+          },
+        });
+      }
+
+      let payAmtLogChart = null;
+      function renderPayAmtLogChart(variable) {
+        const d = payAmtLogData[variable];
+        const labels = d.edges.slice(0, -1).map((e) => e.toFixed(2));
+        const ctx = document.getElementById("payAmtLogChart");
+        if (payAmtLogChart) payAmtLogChart.destroy();
+        payAmtLogChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Count",
+                data: d.counts,
+                backgroundColor: "#3cb371",
+                borderColor: "#2d8655",
+                borderWidth: 1,
+                categoryPercentage: 1.0,
+                barPercentage: 1.0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              subtitle: {
+                display: true,
+                text: `${d.zero_pct.toFixed(1)} % zero payments excluded`,
+                color: "#718096",
+                font: { size: 11 },
+              },
+              tooltip: {
+                callbacks: {
+                  title: (items) =>
+                    `log\u2081\u2080(amt+1) \u2248 ${items[0].label}`,
+                  label: (ctx) =>
+                    ` Count: ${ctx.parsed.y.toLocaleString()}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "log\u2081\u2080(amt + 1)",
+                },
+                ticks: { maxTicksLimit: 8, maxRotation: 0 },
+              },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Count" },
+              },
+            },
+          },
+        });
+      }
+
       const payButtons = document.querySelectorAll(
         "#payVarButtons .pay-var-btn",
       );
@@ -3788,13 +3950,16 @@ print(mi_series)</code></pre></div>
           button.addEventListener("click", () => {
             payAmtButtons.forEach((b) => b.classList.remove("active"));
             button.classList.add("active");
+            const v = button.getAttribute("data-var");
             renderBinnedAnalysis(
               payAmtData,
-              button.getAttribute("data-var"),
+              v,
               payAmtCharts,
               "payAmtCountChart",
               "payAmtRateChart",
             );
+            renderPayAmtLogChart(v);
+            renderPayAmtTargetChart(v);
           });
         });
         renderBinnedAnalysis(
@@ -3804,6 +3969,8 @@ print(mi_series)</code></pre></div>
           "payAmtCountChart",
           "payAmtRateChart",
         );
+        renderPayAmtLogChart("PAY_AMT_1");
+        renderPayAmtTargetChart("PAY_AMT_1");
       }
 
       const catButtons = document.querySelectorAll(
