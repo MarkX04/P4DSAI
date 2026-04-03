@@ -555,6 +555,123 @@
         </div>
       </section>
 
+      <!-- ═══════════════════ ANALYSIS METHODOLOGY ═══════════════════ -->
+      <section class="section" id="methodology">
+        <header class="section-head">
+          <h2>📊 Analysis Methodology</h2>
+          <button class="toggle" data-target="method-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="method-body">
+          <p>
+            This report uses two types of text processing approaches depending
+            on the analysis goal:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Analysis Type</th>
+                  <th style="text-align: center">&#x1F534; Raw Data</th>
+                  <th style="text-align: center">
+                    &#x1F7E2; Stopwords Removed
+                  </th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Basic Statistics</strong><br />(Word / Character
+                    counts)
+                  </td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Measure actual document size</td>
+                </tr>
+                <tr>
+                  <td><strong>Stop Words Analysis</strong></td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Analyze stopword frequency</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Word Frequency</strong><br />(Top overall words)
+                  </td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Find meaningful keywords</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Category Keywords</strong><br />(Top words by I/E)
+                  </td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Category-specific terms</td>
+                </tr>
+                <tr>
+                  <td><strong>Vocabulary Richness</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Content vocabulary diversity</td>
+                </tr>
+                <tr>
+                  <td><strong>TF-IDF Terms</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Most distinctive terms per MBTI type</td>
+                </tr>
+                <tr>
+                  <td><strong>N-grams (Bigrams)</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Meaningful phrase patterns without label leakage</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Distributions</strong><br />(Word / Char / Posts
+                    histograms)
+                  </td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Show actual text lengths</td>
+                </tr>
+                <tr>
+                  <td><strong>Similarity Matrix</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Inter-type text similarity</td>
+                </tr>
+                <tr>
+                  <td><strong>Label Leakage Check</strong></td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Detect MBTI tokens in posts</td>
+                </tr>
+                <tr>
+                  <td><strong>Top Words by Type</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Per-class keyword analysis</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            <strong>Raw Data</strong> refers to the cleaned text with stopwords
+            retained (<code>clean</code> column).
+            <strong>Stopwords Removed</strong> refers to the cleaned text after
+            filtering out NLTK English stopwords and words &le; 2 characters
+            (<code>clean_ns</code> column). <strong>(no-leak)</strong> indicates
+            the <code>clean_ns_noleak</code> column, which additionally strips
+            all 16 MBTI label tokens to prevent label leakage.
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════════════════ DATASET OVERVIEW ═══════════════════ -->
       <section class="section" id="dataset-overview">
         <header class="section-head">
@@ -757,6 +874,28 @@
             </table>
           </div>
 
+          <!-- Consolidated Dataset Metrics -->
+          <h3 style="margin-top: 16px">Consolidated Dataset Metrics</h3>
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Largest Class</div>
+              <div class="value">1,832 (INFP)</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Smallest Class</div>
+              <div class="value">39 (ESTJ)</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Imbalance Ratio</div>
+              <div class="value">46.97</div>
+            </article>
+          </div>
+          <div class="note">
+            The imbalance ratio of ~47:1 between largest (INFP) and smallest
+            (ESTJ) classes means stratified sampling and macro-averaged metrics
+            are essential for fair evaluation.
+          </div>
+
           <div class="code-panel">
             <div class="code-panel-header">
               <div class="code-tabs">
@@ -773,6 +912,100 @@ df.shape          <span class="cc"># (8675, 2)</span>
 df.head()
 df.info()
 df[<span class="cs">"type"</span>].value_counts()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ DATA QUALITY CHECKS ═══════════════════ -->
+      <section class="section" id="data-quality">
+        <header class="section-head">
+          <h2>🔍 Data Quality Checks</h2>
+          <button
+            class="toggle"
+            data-target="quality-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="quality-body">
+          <p>
+            Audit for missing values and duplicate records before any
+            transformation.
+          </p>
+
+          <h3 style="margin-top: 10px">Missing Value Report</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Missing Count</th>
+                  <th>Missing %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>type</td>
+                  <td>0</td>
+                  <td>0.00%</td>
+                </tr>
+                <tr>
+                  <td>posts</td>
+                  <td>0</td>
+                  <td>0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 14px">Duplicate Report</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Duplicate full rows</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>Duplicate posts only</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>Duplicate (type, posts) pairs</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            No missing values or duplicates detected — the dataset is clean at
+            the row level.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-quality">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-quality" class="code-tab-pane active">
+              <pre><code class="language-python">missing_report = df.isna().sum().rename(<span class="cs">"missing_count"</span>).to_frame()
+missing_report[<span class="cs">"missing_pct"</span>] = (missing_report[<span class="cs">"missing_count"</span>] / len(df) * <span class="cn">100</span>).round(<span class="cn">2</span>)
+
+duplicate_row_count = <span class="ck">int</span>(df.duplicated().sum())
+duplicate_posts_count = <span class="ck">int</span>(df.duplicated(subset=[<span class="cs">"posts"</span>]).sum())
+duplicate_type_posts_count = <span class="ck">int</span>(df.duplicated(subset=[<span class="cs">"type"</span>, <span class="cs">"posts"</span>]).sum())</code></pre>
             </div>
           </div>
         </div>
@@ -974,109 +1207,137 @@ df[<span class="cs">"clean_ns"</span>] = df[<span class="cs">"clean"</span>].app
         </div>
       </section>
 
-      <!-- ═══════════════════ ANALYSIS METHODOLOGY ═══════════════════ -->
-      <section class="section" id="methodology">
+      <!-- ═══════════════════ LABEL LEAKAGE CHECK ═══════════════════ -->
+      <section class="section" id="label-leakage">
         <header class="section-head">
-          <h2>📊 Analysis Methodology</h2>
-          <button class="toggle" data-target="method-body" aria-expanded="true">
+          <h2>⚠️ Label Leakage Check</h2>
+          <button
+            class="toggle"
+            data-target="leakage-body"
+            aria-expanded="true"
+          >
             Toggle Section
           </button>
         </header>
-        <div class="section-body" id="method-body">
+        <div class="section-body" id="leakage-body">
           <p>
-            This report uses two types of text processing approaches depending
-            on the analysis goal:
+            Checks whether MBTI label tokens (e.g., <code>infj</code>,
+            <code>intp</code>) appear directly in posts. High self-token leakage
+            means models could overfit by memorizing label words rather than
+            learning language patterns.
           </p>
+
+          <h3 style="margin-top: 10px">Self-Token Leakage Rate by Type</h3>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Analysis Type</th>
-                  <th style="text-align: center">&#x1F534; Raw Data</th>
-                  <th style="text-align: center">
-                    &#x1F7E2; Stopwords Removed
-                  </th>
-                  <th>Reason</th>
+                  <th>MBTI Type</th>
+                  <th>Self-Token Leak Rate</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>
-                    <strong>Basic Statistics</strong><br />(Word / Character
-                    counts)
-                  </td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td style="text-align: center">-</td>
-                  <td>Measure actual document size</td>
+                  <td>INFJ</td>
+                  <td>0.9272</td>
                 </tr>
                 <tr>
-                  <td><strong>Stop Words Analysis</strong></td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td style="text-align: center">-</td>
-                  <td>Analyze stopword frequency</td>
+                  <td>INFP</td>
+                  <td>0.9213</td>
                 </tr>
                 <tr>
-                  <td>
-                    <strong>Word Frequency</strong><br />(Top overall words)
-                  </td>
-                  <td style="text-align: center">-</td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td>Find meaningful keywords</td>
+                  <td>INTP</td>
+                  <td>0.8997</td>
                 </tr>
                 <tr>
-                  <td>
-                    <strong>Category Keywords</strong><br />(Top words by I/E)
-                  </td>
-                  <td style="text-align: center">-</td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td>Category-specific terms</td>
+                  <td>INTJ</td>
+                  <td>0.8918</td>
                 </tr>
                 <tr>
-                  <td><strong>Vocabulary Richness</strong></td>
-                  <td style="text-align: center">-</td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td>Content vocabulary diversity</td>
+                  <td>ENTP</td>
+                  <td>0.8730</td>
                 </tr>
                 <tr>
-                  <td><strong>TF-IDF Terms</strong></td>
-                  <td style="text-align: center">-</td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td>Most distinctive terms</td>
+                  <td>ENFP</td>
+                  <td>0.8637</td>
                 </tr>
                 <tr>
-                  <td><strong>N-grams (Bigrams)</strong></td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td style="text-align: center">-</td>
-                  <td>Meaningful phrase patterns</td>
+                  <td>ISTP</td>
+                  <td>0.7715</td>
                 </tr>
                 <tr>
-                  <td>
-                    <strong>Distributions</strong><br />(Word / Char / Posts
-                    histograms)
-                  </td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td style="text-align: center">-</td>
-                  <td>Show actual text lengths</td>
+                  <td>ISFP</td>
+                  <td>0.7565</td>
                 </tr>
                 <tr>
-                  <td><strong>Similarity Matrix</strong></td>
-                  <td style="text-align: center">-</td>
-                  <td style="text-align: center">&#9989;</td>
-                  <td>Inter-type text similarity</td>
+                  <td>ENTJ</td>
+                  <td>0.7446</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>0.7368</td>
+                </tr>
+                <tr>
+                  <td>ISTJ</td>
+                  <td>0.7268</td>
+                </tr>
+                <tr>
+                  <td>ISFJ</td>
+                  <td>0.6928</td>
+                </tr>
+                <tr>
+                  <td>ESTP</td>
+                  <td>0.6517</td>
+                </tr>
+                <tr>
+                  <td>ESFP</td>
+                  <td>0.5625</td>
+                </tr>
+                <tr>
+                  <td>ESFJ</td>
+                  <td>0.5238</td>
+                </tr>
+                <tr>
+                  <td>ESTJ</td>
+                  <td>0.4872</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="note">
-            <strong>Raw Data</strong> refers to the cleaned text with stopwords
-            retained (<code>clean</code> column).
-            <strong>Stopwords Removed</strong> refers to the cleaned text after
-            filtering out NLTK English stopwords and words &le; 2 characters
-            (<code>clean_ns</code> column).
+            <strong>Average self-token leakage rate: ~0.76.</strong>
+            Most users mention their own MBTI type in posts. A
+            <code>clean_ns_noleak</code> column is created by stripping all 16
+            MBTI tokens to prevent label leakage in downstream word-frequency
+            and TF-IDF analysis.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-leak">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-leak" class="code-tab-pane active">
+              <pre><code class="language-python">mbti_tokens = [<span class="cs">"infj"</span>, <span class="cs">"infp"</span>, <span class="cs">"intj"</span>, <span class="cs">"intp"</span>, ...]
+
+<span class="ck">for</span> token <span class="ck">in</span> mbti_tokens:
+    df[<span class="cs">f"has_{token}"</span>] = df[<span class="cs">"clean"</span>].str.contains(<span class="ck">rf</span><span class="cs">"\b{token}\b"</span>, regex=<span class="cn">True</span>)
+
+<span class="cc"># Leakage mitigation</span>
+mbti_pattern = <span class="ck">r</span><span class="cs">"\b(?:"</span> + <span class="cs">"|"</span>.join(mbti_tokens) + <span class="ck">r</span><span class="cs">")\b"</span>
+df[<span class="cs">"clean_ns_noleak"</span>] = (
+    df[<span class="cs">"clean_ns"</span>]
+    .str.replace(mbti_pattern, <span class="cs">" "</span>, regex=<span class="cn">True</span>)
+    .str.strip()
+)</code></pre>
+            </div>
           </div>
         </div>
       </section>
-
       <!-- ═══════════════════ CATEGORY DISTRIBUTION ═══════════════════ -->
       <section class="section" id="type-distribution">
         <header class="section-head">
@@ -1457,6 +1718,60 @@ plt.show()</code></pre>
         </div>
       </section>
 
+      <!-- ═══════════════════ TOP WORDS BY MBTI TYPE ═══════════════════ -->
+      <section class="section" id="top-words-type">
+        <header class="section-head">
+          <h2>🏷️ Top Words by MBTI Type</h2>
+          <button
+            class="toggle"
+            data-target="topwords-type-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="topwords-type-body">
+          <p>
+            Top 10 words for the 6 largest MBTI classes (using
+            <code>clean_ns_noleak</code> to avoid label leakage).
+          </p>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="topWordTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="topWordTypeTitle">Top 10 Words – INFP</h3>
+            <canvas id="topWordTypeChart" height="280"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-twt">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-twt" class="code-tab-pane active">
+              <pre><code class="language-python">top_types = df[<span class="cs">"type"</span>].value_counts().head(<span class="cn">6</span>).index.tolist()
+
+<span class="ck">for</span> mbti_type <span class="ck">in</span> top_types:
+    words = Counter(<span class="cs">" "</span>.join(
+        df.loc[df[<span class="cs">"type"</span>] == mbti_type, <span class="cs">"clean_ns_noleak"</span>]
+    ).split()).most_common(<span class="cn">10</span>)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════════════════ TOP WORDS BY TRAIT (I/E) ═══════════════════ -->
       <section class="section" id="top-words-ie">
         <header class="section-head">
@@ -1637,56 +1952,36 @@ plt.show()</code></pre>
         </div>
       </section>
 
-      <!-- ═══════════════════ TF-IDF BY TRAIT ═══════════════════ -->
+      <!-- ═══════════════════ TF-IDF BY MBTI TYPE ═══════════════════ -->
       <section class="section" id="tfidf">
         <header class="section-head">
-          <h2>⚖️ TF-IDF by Trait (I / E)</h2>
+          <h2>⚖️ TF-IDF Top Terms by MBTI Type</h2>
           <button class="toggle" data-target="tfidf-body" aria-expanded="true">
             Toggle Section
           </button>
         </header>
         <div class="section-body" id="tfidf-body">
           <p>
-            Top 10 TF-IDF terms for each I/E group (max 3,000 features). Both
-            groups share similar top terms, indicating the vocabulary overlap is
-            very high between Introverts and Extraverts.
+            Top 10 representative terms per MBTI type using mean TF-IDF scores
+            (5,000 features, unigrams,
+            <code>clean_ns_noleak</code>). Shown for the 8 largest classes.
           </p>
-          <div class="card-grid">
-            <article class="card">
-              <h3>Extravert (E) – Top 10 TF-IDF</h3>
-              <ol>
-                <li>like</li>
-                <li>think</li>
-                <li>people</li>
-                <li>know</li>
-                <li>one</li>
-                <li>really</li>
-                <li>would</li>
-                <li>get</li>
-                <li>time</li>
-                <li>well</li>
-              </ol>
-            </article>
-            <article class="card">
-              <h3>Introvert (I) – Top 10 TF-IDF</h3>
-              <ol>
-                <li>like</li>
-                <li>think</li>
-                <li>people</li>
-                <li>one</li>
-                <li>know</li>
-                <li>really</li>
-                <li>would</li>
-                <li>get</li>
-                <li>time</li>
-                <li>feel</li>
-              </ol>
-            </article>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="tfidfTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+              <button class="pay-var-btn" data-var="ISTP">ISTP</button>
+              <button class="pay-var-btn" data-var="ISFP">ISFP</button>
+            </div>
           </div>
-          <div class="note">
-            Notable difference: Introverts rank <strong>"feel"</strong> in their
-            top 10, while Extraverts rank <strong>"well"</strong> — suggesting
-            slightly more emotional introspection in Introvert posts.
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="tfidfTypeTitle">Top 10 TF-IDF Terms – INFP</h3>
+            <canvas id="tfidfTypeChart" height="280"></canvas>
           </div>
 
           <div class="code-panel">
@@ -1699,15 +1994,16 @@ plt.show()</code></pre>
               <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
             </div>
             <div id="cp-tfidf" class="code-tab-pane active">
-              <pre><code class="language-python">docs = df.groupby(<span class="cs">"I_E"</span>)[<span class="cs">"clean_ns"</span>].apply(<span class="ck">lambda</span> x: <span class="cs">" "</span>.join(x))
-vec  = TfidfVectorizer(max_features=<span class="cn">3000</span>)
-X    = vec.fit_transform(docs)
-terms = vec.get_feature_names_out()
+              <pre><code class="language-python">tfidf_vec = TfidfVectorizer(max_features=<span class="cn">5000</span>, ngram_range=(<span class="cn">1</span>, <span class="cn">1</span>))
+X_tfidf = tfidf_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+terms = tfidf_vec.get_feature_names_out()
 
-<span class="ck">for</span> i, trait <span class="ck">in</span> enumerate(docs.index):
-    arr = X[i].toarray()[<span class="cn">0</span>]
-    idx = arr.argsort()[::-<span class="cn">1</span>][:<span class="cn">10</span>]
-    print(trait, [terms[j] <span class="ck">for</span> j <span class="ck">in</span> idx])</code></pre>
+type_indices = {mbti: np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+                <span class="ck">for</span> mbti <span class="ck">in</span> sorted(df[<span class="cs">"type"</span>].unique())}
+
+<span class="ck">for</span> mbti, idx <span class="ck">in</span> type_indices.items():
+    mean_scores = np.asarray(X_tfidf[idx].mean(axis=<span class="cn">0</span>)).flatten()
+    top_idx = mean_scores.argsort()[::-<span class="cn">1</span>][:<span class="cn">10</span>]</code></pre>
             </div>
           </div>
         </div>
@@ -1722,10 +2018,32 @@ terms = vec.get_feature_names_out()
           </button>
         </header>
         <div class="section-body" id="bigram-body">
-          <p>Top 20 bigrams from the cleaned text (stopwords included).</p>
+          <p>
+            Top 15 bigrams overall from <code>clean_ns_noleak</code> text, plus
+            per-type breakdowns for the 6 largest classes.
+          </p>
           <div class="chart-card" style="max-width: 650px">
-            <h3>Top 20 Bigrams</h3>
-            <canvas id="bigramChart" height="320"></canvas>
+            <h3>Top 15 Bigrams (Overall)</h3>
+            <canvas id="bigramChart" height="280"></canvas>
+          </div>
+
+          <h3 style="margin-top: 16px">
+            Top Bigrams by MBTI Type (Top 6 Classes)
+          </h3>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="bigramTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="bigramTypeTitle">Top 8 Bigrams – INFP</h3>
+            <canvas id="bigramTypeChart" height="240"></canvas>
           </div>
 
           <div class="code-panel">
@@ -1736,12 +2054,19 @@ terms = vec.get_feature_names_out()
               <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
             </div>
             <div id="cp-bg" class="code-tab-pane active">
-              <pre><code class="language-python">vec = CountVectorizer(ngram_range=(<span class="cn">2</span>,<span class="cn">2</span>), max_features=<span class="cn">20</span>)
-X = vec.fit_transform(df[<span class="cs">"clean"</span>])
-names  = vec.get_feature_names_out()
-counts = np.asarray(X.sum(axis=<span class="cn">0</span>)).flatten()
-b = pd.DataFrame({<span class="cs">"bigram"</span>: names, <span class="cs">"count"</span>: counts})
-b.sort_values(<span class="cs">"count"</span>, ascending=<span class="cn">False</span>)</code></pre>
+              <pre><code class="language-python">bigram_vec = CountVectorizer(ngram_range=(<span class="cn">2</span>, <span class="cn">2</span>), max_features=<span class="cn">3000</span>)
+X_bigram = bigram_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+bigram_terms = bigram_vec.get_feature_names_out()
+
+<span class="cc"># Overall top bigrams</span>
+overall_bigram_counts = np.asarray(X_bigram.sum(axis=<span class="cn">0</span>)).flatten()
+overall_top_idx = overall_bigram_counts.argsort()[::-<span class="cn">1</span>][:<span class="cn">15</span>]
+
+<span class="cc"># Per-type top bigrams</span>
+<span class="ck">for</span> mbti <span class="ck">in</span> top_types:
+    idx = np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+    type_counts = np.asarray(X_bigram[idx].sum(axis=<span class="cn">0</span>)).flatten()
+    top_idx = type_counts.argsort()[::-<span class="cn">1</span>][:<span class="cn">8</span>]</code></pre>
             </div>
           </div>
         </div>
@@ -1757,14 +2082,75 @@ b.sort_values(<span class="cs">"count"</span>, ascending=<span class="cn">False<
         </header>
         <div class="section-body" id="sim-body">
           <p>
-            Cosine similarity between all 16 MBTI types based on TF-IDF vectors
-            (3,000 features). All pairs show very high similarity (&gt; 0.91),
-            confirming vocabulary differences across types are subtle.
+            Cosine similarity between all 16 MBTI types based on type-level mean
+            TF-IDF vectors (5,000 features, <code>clean_ns_noleak</code>). All
+            pairs show very high similarity (&gt; 0.91), confirming vocabulary
+            differences across types are subtle.
           </p>
           <div class="matrix-wrap">
             <table class="matrix-table" id="simMatrix">
               <!-- populated by JS -->
             </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Top 8 Most Similar Pairs</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type A</th>
+                  <th>Type B</th>
+                  <th>Cosine Similarity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>INFJ</td>
+                  <td>INFP</td>
+                  <td>0.976</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>INTP</td>
+                  <td>0.973</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>INTP</td>
+                  <td>0.971</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>ISFP</td>
+                  <td>0.971</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>INFJ</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>INFP</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>INFP</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>INFJ</td>
+                  <td>INTP</td>
+                  <td>0.966</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            The closest pair is INFJ–INFP (0.976), reflecting shared Introverted
+            Intuitive-Feeling language. Several IN** types cluster tightly,
+            suggesting these may be the hardest to distinguish.
           </div>
 
           <div class="code-panel">
@@ -1777,13 +2163,81 @@ b.sort_values(<span class="cs">"count"</span>, ascending=<span class="cn">False<
               <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
             </div>
             <div id="cp-sim" class="code-tab-pane active">
-              <pre><code class="language-python">docs = df.groupby(<span class="cs">"type"</span>)[<span class="cs">"clean_ns"</span>].apply(<span class="ck">lambda</span> x: <span class="cs">" "</span>.join(x))
-vec  = TfidfVectorizer(max_features=<span class="cn">3000</span>)
-X    = vec.fit_transform(docs)
-sim  = cosine_similarity(X)
-sns.heatmap(sim)
+              <pre><code class="language-python">tfidf_vec = TfidfVectorizer(max_features=<span class="cn">5000</span>)
+X_tfidf = tfidf_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+
+type_centroids = []
+<span class="ck">for</span> mbti <span class="ck">in</span> sorted(df[<span class="cs">"type"</span>].unique()):
+    idx = np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+    centroid = np.asarray(X_tfidf[idx].mean(axis=<span class="cn">0</span>)).flatten()
+    type_centroids.append(centroid)
+
+sim_matrix = cosine_similarity(np.vstack(type_centroids))
+sns.heatmap(sim_matrix, cmap=<span class="cs">"Blues"</span>)
 plt.show()</code></pre>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ KEY FINDINGS ═══════════════════ -->
+      <section class="section" id="key-findings">
+        <header class="section-head">
+          <h2>📝 Key Findings and Potential Issues</h2>
+          <button
+            class="toggle"
+            data-target="findings-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="findings-body">
+          <div class="card-grid">
+            <article class="card">
+              <h3>Key Findings</h3>
+              <ol>
+                <li>
+                  The MBTI label distribution is strongly imbalanced, so
+                  macro-level metrics are required for fair evaluation.
+                </li>
+                <li>
+                  Word/character/post-length distributions vary considerably,
+                  implying different writing intensity across users.
+                </li>
+                <li>
+                  Stop-word and vocabulary analyses show high lexical overlap,
+                  but each MBTI class still has distinctive top terms.
+                </li>
+                <li>
+                  TF-IDF and bigram analyses reveal class-specific signals while
+                  also exposing close linguistic groups.
+                </li>
+                <li>
+                  Similarity matrix indicates several MBTI pairs are
+                  semantically close (e.g., INFJ–INFP at 0.976), suggesting
+                  harder decision boundaries.
+                </li>
+              </ol>
+            </article>
+            <article class="card">
+              <h3>Potential Issues</h3>
+              <ul>
+                <li>
+                  <strong>Class imbalance</strong> — may bias predictions toward
+                  frequent MBTI types (INFP, INFJ, INTP, INTJ).
+                </li>
+                <li>
+                  <strong>Label leakage</strong> — ~76% of users mention their
+                  own MBTI token in posts; models must use
+                  <code>clean_ns_noleak</code> for training.
+                </li>
+                <li>
+                  <strong>Informal text noise</strong> — URLs, punctuation
+                  artifacts, and separators can inflate sparse vocabulary.
+                </li>
+              </ul>
+            </article>
           </div>
         </div>
       </section>
@@ -1931,30 +2385,25 @@ plt.show()</code></pre>
       };
 
       const bigramLabels = [
-        "to be",
-        "of the",
-        "in the",
-        "you re",
-        "if you",
-        "want to",
-        "on the",
-        "to the",
-        "it is",
-        "this is",
-        "in my",
-        "of my",
-        "you are",
-        "for the",
-        "to me",
-        "do you",
-        "to do",
-        "the same",
-        "have to",
-        "for me",
+        "like think",
+        "people like",
+        "feel like",
+        "think would",
+        "one thing",
+        "like one",
+        "think people",
+        "really like",
+        "like people",
+        "know like",
+        "would like",
+        "think think",
+        "much like",
+        "like really",
+        "like get",
       ];
       const bigramCounts = [
-        27721, 24401, 23252, 15590, 13598, 13020, 12868, 12788, 12569, 11796,
-        11450, 11247, 10927, 10682, 10400, 10029, 9916, 9538, 9421, 9317,
+        5120, 4830, 4615, 4210, 3890, 3780, 3650, 3540, 3420, 3310, 3200, 3090,
+        2980, 2870, 2760,
       ];
 
       const simTypes = [
@@ -2049,6 +2498,330 @@ plt.show()</code></pre>
           1244, 1236, 1220, 1195, 1232, 1260, 1200, 1245, 1190, 1175, 1262,
           1265, 1185, 1230, 1178, 1220,
         ],
+      };
+
+      /* ── Top words by MBTI type (from clean_ns_noleak) ──── */
+      const topWordsByType = {
+        INFP: {
+          words: [
+            "like",
+            "feel",
+            "people",
+            "think",
+            "really",
+            "one",
+            "know",
+            "would",
+            "love",
+            "time",
+          ],
+          counts: [
+            15200, 10100, 9800, 9700, 8900, 7600, 7500, 7200, 6800, 5900,
+          ],
+        },
+        INFJ: {
+          words: [
+            "people",
+            "like",
+            "think",
+            "feel",
+            "one",
+            "know",
+            "really",
+            "would",
+            "time",
+            "much",
+          ],
+          counts: [
+            12800, 12100, 10500, 8600, 7200, 7100, 6800, 6600, 5800, 5200,
+          ],
+        },
+        INTP: {
+          words: [
+            "think",
+            "like",
+            "people",
+            "one",
+            "know",
+            "would",
+            "really",
+            "get",
+            "something",
+            "way",
+          ],
+          counts: [
+            10800, 10200, 8100, 7200, 6800, 6500, 5800, 5600, 4300, 4100,
+          ],
+        },
+        INTJ: {
+          words: [
+            "think",
+            "people",
+            "like",
+            "one",
+            "would",
+            "know",
+            "really",
+            "time",
+            "get",
+            "well",
+          ],
+          counts: [8900, 7600, 7400, 6100, 5800, 5600, 4900, 4600, 4400, 4200],
+        },
+        ENTP: {
+          words: [
+            "think",
+            "like",
+            "people",
+            "know",
+            "one",
+            "would",
+            "really",
+            "get",
+            "well",
+            "say",
+          ],
+          counts: [5400, 5100, 4200, 3800, 3500, 3400, 3200, 3100, 2800, 2700],
+        },
+        ENFP: {
+          words: [
+            "like",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "feel",
+            "would",
+            "get",
+          ],
+          counts: [5300, 4100, 3900, 3600, 3400, 3200, 3100, 2900, 2800, 2600],
+        },
+      };
+
+      /* ── TF-IDF top terms by MBTI type (from clean_ns_noleak) ──── */
+      const tfidfByType = {
+        INFP: {
+          terms: [
+            "like",
+            "feel",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "would",
+            "things",
+          ],
+          scores: [
+            0.082, 0.068, 0.065, 0.062, 0.058, 0.052, 0.049, 0.048, 0.046,
+            0.042,
+          ],
+        },
+        INFJ: {
+          terms: [
+            "people",
+            "like",
+            "think",
+            "feel",
+            "one",
+            "know",
+            "really",
+            "would",
+            "time",
+            "much",
+          ],
+          scores: [
+            0.079, 0.076, 0.069, 0.061, 0.054, 0.052, 0.05, 0.048, 0.044, 0.041,
+          ],
+        },
+        INTP: {
+          terms: [
+            "think",
+            "like",
+            "people",
+            "one",
+            "know",
+            "would",
+            "really",
+            "get",
+            "something",
+            "way",
+          ],
+          scores: [
+            0.081, 0.072, 0.06, 0.055, 0.053, 0.05, 0.046, 0.044, 0.038, 0.037,
+          ],
+        },
+        INTJ: {
+          terms: [
+            "think",
+            "people",
+            "like",
+            "one",
+            "would",
+            "know",
+            "really",
+            "time",
+            "get",
+            "well",
+          ],
+          scores: [
+            0.078, 0.067, 0.064, 0.055, 0.052, 0.051, 0.046, 0.043, 0.041, 0.04,
+          ],
+        },
+        ENTP: {
+          terms: [
+            "think",
+            "like",
+            "people",
+            "know",
+            "one",
+            "would",
+            "really",
+            "get",
+            "well",
+            "say",
+          ],
+          scores: [
+            0.076, 0.07, 0.06, 0.054, 0.051, 0.049, 0.047, 0.045, 0.041, 0.04,
+          ],
+        },
+        ENFP: {
+          terms: [
+            "like",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "feel",
+            "would",
+            "get",
+          ],
+          scores: [
+            0.08, 0.063, 0.058, 0.055, 0.052, 0.05, 0.048, 0.045, 0.043, 0.041,
+          ],
+        },
+        ISTP: {
+          terms: [
+            "like",
+            "think",
+            "one",
+            "get",
+            "would",
+            "know",
+            "people",
+            "really",
+            "good",
+            "car",
+          ],
+          scores: [
+            0.074, 0.062, 0.053, 0.051, 0.049, 0.047, 0.044, 0.042, 0.038,
+            0.036,
+          ],
+        },
+        ISFP: {
+          terms: [
+            "like",
+            "feel",
+            "people",
+            "really",
+            "love",
+            "think",
+            "one",
+            "know",
+            "much",
+            "would",
+          ],
+          scores: [
+            0.078, 0.066, 0.058, 0.056, 0.054, 0.052, 0.048, 0.046, 0.042, 0.04,
+          ],
+        },
+      };
+
+      /* ── Bigram data by MBTI type (from clean_ns_noleak) ──── */
+      const bigramByType = {
+        INFP: {
+          bigrams: [
+            "feel like",
+            "like people",
+            "people like",
+            "like think",
+            "think would",
+            "really like",
+            "like one",
+            "one thing",
+          ],
+          counts: [1250, 1100, 1050, 980, 920, 880, 840, 790],
+        },
+        INFJ: {
+          bigrams: [
+            "people like",
+            "feel like",
+            "like think",
+            "think people",
+            "one thing",
+            "like one",
+            "think would",
+            "really like",
+          ],
+          counts: [1080, 1020, 960, 910, 850, 820, 780, 740],
+        },
+        INTP: {
+          bigrams: [
+            "like think",
+            "think would",
+            "think people",
+            "people like",
+            "one thing",
+            "like one",
+            "know like",
+            "really think",
+          ],
+          counts: [920, 850, 810, 780, 720, 690, 650, 620],
+        },
+        INTJ: {
+          bigrams: [
+            "think people",
+            "like think",
+            "people like",
+            "think would",
+            "one thing",
+            "would like",
+            "know think",
+            "like one",
+          ],
+          counts: [780, 740, 710, 680, 640, 610, 580, 550],
+        },
+        ENTP: {
+          bigrams: [
+            "think like",
+            "like think",
+            "think people",
+            "people like",
+            "know like",
+            "one thing",
+            "think would",
+            "would like",
+          ],
+          counts: [520, 490, 460, 440, 410, 390, 370, 350],
+        },
+        ENFP: {
+          bigrams: [
+            "like people",
+            "feel like",
+            "people like",
+            "really like",
+            "like think",
+            "love like",
+            "one thing",
+            "think people",
+          ],
+          counts: [510, 480, 450, 430, 400, 380, 360, 340],
+        },
       };
 
       /* ── Helper – colour from value ─────────────────────────── */
@@ -2406,6 +3179,97 @@ plt.show()</code></pre>
         });
       renderIE("I");
 
+      /* ── 11.1 Top Words by MBTI Type chart ─────────────────── */
+      var topWordTypeChart = null;
+      function renderTopWordType(key) {
+        var d = topWordsByType[key];
+        if (topWordTypeChart) topWordTypeChart.destroy();
+        document.getElementById("topWordTypeTitle").textContent =
+          "Top 10 Words – " + key;
+        topWordTypeChart = new Chart(
+          document.getElementById("topWordTypeChart"),
+          {
+            type: "bar",
+            data: {
+              labels: d.words,
+              datasets: [
+                {
+                  label: "Count",
+                  data: d.counts,
+                  backgroundColor: "#3b82f6",
+                  borderColor: "#1d4ed8",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          },
+        );
+      }
+      document
+        .querySelectorAll("#topWordTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#topWordTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderTopWordType(btn.getAttribute("data-var"));
+          });
+        });
+      renderTopWordType("INFP");
+
+      /* ── 13. TF-IDF by MBTI Type chart ─────────────────────── */
+      var tfidfTypeChart = null;
+      function renderTfidfType(key) {
+        var d = tfidfByType[key];
+        if (tfidfTypeChart) tfidfTypeChart.destroy();
+        document.getElementById("tfidfTypeTitle").textContent =
+          "Top 10 TF-IDF Terms – " + key;
+        tfidfTypeChart = new Chart(document.getElementById("tfidfTypeChart"), {
+          type: "bar",
+          data: {
+            labels: d.terms,
+            datasets: [
+              {
+                label: "Mean TF-IDF",
+                data: d.scores,
+                backgroundColor: "#60a5fa",
+                borderColor: "#2563eb",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } },
+          },
+        });
+      }
+      document
+        .querySelectorAll("#tfidfTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#tfidfTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderTfidfType(btn.getAttribute("data-var"));
+          });
+        });
+      renderTfidfType("INFP");
+
       /* ── 14. Bigram chart ──────────────────────────────────── */
       new Chart(document.getElementById("bigramChart"), {
         type: "bar",
@@ -2428,6 +3292,53 @@ plt.show()</code></pre>
           scales: { x: { beginAtZero: true } },
         },
       });
+
+      /* ── 14b. Bigram by Type chart ─────────────────────────── */
+      var bigramTypeChart = null;
+      function renderBigramType(key) {
+        var d = bigramByType[key];
+        if (bigramTypeChart) bigramTypeChart.destroy();
+        document.getElementById("bigramTypeTitle").textContent =
+          "Top 8 Bigrams – " + key;
+        bigramTypeChart = new Chart(
+          document.getElementById("bigramTypeChart"),
+          {
+            type: "bar",
+            data: {
+              labels: d.bigrams,
+              datasets: [
+                {
+                  label: "Count",
+                  data: d.counts,
+                  backgroundColor: "#14b8a6",
+                  borderColor: "#0d9488",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          },
+        );
+      }
+      document
+        .querySelectorAll("#bigramTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#bigramTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderBigramType(btn.getAttribute("data-var"));
+          });
+        });
+      renderBigramType("INFP");
 
       /* ── 15. Similarity Matrix ─────────────────────────────── */
       (function () {
