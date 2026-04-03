@@ -986,60 +986,6 @@
             </article>
           </div>
 
-          <h3 style="margin-top: 16px">Dataset Overview</h3>
-          <div class="table-wrap">
-            <table class="feature-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Notebook Output</th>
-                  <th>Interpretation</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Dataset source</td>
-                  <td>UCI Default of Credit Card Clients (ID 350)</td>
-                  <td>
-                    Standard benchmark dataset for credit default
-                    classification.
-                  </td>
-                </tr>
-                <tr>
-                  <td>Rows / Columns</td>
-                  <td>30,000 rows / 24 columns</td>
-                  <td>
-                    Sufficient sample size for robust descriptive and
-                    inferential analysis.
-                  </td>
-                </tr>
-                <tr>
-                  <td>Missingness</td>
-                  <td>Columns with missing values: 0</td>
-                  <td>
-                    No imputation pipeline required for baseline modeling.
-                  </td>
-                </tr>
-                <tr>
-                  <td>Duplicates</td>
-                  <td>35 duplicated rows</td>
-                  <td>
-                    Low duplicate ratio, but should be handled consistently for
-                    train/test splits.
-                  </td>
-                </tr>
-                <tr>
-                  <td>Class balance</td>
-                  <td>Class 0: 23,364 | Class 1: 6,636</td>
-                  <td>
-                    Moderate imbalance, so metrics beyond accuracy are
-                    recommended.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
           <h3 style="margin-top: 16px">Feature Descriptions</h3>
           <div class="table-wrap">
             <table>
@@ -1529,13 +1475,13 @@ axes[<span class="cn">1</span>].set_title(<span class="cs">'Doughnut Chart'</spa
 
 plt.tight_layout(); plt.show()</code></pre></div>
           </div>
-          <div class="note" style="margin-top: 12px">
+          <!-- <div class="note" style="margin-top: 12px">
             <strong>Imbalance finding:</strong> Only ~22 % of clients defaulted.
             A naive classifier that always predicts "no default" achieves ~78 %
             accuracy — making accuracy a misleading metric. Use
             <strong>F1-score, AUC-ROC or Precision-Recall curve</strong> when training
             models.
-          </div>
+          </div> -->
         </div>
       </section>
 
@@ -2298,18 +2244,20 @@ plt.tight_layout(); plt.show()</code></pre></div>
           <div class="note" style="margin-top:12px">
             <strong>Key finding:</strong>
             PAY_1 (most recent repayment status) has by far the strongest categorical association
-            with default (V&thinsp;&asymp;&thinsp;0.38 &mdash; <em>Moderate&ndash;Strong</em>).
-            PAY_2&ndash;6 follow with decreasing V, all in the Weak&ndash;Moderate range.
-            Demographics (Gender, Education, Marriage) have <em>Negligible</em> V values (&lt;&thinsp;0.06),
+            with default (V&thinsp;&asymp;&thinsp;0.42 &mdash; <em>Relatively Strong</em>).
+            PAY_2&ndash;6 follow with decreasing V, all in the Moderate range (0.25&ndash;0.34).
+            Demographics (Gender, Education, Marriage) have <em>Negligible</em> V values (&lt;&thinsp;0.08),
             confirming that payment history dominates over demographics by a wide margin.
           </div>
 
           <div class="code-panel" style="margin-top:14px">
             <div class="code-panel-header">
-              <span style="font-size:0.82rem;font-weight:600;color:#e67e22">Python — Cramér's V</span>
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-cramers-py">Python</button>
+              </div>
               <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
             </div>
-            <div class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
+            <div id="cp-cramers-py" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
 <span class="ck">from</span> <span class="cm">scipy.stats</span> <span class="ck">import</span> chi2_contingency
 
 <span class="ck">def</span> <span class="cp">cramers_v</span>(col_a, col_b):
@@ -2363,10 +2311,12 @@ print(pd.Series(results).sort_values(ascending=<span class="cs">False</span>))</
 
           <div class="code-panel" style="margin-top:14px">
             <div class="code-panel-header">
-              <span style="font-size:0.82rem;font-weight:600;color:#e67e22">Python — sklearn Mutual Information</span>
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-mi-py">Python</button>
+              </div>
               <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
             </div>
-            <div class="code-tab-pane active"><pre><code class="language-python"><span class="ck">from</span> <span class="cm">sklearn.feature_selection</span> <span class="ck">import</span> mutual_info_classif
+            <div id="cp-mi-py" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">from</span> <span class="cm">sklearn.feature_selection</span> <span class="ck">import</span> mutual_info_classif
 <span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
 
 feature_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'Gender'</span>, <span class="cs">'Education'</span>, <span class="cs">'Marriage'</span>, <span class="cs">'Age'</span>,
@@ -2426,7 +2376,7 @@ print(mi_series)</code></pre></div>
               <canvas id="delayCountChart" height="180"></canvas>
               <p class="mini-note">
                 Each additional delayed month raises default probability nearly monotonically.
-                Clients with 3+ delay months default at &gt;70&thinsp;%.
+                Clients with 6 delay months default at &asymp;70&thinsp;%; delay_count&thinsp;&ge;&thinsp;3 exceeds 50&thinsp;%.
               </p>
             </article>
             <article class="chart-card">
@@ -2468,7 +2418,7 @@ print(mi_series)</code></pre></div>
           <p style="font-weight:600;color:#2f855a;margin:0 0 8px">Payment History (PAY_1–PAY_6)</p>
           <ul style="margin:0 0 16px 1.2em;line-height:1.9;font-size:0.93rem">
             <li>PAY_1 is the strongest single predictor — default rate rises from ~13 % (PAY_1 = −2) to ~76 % (PAY_1 = 3)</li>
-            <li>Cramér's V: PAY_1 ≈ 0.38 vs demographics &lt; 0.06 — PAY features dominate by a wide margin</li>
+            <li>Cramér's V: PAY_1 ≈ 0.42 vs demographics &lt; 0.08 — PAY features dominate by a wide margin</li>
             <li>Mutual Information: all 6 PAY variables occupy the top 6 ranks before any other feature type</li>
             <li>💡 Engineer <code>delay_count</code> = (PAY_k ≥ 1).sum() as a single ordinal risk score (0–6)</li>
             <li>💡 Engineer binary <code>has_paid_k</code> = (PAY_AMT_k &gt; 0) for each month as a compact default signal</li>
@@ -2479,7 +2429,7 @@ print(mi_series)</code></pre></div>
             <li>Lower credit limit → higher default risk: ≤ NT$50 K defaults at ~32 % vs ~14 % above NT$270 K</li>
             <li>BILL_AMT_1–6 are near-collinear (Pearson r ≈ 0.80–0.95) — severe multicollinearity within the group</li>
             <li>8–10 % outlier rate in all BILL_AMT and PAY_AMT columns (IQR method)</li>
-            <li>Over-limit clients (util_rate &gt; 100 %) default at ≈ 37 %</li>
+            <li>Over-limit clients (util_rate &gt; 100 %) default at ≈ 30 %</li>
             <li>💡 For linear models: use only BILL_AMT_1 or apply PCA; tree-based models handle collinearity natively</li>
             <li>💡 Engineer <code>util_rate</code> = BILL_AMT_1 / Credit_Limit as a credit utilization feature</li>
           </ul>
@@ -4035,8 +3985,8 @@ print(mi_series)</code></pre></div>
         var cvCtx = document.getElementById('cramersVChart');
         if (!cvCtx) return;
         var labels = ['PAY_1','PAY_2','PAY_3','PAY_4','PAY_5','PAY_6',
-                      'Education','Marriage','Gender'];
-        var values = [0.38, 0.28, 0.23, 0.19, 0.17, 0.15, 0.06, 0.04, 0.02];
+                      'Education','Gender','Marriage'];
+        var values = [0.4229, 0.3403, 0.2957, 0.2794, 0.2707, 0.2508, 0.0731, 0.0399, 0.0306];
         var colors = values.map(function(v) {
           return v >= 0.20 ? 'rgba(192,86,33,0.85)' :
                  v >= 0.10 ? 'rgba(230,126,34,0.80)' :
@@ -4080,11 +4030,15 @@ print(mi_series)</code></pre></div>
         var miCtx = document.getElementById('miChart');
         if (!miCtx) return;
         var miLabels = ['PAY_1','PAY_2','PAY_3','PAY_4','PAY_5','PAY_6',
-                        'Credit_Limit','PAY_AMT_1','PAY_AMT_2','BILL_AMT_1',
-                        'BILL_AMT_2','Age','Education','Marriage','Gender'];
-        var miValues = [0.105, 0.069, 0.051, 0.039, 0.034, 0.028,
-                        0.025, 0.019, 0.016, 0.014,
-                        0.012, 0.006, 0.004, 0.003, 0.002];
+                        'PAY_AMT_1','PAY_AMT_3','PAY_AMT_2','PAY_AMT_4',
+                        'Credit_Limit','PAY_AMT_5','BILL_AMT_1','PAY_AMT_6',
+                        'BILL_AMT_5','BILL_AMT_3','BILL_AMT_2','BILL_AMT_6',
+                        'Age','Education','BILL_AMT_4','Gender','Marriage'];
+        var miValues = [0.0761, 0.0491, 0.0373, 0.0329, 0.0305, 0.0264,
+                        0.0233, 0.0169, 0.0163, 0.0158,
+                        0.0152, 0.0128, 0.0112, 0.0105,
+                        0.0076, 0.0064, 0.0063, 0.0055,
+                        0.0031, 0.003, 0.0026, 0.0008, 0.0005];
         var miColors = miValues.map(function(v) {
           return v >= 0.05 ? 'rgba(192,86,33,0.85)' :
                  v >= 0.02 ? 'rgba(230,126,34,0.80)' :
@@ -4135,8 +4089,8 @@ print(mi_series)</code></pre></div>
               labels: ['0','1','2','3','4','5','6'],
               datasets: [{
                 label: 'Default Rate (%)',
-                data: [11, 31, 52, 72, 82, 88, 93],
-                backgroundColor: [TEAL, TEAL, ORANGE, ORANGE, ORANGE, ORANGE, ORANGE],
+                data: [11.71, 29.82, 38.76, 50.87, 57.31, 57.38, 70.32],
+                backgroundColor: [TEAL, TEAL, TEAL, ORANGE, ORANGE, ORANGE, ORANGE],
                 borderWidth: 1
               }]
             },
@@ -4169,8 +4123,8 @@ print(mi_series)</code></pre></div>
               labels: ['≤0 (Neg/Zero)', '0–20%', '20–40%', '40–60%', '60–80%', '80–100%', '>100% Over-limit'],
               datasets: [{
                 label: 'Default Rate (%)',
-                data: [25, 16, 21, 22, 25, 28, 37],
-                backgroundColor: [ORANGE, TEAL, TEAL, TEAL, TEAL, ORANGE, ORANGE],
+                data: [24.75, 16.72, 19.77, 24.13, 27.25, 25.52, 30.07],
+                backgroundColor: [ORANGE, TEAL, TEAL, TEAL, ORANGE, ORANGE, ORANGE],
                 borderWidth: 1
               }]
             },
