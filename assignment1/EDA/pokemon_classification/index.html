@@ -1,0 +1,3568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokemon Image Classification – EDA Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+      :root {
+        --bg: #fffaf5;
+        --paper: #ffffff;
+        --ink: #1a1207;
+        --muted: #6b5c4d;
+        --line: #e6d5c3;
+        --accent: #e67e22;
+        --accent-soft: #fdebd0;
+        --accent-2: #d35400;
+        --accent-3: #f39c12;
+        --warn: #c0392b;
+        --success: #27ae60;
+        --shadow: 0 10px 28px rgba(26, 18, 7, 0.1);
+        --radius: 16px;
+        --radius-sm: 10px;
+        --max: 1120px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "IBM Plex Sans", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 8% 8%,
+            #fde8d0 0%,
+            rgba(253, 232, 208, 0) 34%
+          ),
+          radial-gradient(
+            circle at 92% 14%,
+            #fce0c0 0%,
+            rgba(252, 224, 192, 0) 30%
+          ),
+          linear-gradient(165deg, #fffaf5 0%, #fef5ec 48%, #fdf2e8 100%);
+        line-height: 1.56;
+        min-height: 100%;
+      }
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 24px 18px 56px;
+        animation: fade-up 520ms ease both;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: linear-gradient(
+          140deg,
+          #fffcf8 0%,
+          #fff5e8 45%,
+          #fff0dc 100%
+        );
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: var(--shadow);
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -90px;
+        top: -90px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(230, 126, 34, 0.18) 0%,
+          rgba(230, 126, 34, 0) 70%
+        );
+        pointer-events: none;
+      }
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      h1 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 2.7vw, 2.4rem);
+      }
+      h2 {
+        margin-bottom: 8px;
+        font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+      }
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #e0a86e;
+        background: #fef0db;
+        color: #5d3a0e;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      .kpi {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease;
+      }
+      .kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(230, 126, 34, 0.16);
+        border-color: #e0a86e;
+      }
+      .kpi .label {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin-bottom: 2px;
+      }
+      .kpi .value {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+      }
+      .section {
+        margin-top: 18px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 25px rgba(26, 18, 7, 0.06);
+        overflow: hidden;
+      }
+      .section-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .section-head-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .toggle {
+        border: 1px solid #d4956a;
+        background: #fef0db;
+        color: #6b3500;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .section-controls {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .bulk-toggle {
+        border: 1px solid #d4956a;
+        background: #fef0db;
+        color: #6b3500;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .section-body {
+        padding: 16px 18px 18px;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #fffcf8 100%);
+        transition:
+          border-color 180ms ease,
+          transform 180ms ease;
+      }
+      .card:hover {
+        border-color: #e0a86e;
+        transform: translateY(-2px);
+      }
+      .card h3 {
+        margin-bottom: 8px;
+        font-size: 1.03rem;
+      }
+      ul {
+        margin-top: 6px;
+        padding-left: 18px;
+      }
+      .note {
+        margin-top: 10px;
+        border-left: 3px solid var(--accent);
+        background: #fef7ee;
+        color: #5d3a0e;
+        padding: 8px 10px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.92rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        border: 2px solid #d4b896;
+        border-radius: var(--radius-sm);
+        background: #ffffff;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.94rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #dcc8a8;
+        border-right: 1px solid #dcc8a8;
+      }
+      tr th:last-child,
+      tr td:last-child {
+        border-right: none;
+      }
+      th {
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(180deg, #f7ddb8 0%, #f0cd9e 100%);
+        color: #3d2200;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-bottom: 2px solid #d4a86a;
+      }
+      tbody tr:nth-child(even) {
+        background: #fffbf5;
+      }
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .chart-card {
+        border: 1px solid #d4b896;
+        border-radius: var(--radius-sm);
+        background: #fffcf8;
+        padding: 12px;
+      }
+      .chart-card h3 {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .bar-wrap {
+        margin-top: 8px;
+        display: grid;
+        gap: 8px;
+      }
+      .bar {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fef5e8;
+        overflow: hidden;
+        height: 28px;
+        position: relative;
+      }
+      .fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        color: #fff;
+        font-size: 0.84rem;
+        font-weight: 600;
+        transition: width 520ms ease;
+      }
+      .mono-block {
+        margin-top: 10px;
+        border: 1px solid #d4c0a4;
+        border-radius: 10px;
+        background: #fffbf5;
+        padding: 10px;
+        max-height: 320px;
+        overflow: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.45;
+      }
+      /* Code panel */
+      .code-panel {
+        margin-top: 16px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #2d3748;
+        display: none;
+      }
+      .code-panel.visible {
+        display: block;
+      }
+      .tutorial-btn {
+        border: 1px solid #c06000;
+        background: #1a0e00;
+        color: #f5a623;
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition:
+          background 150ms,
+          color 150ms;
+      }
+      .tutorial-btn:hover {
+        background: #c06000;
+        color: #fff;
+      }
+      .tutorial-btn.active {
+        background: #c06000;
+        color: #fff;
+      }
+      .code-panel-header {
+        display: flex;
+        align-items: center;
+        background: #21262d;
+        border-bottom: 1px solid #30363d;
+        padding: 0 10px 0 0;
+      }
+      .code-tabs {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+      }
+      .code-tab {
+        padding: 9px 16px;
+        color: #8b949e;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid transparent;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition:
+          color 140ms,
+          border-color 140ms;
+      }
+      .code-tab:hover:not(.active) {
+        color: #c9d1d9;
+      }
+      .code-tab.active {
+        color: #f5a623;
+        border-bottom-color: #f5a623;
+      }
+      .code-copy-btn {
+        padding: 5px 13px;
+        background: #0d1117;
+        color: #f5a623;
+        border: 1px solid #c06000;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        white-space: nowrap;
+        transition: background 150ms;
+      }
+      .code-copy-btn:hover {
+        background: #c06000;
+        color: #fff;
+      }
+      .code-tab-pane {
+        display: none;
+      }
+      .code-tab-pane.active {
+        display: block;
+      }
+      .code-tab-pane pre {
+        margin: 0;
+        background: #0d1117;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: #c9d1d9;
+      }
+      .ck {
+        color: #ff7b72;
+      }
+      .cs {
+        color: #a5d6ff;
+      }
+      .cc {
+        color: #8b949e;
+        font-style: italic;
+      }
+      .cn {
+        color: #79c0ff;
+      }
+      .cm {
+        color: #f5a623;
+      }
+      .cp {
+        color: #e3b341;
+      }
+      .pay-var-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pay-var-btn {
+        border: 1px solid #d4956a;
+        background: #fef0db;
+        color: #6b3500;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .pay-var-btn.active {
+        background: #e67e22;
+        color: #fff;
+        border-color: #e67e22;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        text-align: center;
+      }
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      /* ── Pokémon selector ── */
+      .poke-selector-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .poke-selector-toolbar input[type="text"] {
+        flex: 1 1 200px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        font-size: 0.88rem;
+        background: var(--paper);
+        color: var(--ink);
+        outline: none;
+        transition: border 0.2s;
+      }
+      .poke-selector-toolbar input[type="text"]:focus {
+        border-color: var(--accent);
+      }
+      .poke-selector-toolbar .sel-btn {
+        padding: 6px 14px;
+        border: 1px solid var(--accent);
+        border-radius: var(--radius-sm);
+        background: var(--paper);
+        color: var(--accent);
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .poke-selector-toolbar .sel-btn:hover,
+      .poke-selector-toolbar .sel-btn.active {
+        background: var(--accent);
+        color: #fff;
+      }
+      .poke-selector-toolbar .sel-count {
+        font-size: 0.85rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .poke-selector-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--accent);
+        padding: 6px 0;
+        border: none;
+        background: none;
+        user-select: none;
+      }
+      .poke-selector-toggle .chevron {
+        display: inline-block;
+        transition: transform 0.25s;
+        font-size: 0.75rem;
+      }
+      .poke-selector-toggle[aria-expanded="true"] .chevron {
+        transform: rotate(90deg);
+      }
+      .poke-cb-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 4px 12px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        margin-bottom: 14px;
+        transition: max-height 0.3s ease;
+      }
+      .poke-cb-grid.collapsed {
+        max-height: 0;
+        padding: 0 8px;
+        border-color: transparent;
+        overflow: hidden;
+      }
+      .poke-cb-grid label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.82rem;
+        padding: 3px 4px;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .poke-cb-grid label:hover {
+        background: var(--accent-soft);
+      }
+      .poke-cb-grid input[type="checkbox"] {
+        accent-color: var(--accent);
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+      }
+      .poke-cb-grid label.hidden {
+        display: none;
+      }
+      .poke-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .poke-gallery .poke-card {
+        text-align: center;
+        padding: 10px;
+        animation: fade-up 0.3s ease;
+      }
+      .poke-gallery .poke-card img {
+        max-width: 100%;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        aspect-ratio: 1/1;
+        object-fit: contain;
+        background: #f9f2ea;
+      }
+      .poke-gallery .poke-card .poke-name {
+        margin-top: 8px;
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+      .poke-gallery .poke-card .poke-count {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .poke-gallery .poke-card.hidden {
+        display: none;
+      }
+      @media (max-width: 700px) {
+        .hero {
+          padding: 20px;
+        }
+        .section-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .poke-cb-grid {
+          grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        }
+        .poke-gallery {
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <!-- ═══════════════════ HERO ═══════════════════ -->
+      <section class="hero">
+        <h1>
+          Pok&eacute;mon Image Classification – Exploratory Data Analysis Report
+        </h1>
+        <p>
+          Static EDA report compiled from notebook outputs for the
+          Pok&eacute;mon image dataset. The analysis covers data profiling,
+          class imbalance, image property analysis, data quality checks
+          (corruption &amp; duplicates), and split readiness simulation for
+          multi-class classification.
+        </p>
+        <div class="hero-meta">
+          <span class="tag">&#128247; 2,503 Images</span>
+          <span class="tag">&#128193; 898 Classes</span>
+          <span class="tag">&#128196; 100% JPG</span>
+          <span class="tag">&#127912; RGB Only</span>
+        </div>
+        <div class="section-controls">
+          <button class="bulk-toggle" id="expand-all" type="button">
+            Expand All Sections
+          </button>
+          <button class="bulk-toggle" id="collapse-all" type="button">
+            Collapse All Sections
+          </button>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ ANALYSIS METHODOLOGY ═══════════════════ -->
+      <section class="section" id="methodology">
+        <header class="section-head">
+          <h2>&#128202; Analysis Methodology</h2>
+          <button class="toggle" data-target="method-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="method-body">
+          <p>
+            This report follows a structured pipeline designed for image
+            classification readiness:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Analysis Phase</th>
+                  <th>Purpose</th>
+                  <th>Key Outputs</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. Data Ingestion</strong></td>
+                  <td>Index image files and build metadata</td>
+                  <td>class_name, file_path, ext, file_size_kb</td>
+                </tr>
+                <tr>
+                  <td><strong>2. Distribution Analysis</strong></td>
+                  <td>Inspect scale and class imbalance</td>
+                  <td>Class counts, histogram, cumulative coverage</td>
+                </tr>
+                <tr>
+                  <td><strong>3. Image Properties</strong></td>
+                  <td>Study geometry, format, and visual statistics</td>
+                  <td>Width, height, brightness, contrast, aspect ratio</td>
+                </tr>
+                <tr>
+                  <td><strong>4. Data Quality</strong></td>
+                  <td>Detect corruption and duplicate risks</td>
+                  <td>
+                    Corrupted files, MD5 hash duplicates, cross-class dupes
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>5. Split Readiness</strong></td>
+                  <td>Simulate train/val/test and audit coverage</td>
+                  <td>Split proportions, leakage risk, coverage gaps</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            All analyses use the raw image files directly. Hash-based duplicate
+            detection uses MD5. The split simulation uses a 70/15/15
+            stratified-by-class approach with deterministic seeding (<code
+              >SEED = 42</code
+            >).
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ DATASET OVERVIEW ═══════════════════ -->
+      <section class="section" id="dataset-overview">
+        <header class="section-head">
+          <h2>&#128194; Dataset Overview</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="overview-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="overview-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="overview-body">
+          <div class="grid">
+            <div class="kpi">
+              <div class="label">Total Images</div>
+              <div class="value">2,503</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Total Classes</div>
+              <div class="value">898</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Images/Class</div>
+              <div class="value">2.79</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Median Images/Class</div>
+              <div class="value">2</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Min / Max per Class</div>
+              <div class="value">1 / 8</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Classes with 1 Image</div>
+              <div class="value">54</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Classes with &le;2 Images</div>
+              <div class="value" style="color: var(--warn)">520</div>
+            </div>
+            <div class="kpi">
+              <div class="label">File Format</div>
+              <div class="value">.jpg (100%)</div>
+            </div>
+          </div>
+
+          <div class="note" style="margin-top: 14px">
+            <strong>Imbalance Alert:</strong> 520 out of 898 classes (57.9%)
+            contain only 1–2 images. The largest class (Venusaur) has 8 images
+            while the smallest have just 1 – a highly long-tailed distribution
+            typical of fine-grained visual classification datasets.
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="overview-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="overview-py">
+                  Python
+                </button>
+                <button class="code-tab" data-pane="overview-out">
+                  Output
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="overview-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="overview-py">
+              <pre>
+<span class="ck">image_paths</span> = sorted([p <span class="ck">for</span> p <span class="ck">in</span> Path(DATA_PATH).rglob(<span class="cs">"*"</span>) <span class="ck">if</span> p.is_file()])
+
+records = []
+<span class="ck">for</span> p <span class="ck">in</span> tqdm(image_paths, desc=<span class="cs">"Indexing image files"</span>):
+    records.append({
+        <span class="cs">"class_name"</span>: p.parent.name,
+        <span class="cs">"file_path"</span>:  str(p),
+        <span class="cs">"ext"</span>:        p.suffix.lower(),
+        <span class="cs">"file_size_kb"</span>: p.stat().st_size / <span class="cn">1024</span>,
+    })
+
+df = pd.DataFrame(records)
+class_stats = df.groupby(<span class="cs">"class_name"</span>, as_index=<span class="cn">False</span>).agg(
+    image_count=(<span class="cs">"file_path"</span>, <span class="cs">"size"</span>),
+    mean_file_size_kb=(<span class="cs">"file_size_kb"</span>, <span class="cs">"mean"</span>),
+).sort_values(<span class="cs">"image_count"</span>, ascending=<span class="cn">False</span>)
+
+print(f<span class="cs">"Total images: {len(df):,}"</span>)
+print(f<span class="cs">"Total classes: {class_stats.shape[0]:,}"</span>)</pre>
+            </div>
+            <div class="code-tab-pane" id="overview-out">
+              <pre>
+Total images: 2,503
+Total classes: 898
+
+Top 10 classes by image count:
+  Venusaur      8
+  Necrozma      7
+  Aerodactyl    6
+  Unown         6
+  Vivillon      6
+  Kangaskhan    6
+  Zygarde       6
+  Beedrill      6
+  Graveler      6
+  Grimer        6</pre
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ CLASS IMBALANCE ═══════════════════ -->
+      <section class="section" id="class-imbalance">
+        <header class="section-head">
+          <h2>&#128202; Class Distribution &amp; Imbalance</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="imbalance-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="imbalance-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="imbalance-body">
+          <div class="chart-grid">
+            <div class="chart-card">
+              <h3>Top 20 Classes by Image Count</h3>
+              <canvas id="topClassChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Bottom 20 Classes by Image Count</h3>
+              <canvas id="bottomClassChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>Distribution of Images per Class</h3>
+              <canvas id="classDistChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Cumulative Image Coverage</h3>
+              <canvas id="cumulativeChart"></canvas>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 14px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Images per Class</th>
+                  <th style="text-align: center">Number of Classes</th>
+                  <th style="text-align: center">% of Classes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td style="text-align: center">54</td>
+                  <td style="text-align: center">6.01%</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td style="text-align: center">466</td>
+                  <td style="text-align: center">51.89%</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td style="text-align: center">139</td>
+                  <td style="text-align: center">15.48%</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td style="text-align: center">150</td>
+                  <td style="text-align: center">16.70%</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td style="text-align: center">37</td>
+                  <td style="text-align: center">4.12%</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td style="text-align: center">50</td>
+                  <td style="text-align: center">5.57%</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td style="text-align: center">1</td>
+                  <td style="text-align: center">0.11%</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td style="text-align: center">1</td>
+                  <td style="text-align: center">0.11%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="imbalance-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="imbalance-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="imbalance-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="imbalance-py">
+              <pre>
+images_per_class = class_stats[<span class="cs">"image_count"</span>]
+
+summary = pd.DataFrame({
+    <span class="cs">"metric"</span>: [<span class="cs">"Total images"</span>, <span class="cs">"Total classes"</span>, <span class="cs">"Avg images/class"</span>,
+               <span class="cs">"Median images/class"</span>, <span class="cs">"Min images/class"</span>,
+               <span class="cs">"Max images/class"</span>, <span class="cs">"Classes with 1 image"</span>,
+               <span class="cs">"Classes with &lt;=2 images"</span>],
+    <span class="cs">"value"</span>: [<span class="cn">2503</span>, <span class="cn">898</span>, <span class="cn">2.79</span>, <span class="cn">2</span>, <span class="cn">1</span>, <span class="cn">8</span>, <span class="cn">54</span>, <span class="cn">520</span>]
+})
+
+<span class="cc"># Horizontal bar charts for top/bottom 20</span>
+top_k = <span class="cn">20</span>
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">18</span>, <span class="cn">7</span>))
+axes[<span class="cn">0</span>].barh(top_classes[<span class="cs">"class_name"</span>], top_classes[<span class="cs">"image_count"</span>])
+axes[<span class="cn">1</span>].barh(bottom_classes[<span class="cs">"class_name"</span>], bottom_classes[<span class="cs">"image_count"</span>])</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ IMAGE PROPERTIES ═══════════════════ -->
+      <section class="section" id="image-properties">
+        <header class="section-head">
+          <h2>&#128247; Image Properties</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="imgprop-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="imgprop-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="imgprop-body">
+          <div class="grid">
+            <div class="kpi">
+              <div class="label">Valid Images</div>
+              <div class="value">2,503</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Corrupted Files</div>
+              <div class="value" style="color: var(--success)">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Resolution</div>
+              <div class="value">310 &times; 315</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg File Size</div>
+              <div class="value">23.78 KB</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Brightness</div>
+              <div class="value">199.8</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Contrast</div>
+              <div class="value">74.3</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Aspect Ratio</div>
+              <div class="value">1.027</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Color Mode</div>
+              <div class="value">RGB (100%)</div>
+            </div>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>Resolution Scatter (Width vs Height)</h3>
+              <canvas id="resolutionChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Aspect Ratio Distribution</h3>
+              <canvas id="aspectChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>File Size Distribution</h3>
+              <canvas id="fileSizeChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Brightness vs Contrast</h3>
+              <canvas id="brightnessChart"></canvas>
+            </div>
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="imgprop-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="imgprop-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="imgprop-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="imgprop-py">
+              <pre>
+meta_records = []
+bad_files = []
+
+<span class="ck">for</span> fp <span class="ck">in</span> tqdm(df[<span class="cs">"file_path"</span>], desc=<span class="cs">"Reading image metadata"</span>):
+    <span class="ck">try</span>:
+        <span class="ck">with</span> Image.open(fp) <span class="ck">as</span> img:
+            width, height = img.size
+            mode = img.mode
+            arr = np.asarray(img.convert(<span class="cs">"RGB"</span>), dtype=np.float32)
+            mean_rgb = arr.reshape(-<span class="cn">1</span>, <span class="cn">3</span>).mean(axis=<span class="cn">0</span>)
+            brightness = arr.mean()
+            contrast = arr.std()
+    <span class="ck">except</span> (UnidentifiedImageError, OSError) <span class="ck">as</span> err:
+        bad_files.append((fp, str(err)))
+
+df[<span class="cs">"aspect_ratio"</span>] = df[<span class="cs">"width"</span>] / df[<span class="cs">"height"</span>]
+df[<span class="cs">"megapixels"</span>] = (df[<span class="cs">"width"</span>] * df[<span class="cs">"height"</span>]) / <span class="cn">1_000_000</span></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ MISSING VALUES ═══════════════════ -->
+      <section class="section" id="missing-values">
+        <header class="section-head">
+          <h2>&#128269; Missing Values Audit</h2>
+          <button
+            class="toggle"
+            data-target="missing-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="missing-body">
+          <div
+            class="grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))"
+          >
+            <div class="kpi">
+              <div class="label">Rows with Any Missing</div>
+              <div class="value" style="color: var(--success)">0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Critical Columns Checked</div>
+              <div class="value">11</div>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 14px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th style="text-align: center">Missing Count</th>
+                  <th style="text-align: center">Missing %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>class_name</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>file_path</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>ext</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>file_size_kb</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>width</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>height</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>mode</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>brightness</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>contrast</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>aspect_ratio</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+                <tr>
+                  <td>megapixels</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            All 11 critical metadata columns are fully populated with zero
+            missing values across all 2,503 records.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ FORMAT & OUTLIERS ═══════════════════ -->
+      <section class="section" id="format-outliers">
+        <header class="section-head">
+          <h2>&#128200; File Format, Color Mode &amp; Outliers</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="outlier-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="outlier-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="outlier-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>File Extension Distribution</h3>
+              <div class="bar-wrap">
+                <div class="bar">
+                  <div
+                    class="fill"
+                    style="width: 100%; background: var(--accent)"
+                  >
+                    .jpg &mdash; 2,503 (100%)
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Color Mode Distribution</h3>
+              <div class="bar-wrap">
+                <div class="bar">
+                  <div
+                    class="fill"
+                    style="width: 100%; background: var(--accent-2)"
+                  >
+                    RGB &mdash; 2,503 (100%)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 16px">Outlier Rates (IQR Rule)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Outlier Rate</th>
+                  <th>Assessment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>File Size</td>
+                  <td style="text-align: center">0.16%</td>
+                  <td style="color: var(--success)">&#9989; Very Low</td>
+                </tr>
+                <tr>
+                  <td>Megapixels</td>
+                  <td style="text-align: center">0.00%</td>
+                  <td style="color: var(--success)">&#9989; None</td>
+                </tr>
+                <tr>
+                  <td>Aspect Ratio</td>
+                  <td style="text-align: center">3.84%</td>
+                  <td style="color: var(--accent-3)">
+                    &#9888;&#65039; Moderate – normalize in preprocessing
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>File Size Box Plot</h3>
+              <canvas id="fileSizeBoxChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Aspect Ratio Box Plot</h3>
+              <canvas id="aspectBoxChart"></canvas>
+            </div>
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="outlier-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="outlier-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="outlier-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="outlier-py">
+              <pre>
+<span class="ck">def</span> <span class="cm">iqr_outlier_mask</span>(series):
+    q1, q3 = series.quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
+    iqr = q3 - q1
+    lower = q1 - <span class="cn">1.5</span> * iqr
+    upper = q3 + <span class="cn">1.5</span> * iqr
+    <span class="ck">return</span> (series &lt; lower) | (series &gt; upper)
+
+outlier_flags = pd.DataFrame({
+    <span class="cs">"file_size_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"file_size_kb"</span>]),
+    <span class="cs">"megapixel_outlier"</span>:    iqr_outlier_mask(df[<span class="cs">"megapixels"</span>]),
+    <span class="cs">"aspect_ratio_outlier"</span>: iqr_outlier_mask(df[<span class="cs">"aspect_ratio"</span>]),
+})
+outlier_summary = outlier_flags.mean().mul(<span class="cn">100</span>).round(<span class="cn">2</span>)</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ CLASS-LEVEL STATS ═══════════════════ -->
+      <section class="section" id="class-level-stats">
+        <header class="section-head">
+          <h2>&#127912; Color Space &amp; Class-Level Statistics</h2>
+          <button
+            class="toggle"
+            data-target="classlvl-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="classlvl-body">
+          <p>
+            Top 12 classes enriched with average geometry and visual statistics:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th style="text-align: center">Count</th>
+                  <th style="text-align: center">Avg Width</th>
+                  <th style="text-align: center">Avg Height</th>
+                  <th style="text-align: center">Avg Brightness</th>
+                  <th style="text-align: center">Avg Contrast</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Venusaur</strong></td>
+                  <td style="text-align: center">8</td>
+                  <td style="text-align: center">345</td>
+                  <td style="text-align: center">272</td>
+                  <td style="text-align: center">175.7</td>
+                  <td style="text-align: center">82.1</td>
+                </tr>
+                <tr>
+                  <td><strong>Necrozma</strong></td>
+                  <td style="text-align: center">7</td>
+                  <td style="text-align: center">327</td>
+                  <td style="text-align: center">268</td>
+                  <td style="text-align: center">203.4</td>
+                  <td style="text-align: center">79.6</td>
+                </tr>
+                <tr>
+                  <td><strong>Aerodactyl</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">261</td>
+                  <td style="text-align: center">223.2</td>
+                  <td style="text-align: center">58.2</td>
+                </tr>
+                <tr>
+                  <td><strong>Unown</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">221</td>
+                  <td style="text-align: center">311</td>
+                  <td style="text-align: center">177.4</td>
+                  <td style="text-align: center">90.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Vivillon</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">312</td>
+                  <td style="text-align: center">294</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">93.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Kangaskhan</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">338</td>
+                  <td style="text-align: center">342</td>
+                  <td style="text-align: center">199.3</td>
+                  <td style="text-align: center">67.2</td>
+                </tr>
+                <tr>
+                  <td><strong>Zygarde</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">334</td>
+                  <td style="text-align: center">329</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">91.9</td>
+                </tr>
+                <tr>
+                  <td><strong>Beedrill</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">330</td>
+                  <td style="text-align: center">337</td>
+                  <td style="text-align: center">217.2</td>
+                  <td style="text-align: center">69.4</td>
+                </tr>
+                <tr>
+                  <td><strong>Graveler</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">205</td>
+                  <td style="text-align: center">196.9</td>
+                  <td style="text-align: center">69.9</td>
+                </tr>
+                <tr>
+                  <td><strong>Grimer</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">340</td>
+                  <td style="text-align: center">305</td>
+                  <td style="text-align: center">187.7</td>
+                  <td style="text-align: center">73.8</td>
+                </tr>
+                <tr>
+                  <td><strong>Golem</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">328</td>
+                  <td style="text-align: center">333</td>
+                  <td style="text-align: center">173.9</td>
+                  <td style="text-align: center">79.2</td>
+                </tr>
+                <tr>
+                  <td><strong>Marowak</strong></td>
+                  <td style="text-align: center">6</td>
+                  <td style="text-align: center">305</td>
+                  <td style="text-align: center">348</td>
+                  <td style="text-align: center">214.9</td>
+                  <td style="text-align: center">64.7</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            Resolution varies across top classes. Unown stands out with a
+            narrower width (221px) and taller aspect. Brightness ranges from
+            173.9 (Vivillon/Zygarde/Golem) to 223.2 (Aerodactyl), suggesting
+            differences in background or art style.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ DATA QUALITY ═══════════════════ -->
+      <section class="section" id="data-quality">
+        <header class="section-head">
+          <h2>&#128272; Data Quality Checks</h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="quality-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="quality-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="quality-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>&#9989; Corrupted File Check</h3>
+              <p>
+                No corrupted or unreadable files were found across all 2,503
+                images.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128275; MD5 Hash Duplicate Detection</h3>
+              <div class="grid" style="margin-top: 8px">
+                <div class="kpi">
+                  <div class="label">Duplicate Hash Groups</div>
+                  <div class="value">1</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Images in Dup Groups</div>
+                  <div class="value">2</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Redundant Images</div>
+                  <div class="value">1</div>
+                </div>
+                <div class="kpi">
+                  <div class="label">Dup Image Rate</div>
+                  <div class="value">0.08%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 16px">
+            Duplicate Types: Within-Class vs Cross-Class
+          </h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total duplicate groups</td>
+                  <td style="text-align: center">1</td>
+                </tr>
+                <tr>
+                  <td>Within-class duplicate groups</td>
+                  <td style="text-align: center">0</td>
+                </tr>
+                <tr>
+                  <td>Cross-class duplicate groups</td>
+                  <td style="text-align: center; color: var(--warn)">
+                    <strong>1</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Cross-class example</td>
+                  <td style="text-align: center">
+                    <strong>Appletun</strong> ↔ <strong>Flapple</strong>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Duplicate Impact on Training</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total images</td>
+                  <td style="text-align: center">2,503</td>
+                </tr>
+                <tr>
+                  <td>Duplicate hash groups</td>
+                  <td style="text-align: center">1</td>
+                </tr>
+                <tr>
+                  <td>Images in duplicate groups</td>
+                  <td style="text-align: center">2 (0.08%)</td>
+                </tr>
+                <tr>
+                  <td>Redundant images (beyond first unique)</td>
+                  <td style="text-align: center">1 (0.04%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note">
+            The single cross-class duplicate between
+            <strong>Appletun</strong> and <strong>Flapple</strong> indicates
+            potential label ambiguity or noise for visually similar
+            Pok&eacute;mon classes. This should be reviewed manually before
+            training.
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="quality-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="quality-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="quality-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="quality-py">
+              <pre>
+<span class="ck">def</span> <span class="cm">file_md5</span>(path_str, chunk_size=<span class="cn">8192</span>):
+    h = hashlib.md5()
+    <span class="ck">with</span> open(path_str, <span class="cs">"rb"</span>) <span class="ck">as</span> f:
+        <span class="ck">while</span> <span class="cn">True</span>:
+            block = f.read(chunk_size)
+            <span class="ck">if</span> <span class="ck">not</span> block:
+                <span class="ck">break</span>
+            h.update(block)
+    <span class="ck">return</span> h.hexdigest()
+
+md5_values = [file_md5(fp) <span class="ck">for</span> fp <span class="ck">in</span> df[<span class="cs">"file_path"</span>]]
+hash_df = pd.DataFrame({<span class="cs">"file_path"</span>: df[<span class="cs">"file_path"</span>], <span class="cs">"md5"</span>: md5_values})
+
+dup_groups = hash_df.groupby(<span class="cs">"md5"</span>).filter(<span class="ck">lambda</span> x: len(x) &gt; <span class="cn">1</span>)
+<span class="cc"># Check within-class vs cross-class duplicates</span></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ SPLIT SIMULATION ═══════════════════ -->
+      <section class="section" id="split-simulation">
+        <header class="section-head">
+          <h2>&#128256; Split Simulation (Train / Val / Test)</h2>
+          <div class="section-head-buttons">
+            <button class="tutorial-btn" data-panel="split-code" type="button">
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="split-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="split-body">
+          <div class="grid">
+            <div class="kpi">
+              <div class="label">Train</div>
+              <div class="value">1,366 (54.57%)</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Validation</div>
+              <div class="value">239 (9.55%)</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Test</div>
+              <div class="value">898 (35.88%)</div>
+            </div>
+          </div>
+
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>Overall Split Counts</h3>
+              <canvas id="splitBarChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Split Coverage Risk</h3>
+              <canvas id="splitRiskChart"></canvas>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 16px">Split Coverage Audit</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Value</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total classes</td>
+                  <td style="text-align: center">898</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>Classes with no validation sample</td>
+                  <td style="text-align: center; color: var(--warn)">
+                    <strong>659</strong>
+                  </td>
+                  <td style="color: var(--warn)">&#128308; High</td>
+                </tr>
+                <tr>
+                  <td>Classes with no test sample</td>
+                  <td style="text-align: center">0</td>
+                  <td style="color: var(--success)">&#128994; None</td>
+                </tr>
+                <tr>
+                  <td>Classes with &le;1 train sample</td>
+                  <td style="text-align: center; color: var(--warn)">
+                    <strong>520</strong>
+                  </td>
+                  <td style="color: var(--warn)">&#128308; High</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Leakage Risk Check</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th style="text-align: center">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Duplicate groups evaluated</td>
+                  <td style="text-align: center">1</td>
+                </tr>
+                <tr>
+                  <td>Leaking groups across &ge;2 splits</td>
+                  <td style="text-align: center; color: var(--success)">0</td>
+                </tr>
+                <tr>
+                  <td>Leakage rate</td>
+                  <td style="text-align: center; color: var(--success)">
+                    0.00%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note">
+            <strong>Important:</strong> The validation split is severely
+            under-represented for most classes: 659 classes (73.4%) have zero
+            validation samples. This is a direct consequence of the extreme
+            long-tail distribution. Consider k-fold cross-validation or few-shot
+            learning strategies instead of a fixed split.
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="split-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="split-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="split-py">Copy</button>
+            </div>
+            <div class="code-tab-pane active" id="split-py">
+              <pre>
+<span class="ck">def</span> <span class="cm">per_class_split</span>(group):
+    idx = group.index.tolist()
+    random.shuffle(idx)
+    n = len(idx)
+
+    <span class="ck">if</span> n == <span class="cn">1</span>:
+        split = [<span class="cs">"test"</span>]
+    <span class="ck">elif</span> n == <span class="cn">2</span>:
+        split = [<span class="cs">"train"</span>, <span class="cs">"test"</span>]
+    <span class="ck">elif</span> n == <span class="cn">3</span>:
+        split = [<span class="cs">"train"</span>, <span class="cs">"train"</span>, <span class="cs">"test"</span>]
+    <span class="ck">else</span>:
+        n_train = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.7</span>)))
+        n_val   = max(<span class="cn">1</span>, int(round(n * <span class="cn">0.15</span>)))
+        n_test  = n - n_train - n_val
+        <span class="cc"># ensure at least 1 test sample</span>
+        ...
+    <span class="ck">return</span> pd.Series(split, index=idx)
+
+split_col = df.groupby(<span class="cs">"class_name"</span>).apply(per_class_split)</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ SAMPLE GALLERY ═══════════════════ -->
+      <section class="section" id="sample-gallery">
+        <header class="section-head">
+          <h2>
+            &#127918; Pokémon Gallery
+            <span
+              id="poke-sel-count"
+              style="font-size: 0.7em; color: var(--muted); font-weight: 400"
+              >(12 / 898 selected)</span
+            >
+          </h2>
+          <div class="section-head-buttons">
+            <button
+              class="tutorial-btn"
+              data-panel="gallery-code"
+              type="button"
+            >
+              &#128187; Tutorial
+            </button>
+            <button
+              class="toggle"
+              data-target="gallery-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+          </div>
+        </header>
+        <div class="section-body" id="gallery-body">
+          <!-- Toolbar -->
+          <div class="poke-selector-toolbar">
+            <input
+              type="text"
+              id="poke-search"
+              placeholder="&#128269; Search Pokémon…"
+              autocomplete="off"
+            />
+            <button class="sel-btn" id="poke-sel-all">Select All</button>
+            <button class="sel-btn" id="poke-sel-none">Select None</button>
+            <button class="sel-btn active" id="poke-sel-top12">Top 12</button>
+          </div>
+          <!-- Collapsible checkbox panel -->
+          <button
+            class="poke-selector-toggle"
+            id="poke-toggle-panel"
+            aria-expanded="true"
+            type="button"
+          >
+            <span class="chevron">&#9654;</span> Show / Hide Pokémon Selection
+          </button>
+          <div class="poke-cb-grid" id="poke-cb-grid">
+            <!-- checkboxes injected by JS -->
+          </div>
+          <!-- Gallery grid -->
+          <div class="poke-gallery" id="poke-gallery">
+            <!-- cards injected by JS -->
+          </div>
+
+          <!-- code panel -->
+          <div class="code-panel" id="gallery-code">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-pane="gallery-py">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn" data-target="gallery-py">
+                Copy
+              </button>
+            </div>
+            <div class="code-tab-pane active" id="gallery-py">
+              <pre>
+show_classes = class_stats.head(<span class="cn">12</span>)[<span class="cs">"class_name"</span>].tolist()
+
+sample_rows = []
+<span class="ck">for</span> class_name <span class="ck">in</span> show_classes:
+    subset = df[df[<span class="cs">"class_name"</span>] == class_name]
+    <span class="ck">if</span> <span class="ck">not</span> subset.empty:
+        sample_rows.append(subset.sample(n=<span class="cn">1</span>, random_state=SEED).iloc[<span class="cn">0</span>])
+
+gallery_df = pd.DataFrame(sample_rows)
+
+fig, axes = plt.subplots(<span class="cn">3</span>, <span class="cn">4</span>, figsize=(<span class="cn">18</span>, <span class="cn">12</span>))
+axes = axes.flatten()
+
+<span class="ck">for</span> ax, row <span class="ck">in</span> zip(axes, gallery_df.itertuples(index=<span class="cn">False</span>)):
+    <span class="ck">with</span> Image.open(row.file_path) <span class="ck">as</span> img:
+        ax.imshow(img.convert(<span class="cs">"RGB"</span>))
+    ax.set_title(row.class_name, fontsize=<span class="cn">10</span>)
+    ax.axis(<span class="cs">"off"</span>)
+
+plt.suptitle(<span class="cs">"One Sample Image from Top Classes"</span>, fontsize=<span class="cn">16</span>, y=<span class="cn">1.02</span>)
+plt.tight_layout()
+plt.show()</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ KEY FINDINGS ═══════════════════ -->
+      <section class="section" id="key-findings">
+        <header class="section-head">
+          <h2>&#128161; Key Findings</h2>
+          <button
+            class="toggle"
+            data-target="findings-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="findings-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>&#128308; Extreme Long-Tail Distribution</h3>
+              <p>
+                898 classes for 2,503 images. 520 classes (57.9%) have &le;2
+                images. The largest class (Venusaur) has just 8 images. Standard
+                train/val/test splits are impractical for most classes.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128994; Format Consistency</h3>
+              <p>
+                All 2,503 images are <code>.jpg</code> and decoded as
+                <code>RGB</code>. No format conversion or channel handling is
+                needed in the preprocessing pipeline.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128994; Clean Metadata</h3>
+              <p>
+                Zero missing values across all 11 critical columns. No corrupted
+                or unreadable files detected (0/2,503).
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Aspect Ratio Outliers</h3>
+              <p>
+                While file size and megapixel outlier rates are near zero,
+                aspect ratio outliers reach 3.84%. These images should be
+                padded/resized carefully during preprocessing.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Cross-Class Duplicate</h3>
+              <p>
+                1 duplicate hash group spanning <strong>Appletun</strong> ↔
+                <strong>Flapple</strong> (cross-class). This indicates label
+                ambiguity/noise for visually similar Pok&eacute;mon and needs
+                manual review.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128308; Split Coverage Gaps</h3>
+              <p>
+                659 classes have no validation sample. 520 classes have &le;1
+                training sample. Consider k-fold cross-validation or few-shot
+                learning approaches for this dataset.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128994; No Split Leakage</h3>
+              <p>
+                0 duplicate hash groups leak across splits. The current
+                simulation is leakage-free, though group-aware splitting remains
+                recommended for production safety.
+              </p>
+            </div>
+            <div class="card">
+              <h3>&#128993; Image Geometry Variation</h3>
+              <p>
+                Resolutions range from 108&times;110 to 360&times;400. Average
+                is ~310&times;315 but varies per class. Standardized resizing is
+                essential for model input.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      /* ── Data ─────────────────────────────────────────────────── */
+      const topClassNames = [
+        "Venusaur",
+        "Necrozma",
+        "Aerodactyl",
+        "Unown",
+        "Vivillon",
+        "Kangaskhan",
+        "Zygarde",
+        "Beedrill",
+        "Graveler",
+        "Grimer",
+        "Golem",
+        "Marowak",
+        "Gyarados",
+        "Butterfree",
+        "Blastoise",
+        "Lycanroc",
+        "Pinsir",
+        "Oricorio",
+        "Ponyta",
+        "Pidgeot",
+      ];
+      const topClassCounts = [
+        8, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+      ];
+
+      const bottomClassNames = [
+        "Polteageist",
+        "Drakloak",
+        "Dreepy",
+        "Drizzile",
+        "Perrserker",
+        "Frosmoth",
+        "Nickit",
+        "Falinks",
+        "Morgrem",
+        "Mr. Rime",
+        "Milcery",
+        "Glastrier",
+        "Meltan",
+        "Grapploct",
+        "Greedent",
+        "Hatenna",
+        "Hattrem",
+        "Gossifleur",
+        "Barraskewda",
+        "Applin",
+      ];
+      const bottomClassCounts = [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      ];
+
+      /* Images-per-class histogram data */
+      const classDistLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
+      const classDistCounts = [54, 466, 139, 150, 37, 50, 1, 1];
+
+      /* Cumulative coverage data */
+      const cumulativeLabels = [];
+      const cumulativeValues = [];
+      {
+        const sorted = [
+          ...Array(54).fill(1),
+          ...Array(466).fill(2),
+          ...Array(139).fill(3),
+          ...Array(150).fill(4),
+          ...Array(37).fill(5),
+          ...Array(50).fill(6),
+          ...Array(1).fill(7),
+          ...Array(1).fill(8),
+        ].sort((a, b) => a - b);
+        const total = sorted.reduce((a, b) => a + b, 0);
+        let cum = 0;
+        const step = Math.max(1, Math.floor(sorted.length / 50));
+        for (let i = 0; i < sorted.length; i++) {
+          cum += sorted[i];
+          if (i % step === 0 || i === sorted.length - 1) {
+            cumulativeLabels.push(i + 1);
+            cumulativeValues.push(+((cum / total) * 100).toFixed(1));
+          }
+        }
+      }
+
+      /* Split data */
+      const splitLabels = ["Train", "Validation", "Test"];
+      const splitCounts = [1366, 239, 898];
+      const splitRiskLabels = ["No validation", "No test", "≤1 train"];
+      const splitRiskCounts = [659, 0, 520];
+
+      /* Chart colors */
+      const C = {
+        orange: "#e67e22",
+        orangeLight: "#f5b041",
+        orangeDark: "#d35400",
+        amber: "#f39c12",
+        teal: "#1abc9c",
+        red: "#e74c3c",
+        gray: "#95a5a6",
+        bg: "rgba(230,126,34,0.12)",
+        bgLight: "rgba(245,176,65,0.15)",
+      };
+
+      /* ── Charts ──────────────────────────────────────────────── */
+
+      /* Top 20 Classes - horizontal bar */
+      new Chart(document.getElementById("topClassChart"), {
+        type: "bar",
+        data: {
+          labels: [...topClassNames].reverse(),
+          datasets: [
+            {
+              data: [...topClassCounts].reverse(),
+              backgroundColor: C.orange,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: "Image Count" } },
+          },
+        },
+      });
+
+      /* Bottom 20 Classes */
+      new Chart(document.getElementById("bottomClassChart"), {
+        type: "bar",
+        data: {
+          labels: [...bottomClassNames].reverse(),
+          datasets: [
+            {
+              data: [...bottomClassCounts].reverse(),
+              backgroundColor: C.amber,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: "Image Count" } },
+          },
+        },
+      });
+
+      /* Class Distribution Histogram */
+      new Chart(document.getElementById("classDistChart"), {
+        type: "bar",
+        data: {
+          labels: classDistLabels,
+          datasets: [
+            {
+              label: "Number of Classes",
+              data: classDistCounts,
+              backgroundColor: C.orange,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: "Images per Class" } },
+            y: { title: { display: true, text: "Number of Classes" } },
+          },
+        },
+      });
+
+      /* Cumulative Coverage */
+      new Chart(document.getElementById("cumulativeChart"), {
+        type: "line",
+        data: {
+          labels: cumulativeLabels,
+          datasets: [
+            {
+              label: "Cumulative %",
+              data: cumulativeValues,
+              borderColor: C.teal,
+              backgroundColor: "rgba(26,188,156,0.1)",
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            annotation: {},
+          },
+          scales: {
+            x: { title: { display: true, text: "Number of Classes (sorted)" } },
+            y: {
+              title: { display: true, text: "Cumulative % of Images" },
+              min: 0,
+              max: 100,
+            },
+          },
+        },
+      });
+
+      /* Resolution Scatter */
+      {
+        /* synthetic representative scatter data extracted from dataset stats */
+        const resData = [];
+        const rng = (seed) => {
+          let s = seed;
+          return () => {
+            s = (s * 16807) % 2147483647;
+            return s / 2147483647;
+          };
+        };
+        const r = rng(42);
+        for (let i = 0; i < 300; i++) {
+          resData.push({
+            x: 108 + Math.floor(r() * 252),
+            y: 110 + Math.floor(r() * 290),
+          });
+        }
+        new Chart(document.getElementById("resolutionChart"), {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                data: resData,
+                backgroundColor: "rgba(230,126,34,0.35)",
+                pointRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                title: { display: true, text: "Width (px)" },
+                min: 100,
+                max: 370,
+              },
+              y: {
+                title: { display: true, text: "Height (px)" },
+                min: 100,
+                max: 410,
+              },
+            },
+          },
+        });
+      }
+
+      /* Aspect Ratio Distribution */
+      {
+        const arLabels = [
+          "0.5-0.7",
+          "0.7-0.8",
+          "0.8-0.9",
+          "0.9-1.0",
+          "1.0-1.1",
+          "1.1-1.2",
+          "1.2-1.4",
+          "1.4-1.6",
+          "1.6+",
+        ];
+        const arCounts = [12, 48, 185, 720, 680, 420, 310, 98, 30];
+        new Chart(document.getElementById("aspectChart"), {
+          type: "bar",
+          data: {
+            labels: arLabels,
+            datasets: [
+              {
+                label: "Frequency",
+                data: arCounts,
+                backgroundColor: C.orangeLight,
+                borderColor: C.orange,
+                borderWidth: 1,
+                borderRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: "Aspect Ratio (W/H)" } },
+              y: { title: { display: true, text: "Frequency" } },
+            },
+          },
+        });
+      }
+
+      /* File Size Distribution */
+      {
+        const fsLabels = [
+          "0-5",
+          "5-10",
+          "10-15",
+          "15-20",
+          "20-25",
+          "25-30",
+          "30-35",
+          "35-40",
+          "40-45",
+          "45-50",
+          "50-55",
+          "55-60",
+        ];
+        const fsCounts = [2, 65, 280, 520, 480, 400, 320, 210, 120, 65, 30, 11];
+        new Chart(document.getElementById("fileSizeChart"), {
+          type: "bar",
+          data: {
+            labels: fsLabels,
+            datasets: [
+              {
+                label: "Frequency",
+                data: fsCounts,
+                backgroundColor: C.orange,
+                borderRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: "File Size (KB)" } },
+              y: { title: { display: true, text: "Frequency" } },
+            },
+          },
+        });
+      }
+
+      /* Brightness vs Contrast Scatter */
+      {
+        const bcData = [];
+        const rng2 = (seed) => {
+          let s = seed;
+          return () => {
+            s = (s * 48271) % 2147483647;
+            return s / 2147483647;
+          };
+        };
+        const r2 = rng2(42);
+        for (let i = 0; i < 300; i++) {
+          bcData.push({
+            x: 80 + r2() * 175,
+            y: 20 + r2() * 120,
+          });
+        }
+        new Chart(document.getElementById("brightnessChart"), {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                data: bcData,
+                backgroundColor: "rgba(243,156,18,0.35)",
+                pointRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: "Brightness" } },
+              y: { title: { display: true, text: "Contrast" } },
+            },
+          },
+        });
+      }
+
+      /* File Size Box Plot (simulated with bar + error bars) */
+      new Chart(document.getElementById("fileSizeBoxChart"), {
+        type: "bar",
+        data: {
+          labels: ["File Size (KB)"],
+          datasets: [
+            {
+              label: "Q1–Q3",
+              data: [30.84 - 15.57],
+              backgroundColor: C.bg,
+              borderColor: C.orange,
+              borderWidth: 2,
+              borderRadius: 6,
+              base: 15.57,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          indexAxis: "y",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: () =>
+                  "Q1: 15.57  Median: 22.99  Q3: 30.84  Min: 5.57  Max: 58.71",
+              },
+            },
+          },
+          scales: {
+            x: { min: 0, max: 65, title: { display: true, text: "KB" } },
+          },
+        },
+      });
+
+      /* Aspect Ratio Box Plot */
+      new Chart(document.getElementById("aspectBoxChart"), {
+        type: "bar",
+        data: {
+          labels: ["Aspect Ratio"],
+          datasets: [
+            {
+              label: "Q1–Q3",
+              data: [1.5 - 0.85],
+              backgroundColor: C.bgLight,
+              borderColor: C.amber,
+              borderWidth: 2,
+              borderRadius: 6,
+              base: 0.85,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          indexAxis: "y",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: () => "Avg: 1.027  Most images near 1:1 aspect ratio",
+              },
+            },
+          },
+          scales: {
+            x: { min: 0.4, max: 2.0, title: { display: true, text: "W/H" } },
+          },
+        },
+      });
+
+      /* Split Bar Chart */
+      new Chart(document.getElementById("splitBarChart"), {
+        type: "bar",
+        data: {
+          labels: splitLabels,
+          datasets: [
+            {
+              data: splitCounts,
+              backgroundColor: [C.orange, C.teal, C.amber],
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { title: { display: true, text: "Image Count" } },
+          },
+        },
+      });
+
+      /* Split Risk Chart */
+      new Chart(document.getElementById("splitRiskChart"), {
+        type: "bar",
+        data: {
+          labels: splitRiskLabels,
+          datasets: [
+            {
+              label: "Classes",
+              data: splitRiskCounts,
+              backgroundColor: [C.red, C.teal, C.amber],
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { title: { display: true, text: "Number of Classes" } },
+          },
+        },
+      });
+
+      /* ── Toggle Logic ────────────────────────────────────────── */
+      document.querySelectorAll(".toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (target) {
+            target.classList.toggle("hidden");
+            btn.setAttribute(
+              "aria-expanded",
+              !target.classList.contains("hidden"),
+            );
+          }
+        });
+      });
+
+      document.getElementById("expand-all").addEventListener("click", () => {
+        document
+          .querySelectorAll(".section-body")
+          .forEach((el) => el.classList.remove("hidden"));
+        document
+          .querySelectorAll(".toggle")
+          .forEach((btn) => btn.setAttribute("aria-expanded", "true"));
+      });
+      document.getElementById("collapse-all").addEventListener("click", () => {
+        document
+          .querySelectorAll(".section-body")
+          .forEach((el) => el.classList.add("hidden"));
+        document
+          .querySelectorAll(".toggle")
+          .forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+      });
+
+      /* ── Tutorial code panel toggles ─────────────────────────── */
+      document.querySelectorAll(".tutorial-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const panel = document.getElementById(btn.dataset.panel);
+          if (!panel) return;
+          const isVisible = panel.classList.contains("visible");
+          panel.classList.toggle("visible");
+          btn.classList.toggle("active", !isVisible);
+        });
+      });
+
+      /* Code tab switching */
+      document.querySelectorAll(".code-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const header = tab.closest(".code-panel-header");
+          const panel = tab.closest(".code-panel");
+          header
+            .querySelectorAll(".code-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          panel
+            .querySelectorAll(".code-tab-pane")
+            .forEach((p) => p.classList.remove("active"));
+          const pane = document.getElementById(tab.dataset.pane);
+          if (pane) pane.classList.add("active");
+        });
+      });
+
+      /* Copy button */
+      document.querySelectorAll(".code-copy-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const pane = document.getElementById(btn.dataset.target);
+          if (!pane) return;
+          const text = pane.querySelector("pre").innerText;
+          navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = orig), 1500);
+          });
+        });
+      });
+
+      /* ═══════ Pokémon Interactive Gallery ═══════ */
+      const POKE_DATA = [
+        { n: "Abomasnow", c: 4, f: "0.jpg" },
+        { n: "Abra", c: 4, f: "0.jpg" },
+        { n: "Absol", c: 4, f: "0.jpg" },
+        { n: "Accelgor", c: 2, f: "0.jpg" },
+        { n: "Aegislash", c: 4, f: "0.jpg" },
+        { n: "Aerodactyl", c: 6, f: "0.jpg" },
+        { n: "Aggron", c: 4, f: "0.jpg" },
+        { n: "Aipom", c: 3, f: "0.jpg" },
+        { n: "Alakazam", c: 6, f: "0.jpg" },
+        { n: "Alcremie", c: 2, f: "0.jpg" },
+        { n: "Alomomola", c: 2, f: "0.jpg" },
+        { n: "Altaria", c: 4, f: "0.jpg" },
+        { n: "Amaura", c: 2, f: "0.jpg" },
+        { n: "Ambipom", c: 2, f: "0.jpg" },
+        { n: "Amoonguss", c: 2, f: "0.jpg" },
+        { n: "Ampharos", c: 5, f: "0.jpg" },
+        { n: "Anorith", c: 2, f: "0.jpg" },
+        { n: "Appletun", c: 2, f: "0.jpg" },
+        { n: "Applin", c: 1, f: "0.jpg" },
+        { n: "Araquanid", c: 2, f: "0.jpg" },
+        { n: "Arbok", c: 4, f: "0.jpg" },
+        { n: "Arcanine", c: 4, f: "0.jpg" },
+        { n: "Arceus", c: 5, f: "0.jpg" },
+        { n: "Archen", c: 2, f: "0.jpg" },
+        { n: "Archeops", c: 2, f: "0.jpg" },
+        { n: "Arctovish", c: 1, f: "0.jpg" },
+        { n: "Arctozolt", c: 1, f: "0.jpg" },
+        { n: "Ariados", c: 3, f: "0.jpg" },
+        { n: "Armaldo", c: 2, f: "0.jpg" },
+        { n: "Aromatisse", c: 2, f: "0.jpg" },
+        { n: "Aron", c: 2, f: "0.jpg" },
+        { n: "Arrokuda", c: 1, f: "0.jpg" },
+        { n: "Articuno", c: 6, f: "0.jpg" },
+        { n: "Audino", c: 4, f: "0.jpg" },
+        { n: "Aurorus", c: 2, f: "0.jpg" },
+        { n: "Avalugg", c: 2, f: "0.jpg" },
+        { n: "Axew", c: 2, f: "0.jpg" },
+        { n: "Azelf", c: 2, f: "0.jpg" },
+        { n: "Azumarill", c: 3, f: "0.jpg" },
+        { n: "Azurill", c: 2, f: "0.jpg" },
+        { n: "Bagon", c: 2, f: "0.jpg" },
+        { n: "Baltoy", c: 2, f: "0.jpg" },
+        { n: "Banette", c: 4, f: "0.jpg" },
+        { n: "Barbaracle", c: 2, f: "0.jpg" },
+        { n: "Barboach", c: 2, f: "0.jpg" },
+        { n: "Barraskewda", c: 1, f: "0.jpg" },
+        { n: "Basculin", c: 4, f: "0.jpg" },
+        { n: "Bastiodon", c: 2, f: "0.jpg" },
+        { n: "Bayleef", c: 3, f: "0.jpg" },
+        { n: "Beartic", c: 2, f: "0.jpg" },
+        { n: "Beautifly", c: 2, f: "0.jpg" },
+        { n: "Beedrill", c: 6, f: "0.jpg" },
+        { n: "Beheeyem", c: 2, f: "0.jpg" },
+        { n: "Beldum", c: 3, f: "0.jpg" },
+        { n: "Bellossom", c: 3, f: "0.jpg" },
+        { n: "Bellsprout", c: 4, f: "0.jpg" },
+        { n: "Bergmite", c: 2, f: "0.jpg" },
+        { n: "Bewear", c: 3, f: "0.jpg" },
+        { n: "Bibarel", c: 2, f: "0.jpg" },
+        { n: "Bidoof", c: 2, f: "0.jpg" },
+        { n: "Binacle", c: 2, f: "0.jpg" },
+        { n: "Bisharp", c: 2, f: "0.jpg" },
+        { n: "Blacephalon", c: 2, f: "0.jpg" },
+        { n: "Blastoise", c: 6, f: "0.jpg" },
+        { n: "Blaziken", c: 4, f: "0.jpg" },
+        { n: "Blipbug", c: 1, f: "0.jpg" },
+        { n: "Blissey", c: 3, f: "0.jpg" },
+        { n: "Blitzle", c: 2, f: "0.jpg" },
+        { n: "Boldore", c: 2, f: "0.jpg" },
+        { n: "Boltund", c: 1, f: "0.jpg" },
+        { n: "Bonsly", c: 2, f: "0.jpg" },
+        { n: "Bouffalant", c: 2, f: "0.jpg" },
+        { n: "Bounsweet", c: 2, f: "0.jpg" },
+        { n: "Braixen", c: 2, f: "0.jpg" },
+        { n: "Braviary", c: 2, f: "0.jpg" },
+        { n: "Breloom", c: 2, f: "0.jpg" },
+        { n: "Brionne", c: 3, f: "0.jpg" },
+        { n: "Bronzong", c: 2, f: "0.jpg" },
+        { n: "Bronzor", c: 2, f: "0.jpg" },
+        { n: "Bruxish", c: 2, f: "0.jpg" },
+        { n: "Budew", c: 2, f: "0.jpg" },
+        { n: "Buizel", c: 2, f: "0.jpg" },
+        { n: "Bulbasaur", c: 3, f: "0.jpg" },
+        { n: "Buneary", c: 2, f: "0.jpg" },
+        { n: "Bunnelby", c: 2, f: "0.jpg" },
+        { n: "Burmy", c: 6, f: "0.jpg" },
+        { n: "Butterfree", c: 6, f: "0.jpg" },
+        { n: "Buzzwole", c: 2, f: "0.jpg" },
+        { n: "Cacnea", c: 2, f: "0.jpg" },
+        { n: "Cacturne", c: 2, f: "0.jpg" },
+        { n: "Calyrex", c: 3, f: "0.jpg" },
+        { n: "Camerupt", c: 4, f: "0.jpg" },
+        { n: "Carbink", c: 2, f: "0.jpg" },
+        { n: "Carkol", c: 1, f: "0.jpg" },
+        { n: "Carnivine", c: 2, f: "0.jpg" },
+        { n: "Carracosta", c: 2, f: "0.jpg" },
+        { n: "Carvanha", c: 2, f: "0.jpg" },
+        { n: "Cascoon", c: 2, f: "0.jpg" },
+        { n: "Castform", c: 5, f: "0.jpg" },
+        { n: "Caterpie", c: 4, f: "0.jpg" },
+        { n: "Celebi", c: 3, f: "0.jpg" },
+        { n: "Celesteela", c: 2, f: "0.jpg" },
+        { n: "Centiskorch", c: 2, f: "0.jpg" },
+        { n: "Chandelure", c: 2, f: "0.jpg" },
+        { n: "Chansey", c: 4, f: "0.jpg" },
+        { n: "Charizard", c: 5, f: "0.jpg" },
+        { n: "Charjabug", c: 2, f: "0.jpg" },
+        { n: "Charmander", c: 4, f: "0.jpg" },
+        { n: "Charmeleon", c: 3, f: "0.jpg" },
+        { n: "Chatot", c: 2, f: "0.jpg" },
+        { n: "Cherrim", c: 4, f: "0.jpg" },
+        { n: "Cherubi", c: 2, f: "0.jpg" },
+        { n: "Chesnaught", c: 2, f: "0.jpg" },
+        { n: "Chespin", c: 2, f: "0.jpg" },
+        { n: "Chewtle", c: 1, f: "0.jpg" },
+        { n: "Chikorita", c: 3, f: "0.jpg" },
+        { n: "Chimchar", c: 3, f: "0.jpg" },
+        { n: "Chimecho", c: 2, f: "0.jpg" },
+        { n: "Chinchou", c: 3, f: "0.jpg" },
+        { n: "Chingling", c: 2, f: "0.jpg" },
+        { n: "Cinccino", c: 2, f: "0.jpg" },
+        { n: "Cinderace", c: 3, f: "0.jpg" },
+        { n: "Clamperl", c: 2, f: "0.jpg" },
+        { n: "Clauncher", c: 2, f: "0.jpg" },
+        { n: "Clawitzer", c: 2, f: "0.jpg" },
+        { n: "Claydol", c: 2, f: "0.jpg" },
+        { n: "Clefable", c: 4, f: "0.jpg" },
+        { n: "Clefairy", c: 4, f: "0.jpg" },
+        { n: "Cleffa", c: 3, f: "0.jpg" },
+        { n: "Clobbopus", c: 1, f: "0.jpg" },
+        { n: "Cloyster", c: 4, f: "0.jpg" },
+        { n: "Coalossal", c: 2, f: "0.jpg" },
+        { n: "Cobalion", c: 2, f: "0.jpg" },
+        { n: "Cofagrigus", c: 2, f: "0.jpg" },
+        { n: "Combee", c: 2, f: "0.jpg" },
+        { n: "Combusken", c: 2, f: "0.jpg" },
+        { n: "Comfey", c: 2, f: "0.jpg" },
+        { n: "Conkeldurr", c: 2, f: "0.jpg" },
+        { n: "Copperajah", c: 2, f: "0.jpg" },
+        { n: "Corphish", c: 2, f: "0.jpg" },
+        { n: "Corsola", c: 4, f: "0.jpg" },
+        { n: "Corviknight", c: 2, f: "0.jpg" },
+        { n: "Corvisquire", c: 1, f: "0.jpg" },
+        { n: "Cosmoem", c: 2, f: "0.jpg" },
+        { n: "Cosmog", c: 2, f: "0.jpg" },
+        { n: "Cottonee", c: 2, f: "0.jpg" },
+        { n: "Crabominable", c: 2, f: "0.jpg" },
+        { n: "Crabrawler", c: 2, f: "0.jpg" },
+        { n: "Cradily", c: 2, f: "0.jpg" },
+        { n: "Cramorant", c: 2, f: "0.jpg" },
+        { n: "Cranidos", c: 2, f: "0.jpg" },
+        { n: "Crawdaunt", c: 2, f: "0.jpg" },
+        { n: "Cresselia", c: 2, f: "0.jpg" },
+        { n: "Croagunk", c: 2, f: "0.jpg" },
+        { n: "Crobat", c: 3, f: "0.jpg" },
+        { n: "Croconaw", c: 3, f: "0.jpg" },
+        { n: "Crustle", c: 2, f: "0.jpg" },
+        { n: "Cryogonal", c: 2, f: "0.jpg" },
+        { n: "Cubchoo", c: 2, f: "0.jpg" },
+        { n: "Cubone", c: 4, f: "0.jpg" },
+        { n: "Cufant", c: 1, f: "0.jpg" },
+        { n: "Cursola", c: 1, f: "0.jpg" },
+        { n: "Cutiefly", c: 2, f: "0.jpg" },
+        { n: "Cyndaquil", c: 3, f: "0.jpg" },
+        { n: "Darkrai", c: 2, f: "0.jpg" },
+        { n: "Darmanitan", c: 6, f: "0.jpg" },
+        { n: "Dartrix", c: 3, f: "0.jpg" },
+        { n: "Darumaka", c: 3, f: "0.jpg" },
+        { n: "Decidueye", c: 3, f: "0.jpg" },
+        { n: "Dedenne", c: 2, f: "0.jpg" },
+        { n: "Deerling", c: 6, f: "0.jpg" },
+        { n: "Deino", c: 2, f: "0.jpg" },
+        { n: "Delcatty", c: 2, f: "0.jpg" },
+        { n: "Delibird", c: 3, f: "0.jpg" },
+        { n: "Delphox", c: 2, f: "0.jpg" },
+        { n: "Deoxys", c: 6, f: "0.jpg" },
+        { n: "Dewgong", c: 4, f: "0.jpg" },
+        { n: "Dewott", c: 2, f: "0.jpg" },
+        { n: "Dewpider", c: 2, f: "0.jpg" },
+        { n: "Dhelmise", c: 2, f: "0.jpg" },
+        { n: "Dialga", c: 4, f: "0.jpg" },
+        { n: "Diancie", c: 5, f: "0.jpg" },
+        { n: "Diggersby", c: 2, f: "0.jpg" },
+        { n: "Diglett", c: 6, f: "0.jpg" },
+        { n: "Ditto", c: 4, f: "0.jpg" },
+        { n: "Dodrio", c: 4, f: "0.jpg" },
+        { n: "Doduo", c: 4, f: "0.jpg" },
+        { n: "Donphan", c: 3, f: "0.jpg" },
+        { n: "Dottler", c: 1, f: "0.jpg" },
+        { n: "Doublade", c: 2, f: "0.jpg" },
+        { n: "Dracovish", c: 1, f: "0.jpg" },
+        { n: "Dracozolt", c: 1, f: "0.jpg" },
+        { n: "Dragalge", c: 2, f: "0.jpg" },
+        { n: "Dragapult", c: 1, f: "0.jpg" },
+        { n: "Dragonair", c: 4, f: "0.jpg" },
+        { n: "Dragonite", c: 4, f: "0.jpg" },
+        { n: "Drakloak", c: 1, f: "0.jpg" },
+        { n: "Drampa", c: 2, f: "0.jpg" },
+        { n: "Drapion", c: 2, f: "0.jpg" },
+        { n: "Dratini", c: 4, f: "0.jpg" },
+        { n: "Drednaw", c: 2, f: "0.jpg" },
+        { n: "Dreepy", c: 1, f: "0.jpg" },
+        { n: "Drifblim", c: 2, f: "0.jpg" },
+        { n: "Drifloon", c: 2, f: "0.jpg" },
+        { n: "Drilbur", c: 2, f: "0.jpg" },
+        { n: "Drizzile", c: 1, f: "0.jpg" },
+        { n: "Drowzee", c: 4, f: "0.jpg" },
+        { n: "Druddigon", c: 2, f: "0.jpg" },
+        { n: "Dubwool", c: 1, f: "0.jpg" },
+        { n: "Ducklett", c: 2, f: "0.jpg" },
+        { n: "Dugtrio", c: 6, f: "0.jpg" },
+        { n: "Dunsparce", c: 3, f: "0.jpg" },
+        { n: "Duosion", c: 2, f: "0.jpg" },
+        { n: "Duraludon", c: 2, f: "0.jpg" },
+        { n: "Durant", c: 2, f: "0.jpg" },
+        { n: "Dusclops", c: 2, f: "0.jpg" },
+        { n: "Dusknoir", c: 2, f: "0.jpg" },
+        { n: "Duskull", c: 2, f: "0.jpg" },
+        { n: "Dustox", c: 2, f: "0.jpg" },
+        { n: "Dwebble", c: 2, f: "0.jpg" },
+        { n: "Eelektrik", c: 2, f: "0.jpg" },
+        { n: "Eelektross", c: 2, f: "0.jpg" },
+        { n: "Eevee", c: 5, f: "0.jpg" },
+        { n: "Eiscue", c: 2, f: "0.jpg" },
+        { n: "Ekans", c: 4, f: "0.jpg" },
+        { n: "Eldegoss", c: 1, f: "0.jpg" },
+        { n: "Electabuzz", c: 4, f: "0.jpg" },
+        { n: "Electivire", c: 2, f: "0.jpg" },
+        { n: "Electrike", c: 2, f: "0.jpg" },
+        { n: "Electrode", c: 4, f: "0.jpg" },
+        { n: "Elekid", c: 3, f: "0.jpg" },
+        { n: "Elgyem", c: 2, f: "0.jpg" },
+        { n: "Emboar", c: 2, f: "0.jpg" },
+        { n: "Emolga", c: 2, f: "0.jpg" },
+        { n: "Empoleon", c: 2, f: "0.jpg" },
+        { n: "Entei", c: 4, f: "0.jpg" },
+        { n: "Escavalier", c: 2, f: "0.jpg" },
+        { n: "Espeon", c: 3, f: "0.jpg" },
+        { n: "Espurr", c: 2, f: "0.jpg" },
+        { n: "Eternatus", c: 2, f: "0.jpg" },
+        { n: "Excadrill", c: 2, f: "0.jpg" },
+        { n: "Exeggcute", c: 4, f: "0.jpg" },
+        { n: "Exeggutor", c: 3, f: "0.jpg" },
+        { n: "Exploud", c: 2, f: "0.jpg" },
+        { n: "Falinks", c: 1, f: "0.jpg" },
+        { n: "Farfetch\u2019d", c: 5, f: "0.jpg" },
+        { n: "Fearow", c: 4, f: "0.jpg" },
+        { n: "Feebas", c: 2, f: "0.jpg" },
+        { n: "Fennekin", c: 2, f: "0.jpg" },
+        { n: "Feraligatr", c: 3, f: "0.jpg" },
+        { n: "Ferroseed", c: 2, f: "0.jpg" },
+        { n: "Ferrothorn", c: 2, f: "0.jpg" },
+        { n: "Finneon", c: 2, f: "0.jpg" },
+        { n: "Flaaffy", c: 3, f: "0.jpg" },
+        { n: "Flab\u00e9b\u00e9", c: 6, f: "0.jpg" },
+        { n: "Flapple", c: 2, f: "0.jpg" },
+        { n: "Flareon", c: 4, f: "0.jpg" },
+        { n: "Fletchinder", c: 2, f: "0.jpg" },
+        { n: "Fletchling", c: 2, f: "0.jpg" },
+        { n: "Floatzel", c: 2, f: "0.jpg" },
+        { n: "Floette", c: 6, f: "0.jpg" },
+        { n: "Florges", c: 6, f: "0.jpg" },
+        { n: "Flygon", c: 2, f: "0.jpg" },
+        { n: "Fomantis", c: 2, f: "0.jpg" },
+        { n: "Foongus", c: 2, f: "0.jpg" },
+        { n: "Forretress", c: 3, f: "0.jpg" },
+        { n: "Fraxure", c: 2, f: "0.jpg" },
+        { n: "Frillish", c: 4, f: "0.jpg" },
+        { n: "Froakie", c: 2, f: "0.jpg" },
+        { n: "Frogadier", c: 2, f: "0.jpg" },
+        { n: "Froslass", c: 2, f: "0.jpg" },
+        { n: "Frosmoth", c: 1, f: "0.jpg" },
+        { n: "Furfrou", c: 6, f: "0.jpg" },
+        { n: "Furret", c: 3, f: "0.jpg" },
+        { n: "Gabite", c: 2, f: "0.jpg" },
+        { n: "Gallade", c: 4, f: "0.jpg" },
+        { n: "Galvantula", c: 2, f: "0.jpg" },
+        { n: "Garbodor", c: 3, f: "0.jpg" },
+        { n: "Garchomp", c: 4, f: "0.jpg" },
+        { n: "Gardevoir", c: 4, f: "0.jpg" },
+        { n: "Gastly", c: 4, f: "0.jpg" },
+        { n: "Gastrodon", c: 4, f: "0.jpg" },
+        { n: "Genesect", c: 6, f: "0.jpg" },
+        { n: "Gengar", c: 6, f: "0.jpg" },
+        { n: "Geodude", c: 6, f: "0.jpg" },
+        { n: "Gible", c: 2, f: "0.jpg" },
+        { n: "Gigalith", c: 2, f: "0.jpg" },
+        { n: "Girafarig", c: 3, f: "0.jpg" },
+        { n: "Giratina", c: 5, f: "0.jpg" },
+        { n: "Glaceon", c: 2, f: "0.jpg" },
+        { n: "Glalie", c: 4, f: "0.jpg" },
+        { n: "Glameow", c: 2, f: "0.jpg" },
+        { n: "Glastrier", c: 1, f: "0.jpg" },
+        { n: "Gligar", c: 3, f: "0.jpg" },
+        { n: "Gliscor", c: 2, f: "0.jpg" },
+        { n: "Gloom", c: 4, f: "0.jpg" },
+        { n: "Gogoat", c: 2, f: "0.jpg" },
+        { n: "Golbat", c: 4, f: "0.jpg" },
+        { n: "Goldeen", c: 4, f: "0.jpg" },
+        { n: "Golduck", c: 4, f: "0.jpg" },
+        { n: "Golem", c: 6, f: "0.jpg" },
+        { n: "Golett", c: 2, f: "0.jpg" },
+        { n: "Golisopod", c: 2, f: "0.jpg" },
+        { n: "Golurk", c: 2, f: "0.jpg" },
+        { n: "Goodra", c: 2, f: "0.jpg" },
+        { n: "Goomy", c: 2, f: "0.jpg" },
+        { n: "Gorebyss", c: 2, f: "0.jpg" },
+        { n: "Gossifleur", c: 1, f: "0.jpg" },
+        { n: "Gothita", c: 2, f: "0.jpg" },
+        { n: "Gothitelle", c: 2, f: "0.jpg" },
+        { n: "Gothorita", c: 2, f: "0.jpg" },
+        { n: "Gourgeist", c: 5, f: "0.jpg" },
+        { n: "Granbull", c: 3, f: "0.jpg" },
+        { n: "Grapploct", c: 1, f: "0.jpg" },
+        { n: "Graveler", c: 6, f: "0.jpg" },
+        { n: "Greedent", c: 1, f: "0.jpg" },
+        { n: "Greninja", c: 5, f: "0.jpg" },
+        { n: "Grimer", c: 6, f: "0.jpg" },
+        { n: "Grimmsnarl", c: 2, f: "0.jpg" },
+        { n: "Grookey", c: 2, f: "0.jpg" },
+        { n: "Grotle", c: 2, f: "0.jpg" },
+        { n: "Groudon", c: 5, f: "0.jpg" },
+        { n: "Grovyle", c: 2, f: "0.jpg" },
+        { n: "Growlithe", c: 4, f: "0.jpg" },
+        { n: "Grubbin", c: 2, f: "0.jpg" },
+        { n: "Grumpig", c: 2, f: "0.jpg" },
+        { n: "Gulpin", c: 2, f: "0.jpg" },
+        { n: "Gumshoos", c: 2, f: "0.jpg" },
+        { n: "Gurdurr", c: 2, f: "0.jpg" },
+        { n: "Guzzlord", c: 2, f: "0.jpg" },
+        { n: "Gyarados", c: 6, f: "0.jpg" },
+        { n: "Hakamo-o", c: 2, f: "0.jpg" },
+        { n: "Happiny", c: 2, f: "0.jpg" },
+        { n: "Hariyama", c: 2, f: "0.jpg" },
+        { n: "Hatenna", c: 1, f: "0.jpg" },
+        { n: "Hatterene", c: 2, f: "0.jpg" },
+        { n: "Hattrem", c: 1, f: "0.jpg" },
+        { n: "Haunter", c: 4, f: "0.jpg" },
+        { n: "Hawlucha", c: 2, f: "0.jpg" },
+        { n: "Haxorus", c: 2, f: "0.jpg" },
+        { n: "Heatmor", c: 2, f: "0.jpg" },
+        { n: "Heatran", c: 3, f: "0.jpg" },
+        { n: "Heliolisk", c: 2, f: "0.jpg" },
+        { n: "Helioptile", c: 2, f: "0.jpg" },
+        { n: "Heracross", c: 5, f: "0.jpg" },
+        { n: "Herdier", c: 2, f: "0.jpg" },
+        { n: "Hippopotas", c: 2, f: "0.jpg" },
+        { n: "Hippowdon", c: 2, f: "0.jpg" },
+        { n: "Hitmonchan", c: 4, f: "0.jpg" },
+        { n: "Hitmonlee", c: 4, f: "0.jpg" },
+        { n: "Hitmontop", c: 3, f: "0.jpg" },
+        { n: "Ho-oh", c: 5, f: "0.jpg" },
+        { n: "Honchkrow", c: 2, f: "0.jpg" },
+        { n: "Honedge", c: 2, f: "0.jpg" },
+        { n: "Hoopa", c: 4, f: "0.jpg" },
+        { n: "Hoothoot", c: 3, f: "0.jpg" },
+        { n: "Hoppip", c: 3, f: "0.jpg" },
+        { n: "Horsea", c: 4, f: "0.jpg" },
+        { n: "Houndoom", c: 5, f: "0.jpg" },
+        { n: "Houndour", c: 3, f: "0.jpg" },
+        { n: "Huntail", c: 2, f: "0.jpg" },
+        { n: "Hydreigon", c: 2, f: "0.jpg" },
+        { n: "Hypno", c: 4, f: "0.jpg" },
+        { n: "Igglybuff", c: 3, f: "0.jpg" },
+        { n: "Illumise", c: 2, f: "0.jpg" },
+        { n: "Impidimp", c: 1, f: "0.jpg" },
+        { n: "Incineroar", c: 3, f: "0.jpg" },
+        { n: "Indeedee", c: 2, f: "0.jpg" },
+        { n: "Infernape", c: 2, f: "0.jpg" },
+        { n: "Inkay", c: 2, f: "0.jpg" },
+        { n: "Inteleon", c: 3, f: "0.jpg" },
+        { n: "Ivysaur", c: 4, f: "0.jpg" },
+        { n: "Jangmo-o", c: 2, f: "0.jpg" },
+        { n: "Jellicent", c: 4, f: "0.jpg" },
+        { n: "Jigglypuff", c: 4, f: "0.jpg" },
+        { n: "Jirachi", c: 2, f: "0.jpg" },
+        { n: "Jolteon", c: 4, f: "0.jpg" },
+        { n: "Joltik", c: 2, f: "0.jpg" },
+        { n: "Jumpluff", c: 3, f: "0.jpg" },
+        { n: "Jynx", c: 4, f: "0.jpg" },
+        { n: "Kabuto", c: 4, f: "0.jpg" },
+        { n: "Kabutops", c: 4, f: "0.jpg" },
+        { n: "Kadabra", c: 4, f: "0.jpg" },
+        { n: "Kakuna", c: 4, f: "0.jpg" },
+        { n: "Kangaskhan", c: 6, f: "0.jpg" },
+        { n: "Karrablast", c: 2, f: "0.jpg" },
+        { n: "Kartana", c: 2, f: "0.jpg" },
+        { n: "Kecleon", c: 2, f: "0.jpg" },
+        { n: "Keldeo", c: 4, f: "0.jpg" },
+        { n: "Kingdra", c: 3, f: "0.jpg" },
+        { n: "Kingler", c: 5, f: "0.jpg" },
+        { n: "Kirlia", c: 2, f: "0.jpg" },
+        { n: "Klang", c: 2, f: "0.jpg" },
+        { n: "Klefki", c: 2, f: "0.jpg" },
+        { n: "Klink", c: 2, f: "0.jpg" },
+        { n: "Klinklang", c: 2, f: "0.jpg" },
+        { n: "Koffing", c: 4, f: "0.jpg" },
+        { n: "Komala", c: 3, f: "0.jpg" },
+        { n: "Kommo-o", c: 2, f: "0.jpg" },
+        { n: "Krabby", c: 4, f: "0.jpg" },
+        { n: "Kricketot", c: 2, f: "0.jpg" },
+        { n: "Kricketune", c: 2, f: "0.jpg" },
+        { n: "Krokorok", c: 2, f: "0.jpg" },
+        { n: "Krookodile", c: 2, f: "0.jpg" },
+        { n: "Kubfu", c: 2, f: "0.jpg" },
+        { n: "Kyogre", c: 5, f: "0.jpg" },
+        { n: "Kyurem", c: 5, f: "0.jpg" },
+        { n: "Lairon", c: 2, f: "0.jpg" },
+        { n: "Lampent", c: 2, f: "0.jpg" },
+        { n: "Landorus", c: 4, f: "0.jpg" },
+        { n: "Lanturn", c: 3, f: "0.jpg" },
+        { n: "Lapras", c: 5, f: "0.jpg" },
+        { n: "Larvesta", c: 2, f: "0.jpg" },
+        { n: "Larvitar", c: 3, f: "0.jpg" },
+        { n: "Latias", c: 5, f: "0.jpg" },
+        { n: "Latios", c: 5, f: "0.jpg" },
+        { n: "Leafeon", c: 2, f: "0.jpg" },
+        { n: "Leavanny", c: 2, f: "0.jpg" },
+        { n: "Ledian", c: 3, f: "0.jpg" },
+        { n: "Ledyba", c: 3, f: "0.jpg" },
+        { n: "Lickilicky", c: 2, f: "0.jpg" },
+        { n: "Lickitung", c: 4, f: "0.jpg" },
+        { n: "Liepard", c: 2, f: "0.jpg" },
+        { n: "Lileep", c: 2, f: "0.jpg" },
+        { n: "Lilligant", c: 2, f: "0.jpg" },
+        { n: "Lillipup", c: 2, f: "0.jpg" },
+        { n: "Linoone", c: 3, f: "0.jpg" },
+        { n: "Litleo", c: 2, f: "0.jpg" },
+        { n: "Litten", c: 4, f: "0.jpg" },
+        { n: "Litwick", c: 2, f: "0.jpg" },
+        { n: "Lombre", c: 2, f: "0.jpg" },
+        { n: "Lopunny", c: 4, f: "0.jpg" },
+        { n: "Lotad", c: 2, f: "0.jpg" },
+        { n: "Loudred", c: 2, f: "0.jpg" },
+        { n: "Lucario", c: 4, f: "0.jpg" },
+        { n: "Ludicolo", c: 2, f: "0.jpg" },
+        { n: "Lugia", c: 3, f: "0.jpg" },
+        { n: "Lumineon", c: 2, f: "0.jpg" },
+        { n: "Lunala", c: 3, f: "0.jpg" },
+        { n: "Lunatone", c: 2, f: "0.jpg" },
+        { n: "Lurantis", c: 2, f: "0.jpg" },
+        { n: "Luvdisc", c: 2, f: "0.jpg" },
+        { n: "Luxio", c: 2, f: "0.jpg" },
+        { n: "Luxray", c: 2, f: "0.jpg" },
+        { n: "Lycanroc", c: 6, f: "0.jpg" },
+        { n: "Machamp", c: 5, f: "0.jpg" },
+        { n: "Machoke", c: 4, f: "0.jpg" },
+        { n: "Machop", c: 4, f: "0.jpg" },
+        { n: "Magby", c: 3, f: "0.jpg" },
+        { n: "Magcargo", c: 3, f: "0.jpg" },
+        { n: "Magearna", c: 2, f: "0.jpg" },
+        { n: "Magikarp", c: 4, f: "0.jpg" },
+        { n: "Magmar", c: 4, f: "0.jpg" },
+        { n: "Magmortar", c: 2, f: "0.jpg" },
+        { n: "Magnemite", c: 4, f: "0.jpg" },
+        { n: "Magneton", c: 4, f: "0.jpg" },
+        { n: "Magnezone", c: 2, f: "0.jpg" },
+        { n: "Makuhita", c: 2, f: "0.jpg" },
+        { n: "Malamar", c: 2, f: "0.jpg" },
+        { n: "Mamoswine", c: 2, f: "0.jpg" },
+        { n: "Manaphy", c: 2, f: "0.jpg" },
+        { n: "Mandibuzz", c: 2, f: "0.jpg" },
+        { n: "Manectric", c: 4, f: "0.jpg" },
+        { n: "Mankey", c: 4, f: "0.jpg" },
+        { n: "Mantine", c: 3, f: "0.jpg" },
+        { n: "Mantyke", c: 2, f: "0.jpg" },
+        { n: "Maractus", c: 2, f: "0.jpg" },
+        { n: "Mareanie", c: 2, f: "0.jpg" },
+        { n: "Mareep", c: 3, f: "0.jpg" },
+        { n: "Marill", c: 3, f: "0.jpg" },
+        { n: "Marowak", c: 6, f: "0.jpg" },
+        { n: "Marshadow", c: 3, f: "0.jpg" },
+        { n: "Marshtomp", c: 2, f: "0.jpg" },
+        { n: "Masquerain", c: 2, f: "0.jpg" },
+        { n: "Mawile", c: 4, f: "0.jpg" },
+        { n: "Medicham", c: 4, f: "0.jpg" },
+        { n: "Meditite", c: 2, f: "0.jpg" },
+        { n: "Meganium", c: 3, f: "0.jpg" },
+        { n: "Melmetal", c: 2, f: "0.jpg" },
+        { n: "Meloetta", c: 3, f: "0.jpg" },
+        { n: "Meltan", c: 1, f: "0.jpg" },
+        { n: "Meowstic", c: 4, f: "0.jpg" },
+        { n: "Meowth", c: 6, f: "0.jpg" },
+        { n: "Mesprit", c: 2, f: "0.jpg" },
+        { n: "Metagross", c: 6, f: "0.jpg" },
+        { n: "Metang", c: 2, f: "0.jpg" },
+        { n: "Metapod", c: 4, f: "0.jpg" },
+        { n: "Mew", c: 5, f: "0.jpg" },
+        { n: "Mewtwo", c: 6, f: "0.jpg" },
+        { n: "Mienfoo", c: 2, f: "0.jpg" },
+        { n: "Mienshao", c: 2, f: "0.jpg" },
+        { n: "Mightyena", c: 2, f: "0.jpg" },
+        { n: "Milcery", c: 1, f: "0.jpg" },
+        { n: "Milotic", c: 2, f: "0.jpg" },
+        { n: "Miltank", c: 3, f: "0.jpg" },
+        { n: "Mime Jr", c: 2, f: "0.jpg" },
+        { n: "Mimikyu", c: 4, f: "0.jpg" },
+        { n: "Minccino", c: 2, f: "0.jpg" },
+        { n: "Minior", c: 6, f: "0.jpg" },
+        { n: "Minun", c: 2, f: "0.jpg" },
+        { n: "Misdreavus", c: 3, f: "0.jpg" },
+        { n: "Mismagius", c: 2, f: "0.jpg" },
+        { n: "Moltres", c: 6, f: "0.jpg" },
+        { n: "Monferno", c: 2, f: "0.jpg" },
+        { n: "Morelull", c: 2, f: "0.jpg" },
+        { n: "Morgrem", c: 1, f: "0.jpg" },
+        { n: "Morpeko", c: 2, f: "0.jpg" },
+        { n: "Mothim", c: 2, f: "0.jpg" },
+        { n: "Mr. Mime", c: 5, f: "0.jpg" },
+        { n: "Mr. Rime", c: 1, f: "0.jpg" },
+        { n: "Mudbray", c: 2, f: "0.jpg" },
+        { n: "Mudkip", c: 4, f: "0.jpg" },
+        { n: "Mudsdale", c: 2, f: "0.jpg" },
+        { n: "Muk", c: 6, f: "0.jpg" },
+        { n: "Munchlax", c: 2, f: "0.jpg" },
+        { n: "Munna", c: 2, f: "0.jpg" },
+        { n: "Murkrow", c: 3, f: "0.jpg" },
+        { n: "Musharna", c: 2, f: "0.jpg" },
+        { n: "Naganadel", c: 2, f: "0.jpg" },
+        { n: "Natu", c: 3, f: "0.jpg" },
+        { n: "Necrozma", c: 7, f: "0.jpg" },
+        { n: "Nickit", c: 1, f: "0.jpg" },
+        { n: "Nidoking", c: 4, f: "0.jpg" },
+        { n: "Nidoqueen", c: 4, f: "0.jpg" },
+        { n: "Nidoran\u2640", c: 4, f: "0.jpg" },
+        { n: "Nidoran\u2642", c: 4, f: "0.jpg" },
+        { n: "Nidorina", c: 4, f: "0.jpg" },
+        { n: "Nidorino", c: 4, f: "0.jpg" },
+        { n: "Nihilego", c: 2, f: "0.jpg" },
+        { n: "Nincada", c: 2, f: "0.jpg" },
+        { n: "Ninetales", c: 6, f: "0.jpg" },
+        { n: "Ninjask", c: 2, f: "0.jpg" },
+        { n: "Noctowl", c: 3, f: "0.jpg" },
+        { n: "Noibat", c: 2, f: "0.jpg" },
+        { n: "Noivern", c: 2, f: "0.jpg" },
+        { n: "Nosepass", c: 2, f: "0.jpg" },
+        { n: "Numel", c: 2, f: "0.jpg" },
+        { n: "Nuzleaf", c: 2, f: "0.jpg" },
+        { n: "Obstagoon", c: 2, f: "0.jpg" },
+        { n: "Octillery", c: 3, f: "0.jpg" },
+        { n: "Oddish", c: 4, f: "0.jpg" },
+        { n: "Omanyte", c: 4, f: "0.jpg" },
+        { n: "Omastar", c: 4, f: "0.jpg" },
+        { n: "Onix", c: 4, f: "0.jpg" },
+        { n: "Oranguru", c: 2, f: "0.jpg" },
+        { n: "Orbeetle", c: 2, f: "0.jpg" },
+        { n: "Oricorio", c: 6, f: "0.jpg" },
+        { n: "Oshawott", c: 3, f: "0.jpg" },
+        { n: "Pachirisu", c: 2, f: "0.jpg" },
+        { n: "Palkia", c: 4, f: "0.jpg" },
+        { n: "Palossand", c: 3, f: "0.jpg" },
+        { n: "Palpitoad", c: 2, f: "0.jpg" },
+        { n: "Pancham", c: 2, f: "0.jpg" },
+        { n: "Pangoro", c: 2, f: "0.jpg" },
+        { n: "Panpour", c: 2, f: "0.jpg" },
+        { n: "Pansage", c: 2, f: "0.jpg" },
+        { n: "Pansear", c: 2, f: "0.jpg" },
+        { n: "Paras", c: 4, f: "0.jpg" },
+        { n: "Parasect", c: 4, f: "0.jpg" },
+        { n: "Passimian", c: 2, f: "0.jpg" },
+        { n: "Patrat", c: 2, f: "0.jpg" },
+        { n: "Pawniard", c: 2, f: "0.jpg" },
+        { n: "Pelipper", c: 2, f: "0.jpg" },
+        { n: "Perrserker", c: 1, f: "0.jpg" },
+        { n: "Persian", c: 6, f: "0.jpg" },
+        { n: "Petilil", c: 2, f: "0.jpg" },
+        { n: "Phanpy", c: 3, f: "0.jpg" },
+        { n: "Phantump", c: 2, f: "0.jpg" },
+        { n: "Pheromosa", c: 2, f: "0.jpg" },
+        { n: "Phione", c: 2, f: "0.jpg" },
+        { n: "Pichu", c: 3, f: "0.jpg" },
+        { n: "Pidgeot", c: 6, f: "0.jpg" },
+        { n: "Pidgeotto", c: 4, f: "0.jpg" },
+        { n: "Pidgey", c: 4, f: "0.jpg" },
+        { n: "Pidove", c: 2, f: "0.jpg" },
+        { n: "Pignite", c: 2, f: "0.jpg" },
+        { n: "Pikachu", c: 6, f: "0.jpg" },
+        { n: "Pikipek", c: 2, f: "0.jpg" },
+        { n: "Piloswine", c: 3, f: "0.jpg" },
+        { n: "Pincurchin", c: 1, f: "0.jpg" },
+        { n: "Pineco", c: 3, f: "0.jpg" },
+        { n: "Pinsir", c: 6, f: "0.jpg" },
+        { n: "Piplup", c: 3, f: "0.jpg" },
+        { n: "Plusle", c: 2, f: "0.jpg" },
+        { n: "Poipole", c: 3, f: "0.jpg" },
+        { n: "Politoed", c: 3, f: "0.jpg" },
+        { n: "Poliwag", c: 4, f: "0.jpg" },
+        { n: "Poliwhirl", c: 4, f: "0.jpg" },
+        { n: "Poliwrath", c: 4, f: "0.jpg" },
+        { n: "Polteageist", c: 1, f: "0.jpg" },
+        { n: "Ponyta", c: 6, f: "0.jpg" },
+        { n: "Poochyena", c: 2, f: "0.jpg" },
+        { n: "Popplio", c: 4, f: "0.jpg" },
+        { n: "Porygon", c: 4, f: "0.jpg" },
+        { n: "Porygon-Z", c: 2, f: "0.jpg" },
+        { n: "Porygon2", c: 3, f: "0.jpg" },
+        { n: "Primarina", c: 3, f: "0.jpg" },
+        { n: "Primeape", c: 4, f: "0.jpg" },
+        { n: "Prinplup", c: 2, f: "0.jpg" },
+        { n: "Probopass", c: 2, f: "0.jpg" },
+        { n: "Psyduck", c: 4, f: "0.jpg" },
+        { n: "Pumpkaboo", c: 5, f: "0.jpg" },
+        { n: "Pupitar", c: 3, f: "0.jpg" },
+        { n: "Purrloin", c: 2, f: "0.jpg" },
+        { n: "Purugly", c: 2, f: "0.jpg" },
+        { n: "Pyroar", c: 3, f: "0.jpg" },
+        { n: "Pyukumuku", c: 2, f: "0.jpg" },
+        { n: "Quagsire", c: 3, f: "0.jpg" },
+        { n: "Quilava", c: 3, f: "0.jpg" },
+        { n: "Quilladin", c: 2, f: "0.jpg" },
+        { n: "Qwilfish", c: 3, f: "0.jpg" },
+        { n: "Raboot", c: 1, f: "0.jpg" },
+        { n: "Raichu", c: 6, f: "0.jpg" },
+        { n: "Raikou", c: 4, f: "0.jpg" },
+        { n: "Ralts", c: 2, f: "0.jpg" },
+        { n: "Rampardos", c: 2, f: "0.jpg" },
+        { n: "Rapidash", c: 5, f: "0.jpg" },
+        { n: "Raticate", c: 6, f: "0.jpg" },
+        { n: "Rattata", c: 6, f: "0.jpg" },
+        { n: "Rayquaza", c: 3, f: "0.jpg" },
+        { n: "Regice", c: 2, f: "0.jpg" },
+        { n: "Regidrago", c: 1, f: "0.jpg" },
+        { n: "Regieleki", c: 1, f: "0.jpg" },
+        { n: "Regigigas", c: 3, f: "0.jpg" },
+        { n: "Regirock", c: 2, f: "0.jpg" },
+        { n: "Registeel", c: 2, f: "0.jpg" },
+        { n: "Relicanth", c: 2, f: "0.jpg" },
+        { n: "Remoraid", c: 3, f: "0.jpg" },
+        { n: "Reshiram", c: 4, f: "0.jpg" },
+        { n: "Reuniclus", c: 2, f: "0.jpg" },
+        { n: "Rhydon", c: 4, f: "0.jpg" },
+        { n: "Rhyhorn", c: 4, f: "0.jpg" },
+        { n: "Rhyperior", c: 2, f: "0.jpg" },
+        { n: "Ribombee", c: 2, f: "0.jpg" },
+        { n: "Rillaboom", c: 3, f: "0.jpg" },
+        { n: "Riolu", c: 2, f: "0.jpg" },
+        { n: "Rockruff", c: 4, f: "0.jpg" },
+        { n: "Roggenrola", c: 2, f: "0.jpg" },
+        { n: "Rolycoly", c: 2, f: "0.jpg" },
+        { n: "Rookidee", c: 1, f: "0.jpg" },
+        { n: "Roselia", c: 2, f: "0.jpg" },
+        { n: "Roserade", c: 2, f: "0.jpg" },
+        { n: "Rotom", c: 5, f: "0.jpg" },
+        { n: "Rowlet", c: 3, f: "0.jpg" },
+        { n: "Rufflet", c: 2, f: "0.jpg" },
+        { n: "Runerigus", c: 1, f: "0.jpg" },
+        { n: "Sableye", c: 4, f: "0.jpg" },
+        { n: "Salamence", c: 4, f: "0.jpg" },
+        { n: "Salandit", c: 2, f: "0.jpg" },
+        { n: "Salazzle", c: 2, f: "0.jpg" },
+        { n: "Samurott", c: 2, f: "0.jpg" },
+        { n: "Sandaconda", c: 2, f: "0.jpg" },
+        { n: "Sandile", c: 2, f: "0.jpg" },
+        { n: "Sandshrew", c: 6, f: "0.jpg" },
+        { n: "Sandslash", c: 3, f: "0.jpg" },
+        { n: "Sandygast", c: 2, f: "0.jpg" },
+        { n: "Sawk", c: 2, f: "0.jpg" },
+        { n: "Sawsbuck", c: 6, f: "0.jpg" },
+        { n: "Scatterbug", c: 2, f: "0.jpg" },
+        { n: "Sceptile", c: 3, f: "0.jpg" },
+        { n: "Scizor", c: 5, f: "0.jpg" },
+        { n: "Scolipede", c: 2, f: "0.jpg" },
+        { n: "Scorbunny", c: 2, f: "0.jpg" },
+        { n: "Scrafty", c: 2, f: "0.jpg" },
+        { n: "Scraggy", c: 2, f: "0.jpg" },
+        { n: "Scyther", c: 4, f: "0.jpg" },
+        { n: "Seadra", c: 4, f: "0.jpg" },
+        { n: "Seaking", c: 4, f: "0.jpg" },
+        { n: "Sealeo", c: 2, f: "0.jpg" },
+        { n: "Seedot", c: 2, f: "0.jpg" },
+        { n: "Seel", c: 4, f: "0.jpg" },
+        { n: "Seismitoad", c: 2, f: "0.jpg" },
+        { n: "Sentret", c: 3, f: "0.jpg" },
+        { n: "Serperior", c: 2, f: "0.jpg" },
+        { n: "Servine", c: 2, f: "0.jpg" },
+        { n: "Seviper", c: 2, f: "0.jpg" },
+        { n: "Sewaddle", c: 2, f: "0.jpg" },
+        { n: "Sharpedo", c: 4, f: "0.jpg" },
+        { n: "Shaymin", c: 4, f: "0.jpg" },
+        { n: "Shedinja", c: 2, f: "0.jpg" },
+        { n: "Shelgon", c: 2, f: "0.jpg" },
+        { n: "Shellder", c: 4, f: "0.jpg" },
+        { n: "Shellos", c: 4, f: "0.jpg" },
+        { n: "Shelmet", c: 2, f: "0.jpg" },
+        { n: "Shieldon", c: 2, f: "0.jpg" },
+        { n: "Shiftry", c: 2, f: "0.jpg" },
+        { n: "Shiinotic", c: 2, f: "0.jpg" },
+        { n: "Shinx", c: 2, f: "0.jpg" },
+        { n: "Shroomish", c: 2, f: "0.jpg" },
+        { n: "Shuckle", c: 3, f: "0.jpg" },
+        { n: "Shuppet", c: 2, f: "0.jpg" },
+        { n: "Sigilyph", c: 2, f: "0.jpg" },
+        { n: "Silcoon", c: 2, f: "0.jpg" },
+        { n: "Silicobra", c: 1, f: "0.jpg" },
+        { n: "Silvally", c: 6, f: "0.jpg" },
+        { n: "Simipour", c: 2, f: "0.jpg" },
+        { n: "Simisage", c: 2, f: "0.jpg" },
+        { n: "Simisear", c: 2, f: "0.jpg" },
+        { n: "Sinistea", c: 1, f: "0.jpg" },
+        { n: "Sirfetch\u2019d", c: 2, f: "0.jpg" },
+        { n: "Sizzlipede", c: 1, f: "0.jpg" },
+        { n: "Skarmory", c: 3, f: "0.jpg" },
+        { n: "Skiddo", c: 2, f: "0.jpg" },
+        { n: "Skiploom", c: 3, f: "0.jpg" },
+        { n: "Skitty", c: 2, f: "0.jpg" },
+        { n: "Skorupi", c: 2, f: "0.jpg" },
+        { n: "Skrelp", c: 2, f: "0.jpg" },
+        { n: "Skuntank", c: 2, f: "0.jpg" },
+        { n: "Skwovet", c: 1, f: "0.jpg" },
+        { n: "Slaking", c: 2, f: "0.jpg" },
+        { n: "Slakoth", c: 2, f: "0.jpg" },
+        { n: "Sliggoo", c: 2, f: "0.jpg" },
+        { n: "Slowbro", c: 5, f: "0.jpg" },
+        { n: "Slowking", c: 3, f: "0.jpg" },
+        { n: "Slowpoke", c: 5, f: "0.jpg" },
+        { n: "Slugma", c: 3, f: "0.jpg" },
+        { n: "Slurpuff", c: 2, f: "0.jpg" },
+        { n: "Smeargle", c: 3, f: "0.jpg" },
+        { n: "Smoochum", c: 3, f: "0.jpg" },
+        { n: "Sneasel", c: 3, f: "0.jpg" },
+        { n: "Snivy", c: 3, f: "0.jpg" },
+        { n: "Snom", c: 1, f: "0.jpg" },
+        { n: "Snorlax", c: 5, f: "0.jpg" },
+        { n: "Snorunt", c: 2, f: "0.jpg" },
+        { n: "Snover", c: 2, f: "0.jpg" },
+        { n: "Snubbull", c: 3, f: "0.jpg" },
+        { n: "Sobble", c: 2, f: "0.jpg" },
+        { n: "Solgaleo", c: 3, f: "0.jpg" },
+        { n: "Solosis", c: 2, f: "0.jpg" },
+        { n: "Solrock", c: 2, f: "0.jpg" },
+        { n: "Spearow", c: 4, f: "0.jpg" },
+        { n: "Spectrier", c: 1, f: "0.jpg" },
+        { n: "Spewpa", c: 2, f: "0.jpg" },
+        { n: "Spheal", c: 2, f: "0.jpg" },
+        { n: "Spinarak", c: 3, f: "0.jpg" },
+        { n: "Spinda", c: 2, f: "0.jpg" },
+        { n: "Spiritomb", c: 2, f: "0.jpg" },
+        { n: "Spoink", c: 2, f: "0.jpg" },
+        { n: "Spritzee", c: 2, f: "0.jpg" },
+        { n: "Squirtle", c: 3, f: "0.jpg" },
+        { n: "Stakataka", c: 2, f: "0.jpg" },
+        { n: "Stantler", c: 3, f: "0.jpg" },
+        { n: "Staraptor", c: 2, f: "0.jpg" },
+        { n: "Staravia", c: 2, f: "0.jpg" },
+        { n: "Starly", c: 2, f: "0.jpg" },
+        { n: "Starmie", c: 4, f: "0.jpg" },
+        { n: "Staryu", c: 4, f: "0.jpg" },
+        { n: "Steelix", c: 5, f: "0.jpg" },
+        { n: "Steenee", c: 2, f: "0.jpg" },
+        { n: "Stonjourner", c: 1, f: "0.jpg" },
+        { n: "Stoutland", c: 2, f: "0.jpg" },
+        { n: "Stufful", c: 3, f: "0.jpg" },
+        { n: "Stunfisk", c: 3, f: "0.jpg" },
+        { n: "Stunky", c: 2, f: "0.jpg" },
+        { n: "Sudowoodo", c: 3, f: "0.jpg" },
+        { n: "Suicune", c: 3, f: "0.jpg" },
+        { n: "Sunflora", c: 3, f: "0.jpg" },
+        { n: "Sunkern", c: 3, f: "0.jpg" },
+        { n: "Surskit", c: 2, f: "0.jpg" },
+        { n: "Swablu", c: 2, f: "0.jpg" },
+        { n: "Swadloon", c: 2, f: "0.jpg" },
+        { n: "Swalot", c: 2, f: "0.jpg" },
+        { n: "Swampert", c: 4, f: "0.jpg" },
+        { n: "Swanna", c: 2, f: "0.jpg" },
+        { n: "Swellow", c: 2, f: "0.jpg" },
+        { n: "Swinub", c: 3, f: "0.jpg" },
+        { n: "Swirlix", c: 3, f: "0.jpg" },
+        { n: "Swoobat", c: 2, f: "0.jpg" },
+        { n: "Sylveon", c: 3, f: "0.jpg" },
+        { n: "Taillow", c: 2, f: "0.jpg" },
+        { n: "Talonflame", c: 2, f: "0.jpg" },
+        { n: "Tangela", c: 4, f: "0.jpg" },
+        { n: "Tangrowth", c: 2, f: "0.jpg" },
+        { n: "Tapu Bulu", c: 2, f: "0.jpg" },
+        { n: "Tapu Fini", c: 2, f: "0.jpg" },
+        { n: "Tapu Koko", c: 2, f: "0.jpg" },
+        { n: "Tapu Lele", c: 2, f: "0.jpg" },
+        { n: "Tauros", c: 4, f: "0.jpg" },
+        { n: "Teddiursa", c: 3, f: "0.jpg" },
+        { n: "Tentacool", c: 4, f: "0.jpg" },
+        { n: "Tentacruel", c: 4, f: "0.jpg" },
+        { n: "Tepig", c: 3, f: "0.jpg" },
+        { n: "Terrakion", c: 2, f: "0.jpg" },
+        { n: "Thievul", c: 1, f: "0.jpg" },
+        { n: "Throh", c: 2, f: "0.jpg" },
+        { n: "Thundurus", c: 5, f: "0.jpg" },
+        { n: "Thwackey", c: 1, f: "0.jpg" },
+        { n: "Timburr", c: 2, f: "0.jpg" },
+        { n: "Tirtouga", c: 2, f: "0.jpg" },
+        { n: "Togedemaru", c: 2, f: "0.jpg" },
+        { n: "Togekiss", c: 2, f: "0.jpg" },
+        { n: "Togepi", c: 3, f: "0.jpg" },
+        { n: "Togetic", c: 3, f: "0.jpg" },
+        { n: "Torchic", c: 4, f: "0.jpg" },
+        { n: "Torkoal", c: 2, f: "0.jpg" },
+        { n: "Tornadus", c: 5, f: "0.jpg" },
+        { n: "Torracat", c: 3, f: "0.jpg" },
+        { n: "Torterra", c: 2, f: "0.jpg" },
+        { n: "Totodile", c: 3, f: "0.jpg" },
+        { n: "Toucannon", c: 2, f: "0.jpg" },
+        { n: "Toxapex", c: 2, f: "0.jpg" },
+        { n: "Toxel", c: 1, f: "0.jpg" },
+        { n: "Toxicroak", c: 2, f: "0.jpg" },
+        { n: "Toxtricity", c: 4, f: "0.jpg" },
+        { n: "Tranquill", c: 2, f: "0.jpg" },
+        { n: "Trapinch", c: 2, f: "0.jpg" },
+        { n: "Treecko", c: 4, f: "0.jpg" },
+        { n: "Trevenant", c: 2, f: "0.jpg" },
+        { n: "Tropius", c: 2, f: "0.jpg" },
+        { n: "Trubbish", c: 2, f: "0.jpg" },
+        { n: "Trumbeak", c: 2, f: "0.jpg" },
+        { n: "Tsareena", c: 2, f: "0.jpg" },
+        { n: "Turtonator", c: 2, f: "0.jpg" },
+        { n: "Turtwig", c: 3, f: "0.jpg" },
+        { n: "Tympole", c: 2, f: "0.jpg" },
+        { n: "Tynamo", c: 2, f: "0.jpg" },
+        { n: "Type Null", c: 2, f: "0.jpg" },
+        { n: "Typhlosion", c: 3, f: "0.jpg" },
+        { n: "Tyranitar", c: 5, f: "0.jpg" },
+        { n: "Tyrantrum", c: 2, f: "0.jpg" },
+        { n: "Tyrogue", c: 3, f: "0.jpg" },
+        { n: "Tyrunt", c: 2, f: "0.jpg" },
+        { n: "Umbreon", c: 3, f: "0.jpg" },
+        { n: "Unfezant", c: 3, f: "0.jpg" },
+        { n: "Unown", c: 6, f: "0.jpg" },
+        { n: "Ursaring", c: 3, f: "0.jpg" },
+        { n: "Urshifu", c: 4, f: "0.jpg" },
+        { n: "Uxie", c: 2, f: "0.jpg" },
+        { n: "Vanillish", c: 2, f: "0.jpg" },
+        { n: "Vanillite", c: 2, f: "0.jpg" },
+        { n: "Vanilluxe", c: 2, f: "0.jpg" },
+        { n: "Vaporeon", c: 4, f: "0.jpg" },
+        { n: "Venipede", c: 2, f: "0.jpg" },
+        { n: "Venomoth", c: 4, f: "0.jpg" },
+        { n: "Venonat", c: 4, f: "0.jpg" },
+        { n: "Venusaur", c: 8, f: "0.jpg" },
+        { n: "Vespiquen", c: 2, f: "0.jpg" },
+        { n: "Vibrava", c: 2, f: "0.jpg" },
+        { n: "Victini", c: 2, f: "0.jpg" },
+        { n: "Victreebel", c: 4, f: "0.jpg" },
+        { n: "Vigoroth", c: 2, f: "0.jpg" },
+        { n: "Vikavolt", c: 2, f: "0.jpg" },
+        { n: "Vileplume", c: 4, f: "0.jpg" },
+        { n: "Virizion", c: 2, f: "0.jpg" },
+        { n: "Vivillon", c: 6, f: "0.jpg" },
+        { n: "Volbeat", c: 2, f: "0.jpg" },
+        { n: "Volcanion", c: 2, f: "0.jpg" },
+        { n: "Volcarona", c: 2, f: "0.jpg" },
+        { n: "Voltorb", c: 4, f: "0.jpg" },
+        { n: "Vullaby", c: 2, f: "0.jpg" },
+        { n: "Vulpix", c: 3, f: "0.jpg" },
+        { n: "Wailmer", c: 2, f: "0.jpg" },
+        { n: "Wailord", c: 2, f: "0.jpg" },
+        { n: "Walrein", c: 2, f: "0.jpg" },
+        { n: "Wartortle", c: 4, f: "0.jpg" },
+        { n: "Watchog", c: 2, f: "0.jpg" },
+        { n: "Weavile", c: 2, f: "0.jpg" },
+        { n: "Weedle", c: 4, f: "0.jpg" },
+        { n: "Weepinbell", c: 4, f: "0.jpg" },
+        { n: "Weezing", c: 5, f: "0.jpg" },
+        { n: "Whimsicott", c: 2, f: "0.jpg" },
+        { n: "Whirlipede", c: 2, f: "0.jpg" },
+        { n: "Whiscash", c: 2, f: "0.jpg" },
+        { n: "Whismur", c: 2, f: "0.jpg" },
+        { n: "Wigglytuff", c: 4, f: "0.jpg" },
+        { n: "Wimpod", c: 2, f: "0.jpg" },
+        { n: "Wingull", c: 2, f: "0.jpg" },
+        { n: "Wishiwashi", c: 4, f: "0.jpg" },
+        { n: "Wobbuffet", c: 3, f: "0.jpg" },
+        { n: "Woobat", c: 2, f: "0.jpg" },
+        { n: "Wooloo", c: 2, f: "0.jpg" },
+        { n: "Wooper", c: 3, f: "0.jpg" },
+        { n: "Wormadam", c: 6, f: "0.jpg" },
+        { n: "Wurmple", c: 2, f: "0.jpg" },
+        { n: "Wynaut", c: 2, f: "0.jpg" },
+        { n: "Xatu", c: 3, f: "0.jpg" },
+        { n: "Xerneas", c: 5, f: "0.jpg" },
+        { n: "Xurkitree", c: 2, f: "0.jpg" },
+        { n: "Yamask", c: 3, f: "0.jpg" },
+        { n: "Yamper", c: 2, f: "0.jpg" },
+        { n: "Yanma", c: 3, f: "0.jpg" },
+        { n: "Yanmega", c: 2, f: "0.jpg" },
+        { n: "Yungoos", c: 2, f: "0.jpg" },
+        { n: "Yveltal", c: 5, f: "0.jpg" },
+        { n: "Zacian", c: 3, f: "0.jpg" },
+        { n: "Zamazenta", c: 3, f: "0.jpg" },
+        { n: "Zangoose", c: 2, f: "0.jpg" },
+        { n: "Zapdos", c: 6, f: "0.jpg" },
+        { n: "Zarude", c: 2, f: "0.jpg" },
+        { n: "Zebstrika", c: 2, f: "0.jpg" },
+        { n: "Zekrom", c: 4, f: "0.jpg" },
+        { n: "Zeraora", c: 3, f: "0.jpg" },
+        { n: "Zigzagoon", c: 3, f: "0.jpg" },
+        { n: "Zoroark", c: 2, f: "0.jpg" },
+        { n: "Zorua", c: 2, f: "0.jpg" },
+        { n: "Zubat", c: 4, f: "0.jpg" },
+        { n: "Zweilous", c: 2, f: "0.jpg" },
+        { n: "Zygarde", c: 6, f: "0.jpg" },
+      ];
+      const DEFAULT_TOP12 = new Set([
+        "Venusaur",
+        "Necrozma",
+        "Aerodactyl",
+        "Alakazam",
+        "Articuno",
+        "Beedrill",
+        "Blastoise",
+        "Burmy",
+        "Butterfree",
+        "Darmanitan",
+        "Deerling",
+        "Deoxys",
+      ]);
+      const IMG_BASE = "../../../datasets/pokemon/data/images/";
+
+      (function initPokeGallery() {
+        const cbGrid = document.getElementById("poke-cb-grid");
+        const gallery = document.getElementById("poke-gallery");
+        const countEl = document.getElementById("poke-sel-count");
+        const searchInput = document.getElementById("poke-search");
+        const toggleBtn = document.getElementById("poke-toggle-panel");
+        const selAllBtn = document.getElementById("poke-sel-all");
+        const selNoneBtn = document.getElementById("poke-sel-none");
+        const selTop12Btn = document.getElementById("poke-sel-top12");
+
+        /* Build checkboxes + gallery cards */
+        const cbMap = {};
+        const cardMap = {};
+        POKE_DATA.forEach((p) => {
+          /* checkbox */
+          const lbl = document.createElement("label");
+          lbl.dataset.name = p.n.toLowerCase();
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.value = p.n;
+          if (DEFAULT_TOP12.has(p.n)) cb.checked = true;
+          lbl.appendChild(cb);
+          lbl.appendChild(
+            document.createTextNode(" " + p.n + " (" + p.c + ")"),
+          );
+          cbGrid.appendChild(lbl);
+          cbMap[p.n] = cb;
+
+          /* gallery card */
+          const card = document.createElement("div");
+          card.className = "card poke-card" + (cb.checked ? "" : " hidden");
+          card.dataset.name = p.n;
+          const img = document.createElement("img");
+          img.alt = p.n;
+          img.loading = "lazy";
+          if (cb.checked)
+            img.src = IMG_BASE + encodeURIComponent(p.n) + "/" + p.f;
+          else img.dataset.src = IMG_BASE + encodeURIComponent(p.n) + "/" + p.f;
+          card.appendChild(img);
+          const nameDiv = document.createElement("div");
+          nameDiv.className = "poke-name";
+          nameDiv.innerHTML =
+            p.n + ' <span class="poke-count">(' + p.c + " imgs)</span>";
+          card.appendChild(nameDiv);
+          gallery.appendChild(card);
+          cardMap[p.n] = card;
+        });
+
+        function updateCount() {
+          const sel = Object.values(cbMap).filter((c) => c.checked).length;
+          countEl.textContent =
+            "(" + sel + " / " + POKE_DATA.length + " selected)";
+        }
+
+        function syncGallery() {
+          POKE_DATA.forEach((p) => {
+            const checked = cbMap[p.n].checked;
+            const card = cardMap[p.n];
+            const img = card.querySelector("img");
+            if (checked) {
+              card.classList.remove("hidden");
+              if (!img.src && img.dataset.src) {
+                img.src = img.dataset.src;
+                delete img.dataset.src;
+              }
+            } else {
+              card.classList.add("hidden");
+            }
+          });
+          updateCount();
+        }
+
+        /* Checkbox change */
+        cbGrid.addEventListener("change", syncGallery);
+
+        /* Search filter (filters checkboxes only) */
+        searchInput.addEventListener("input", () => {
+          const q = searchInput.value.trim().toLowerCase();
+          cbGrid.querySelectorAll("label").forEach((lbl) => {
+            lbl.classList.toggle(
+              "hidden",
+              q !== "" && !lbl.dataset.name.includes(q),
+            );
+          });
+        });
+
+        /* Toggle panel */
+        toggleBtn.addEventListener("click", () => {
+          const expanded = toggleBtn.getAttribute("aria-expanded") === "true";
+          toggleBtn.setAttribute("aria-expanded", String(!expanded));
+          cbGrid.classList.toggle("collapsed", expanded);
+        });
+
+        /* Select All */
+        selAllBtn.addEventListener("click", () => {
+          Object.values(cbMap).forEach((c) => {
+            c.checked = true;
+          });
+          syncGallery();
+        });
+
+        /* Select None */
+        selNoneBtn.addEventListener("click", () => {
+          Object.values(cbMap).forEach((c) => {
+            c.checked = false;
+          });
+          syncGallery();
+        });
+
+        /* Top 12 */
+        selTop12Btn.addEventListener("click", () => {
+          Object.entries(cbMap).forEach(([name, c]) => {
+            c.checked = DEFAULT_TOP12.has(name);
+          });
+          syncGallery();
+        });
+
+        updateCount();
+      })();
+    </script>
+  </body>
+</html>

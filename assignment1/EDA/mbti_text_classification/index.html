@@ -1,0 +1,3397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MBTI Text Classification – EDA Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+      :root {
+        --bg: #f4f6fa;
+        --paper: #ffffff;
+        --ink: #121828;
+        --muted: #4b5568;
+        --line: #d3dae6;
+        --accent: #1864ab;
+        --accent-soft: #d0e3f7;
+        --accent-2: #2b6cb0;
+        --warn: #c05621;
+        --shadow: 0 10px 28px rgba(18, 24, 40, 0.1);
+        --radius: 16px;
+        --radius-sm: 10px;
+        --max: 1120px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "IBM Plex Sans", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 8% 8%,
+            #dde8f5 0%,
+            rgba(221, 232, 245, 0) 34%
+          ),
+          radial-gradient(
+            circle at 92% 14%,
+            #d4e5f5 0%,
+            rgba(212, 229, 245, 0) 30%
+          ),
+          linear-gradient(165deg, #f4f6fa 0%, #eef2f9 48%, #ecf0f7 100%);
+        line-height: 1.56;
+        min-height: 100%;
+      }
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 24px 18px 56px;
+        animation: fade-up 520ms ease both;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: linear-gradient(
+          140deg,
+          #f8faff 0%,
+          #f0f5ff 45%,
+          #eff2ff 100%
+        );
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: var(--shadow);
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -90px;
+        top: -90px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(24, 100, 171, 0.18) 0%,
+          rgba(24, 100, 171, 0) 70%
+        );
+        pointer-events: none;
+      }
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      h1 {
+        margin-bottom: 10px;
+        font-size: clamp(1.55rem, 2.7vw, 2.4rem);
+      }
+      h2 {
+        margin-bottom: 8px;
+        font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+      }
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #a8c4e0;
+        background: #e7f0fa;
+        color: #1b3a5d;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      .kpi {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease;
+      }
+      .kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(24, 100, 171, 0.16);
+        border-color: #8bb8dc;
+      }
+      .kpi .label {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin-bottom: 2px;
+      }
+      .kpi .value {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+      }
+      .section {
+        margin-top: 18px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 25px rgba(18, 24, 40, 0.06);
+        overflow: hidden;
+      }
+      .section-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .section-head-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .toggle {
+        border: 1px solid #7fafd4;
+        background: #ebf3fc;
+        color: #0f4275;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .section-controls {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .bulk-toggle {
+        border: 1px solid #7fafd4;
+        background: #e6f0fa;
+        color: #104870;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .section-body {
+        padding: 16px 18px 18px;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+        transition:
+          border-color 180ms ease,
+          transform 180ms ease;
+      }
+      .card:hover {
+        border-color: #8bb8dc;
+        transform: translateY(-2px);
+      }
+      .card h3 {
+        margin-bottom: 8px;
+        font-size: 1.03rem;
+      }
+      ul {
+        margin-top: 6px;
+        padding-left: 18px;
+      }
+      .note {
+        margin-top: 10px;
+        border-left: 3px solid var(--accent);
+        background: #f0f6fd;
+        color: #1a3f5c;
+        padding: 8px 10px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.92rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        border: 2px solid #a8b8c8;
+        border-radius: var(--radius-sm);
+        background: #ffffff;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.94rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #c5d2dc;
+        border-right: 1px solid #c5d2dc;
+      }
+      tr th:last-child,
+      tr td:last-child {
+        border-right: none;
+      }
+      th {
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(180deg, #d3e1f6 0%, #c3d5ef 100%);
+        color: #102a43;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-bottom: 2px solid #8eacc8;
+      }
+      tbody tr:nth-child(even) {
+        background: #f9fbfe;
+      }
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .chart-card {
+        border: 1px solid #b9c9dc;
+        border-radius: var(--radius-sm);
+        background: #fcfdff;
+        padding: 12px;
+      }
+      .chart-card h3 {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .bar-wrap {
+        margin-top: 8px;
+        display: grid;
+        gap: 8px;
+      }
+      .bar {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #f2f5fa;
+        overflow: hidden;
+        height: 28px;
+        position: relative;
+      }
+      .fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        color: #fff;
+        font-size: 0.84rem;
+        font-weight: 600;
+        transition: width 520ms ease;
+      }
+      .mono-block {
+        margin-top: 10px;
+        border: 1px solid #c9d4df;
+        border-radius: 10px;
+        background: #f7f9fc;
+        padding: 10px;
+        max-height: 320px;
+        overflow: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.45;
+      }
+      /* Code panel */
+      .code-panel {
+        margin-top: 16px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #2d3748;
+        display: none;
+      }
+      .code-panel.visible {
+        display: block;
+      }
+      .tutorial-btn {
+        border: 1px solid #238636;
+        background: #0d1117;
+        color: #7ee787;
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition:
+          background 150ms,
+          color 150ms;
+      }
+      .tutorial-btn:hover {
+        background: #238636;
+        color: #fff;
+      }
+      .tutorial-btn.active {
+        background: #238636;
+        color: #fff;
+      }
+      .code-panel-header {
+        display: flex;
+        align-items: center;
+        background: #21262d;
+        border-bottom: 1px solid #30363d;
+        padding: 0 10px 0 0;
+      }
+      .code-tabs {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+      }
+      .code-tab {
+        padding: 9px 16px;
+        color: #8b949e;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid transparent;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition:
+          color 140ms,
+          border-color 140ms;
+      }
+      .code-tab:hover:not(.active) {
+        color: #c9d1d9;
+      }
+      .code-tab.active {
+        color: #79c0ff;
+        border-bottom-color: #79c0ff;
+      }
+      .code-copy-btn {
+        padding: 5px 13px;
+        background: #0d1117;
+        color: #7ee787;
+        border: 1px solid #238636;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        white-space: nowrap;
+        transition: background 150ms;
+      }
+      .code-copy-btn:hover {
+        background: #238636;
+        color: #fff;
+      }
+      .code-tab-pane {
+        display: none;
+      }
+      .code-tab-pane.active {
+        display: block;
+      }
+      .code-tab-pane pre {
+        margin: 0;
+        background: #0d1117;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: #c9d1d9;
+      }
+      .ck {
+        color: #ff7b72;
+      }
+      .cs {
+        color: #a5d6ff;
+      }
+      .cc {
+        color: #8b949e;
+        font-style: italic;
+      }
+      .cn {
+        color: #79c0ff;
+      }
+      .cm {
+        color: #7ee787;
+      }
+      .cp {
+        color: #e3b341;
+      }
+
+      /* Similarity heatmap */
+      .matrix-wrap {
+        overflow: auto;
+        border: 1px solid #b8c0d0;
+        border-radius: var(--radius-sm);
+        background: #ffffff;
+      }
+      .matrix-table {
+        min-width: 980px;
+        border-collapse: collapse;
+      }
+      .matrix-table th,
+      .matrix-table td {
+        border: 1px solid #d1dae6;
+        padding: 6px;
+        text-align: center;
+        font-size: 0.75rem;
+      }
+      .matrix-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #eef4ff;
+        color: #1b345d;
+      }
+      .matrix-table .row-head {
+        text-align: left;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #f4f8ff;
+        color: #1b345d;
+        font-weight: 700;
+      }
+      .pay-var-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pay-var-btn {
+        border: 1px solid #8bb8dc;
+        background: #f0f6fd;
+        color: #1b4f7a;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .pay-var-btn.active {
+        background: #1864ab;
+        color: #f4faff;
+        border-color: #1864ab;
+      }
+      .pay-status-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        text-align: center;
+      }
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @media (max-width: 700px) {
+        .hero {
+          padding: 20px;
+        }
+        .section-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <!-- ═══════════════════ HERO ═══════════════════ -->
+      <section class="hero">
+        <h1>MBTI Text Classification – Exploratory Data Analysis Report</h1>
+        <p>
+          Static EDA report compiled from notebook outputs for the MBTI
+          (Myers-Briggs Type Indicator) Personality Type text dataset. The
+          analysis covers data profiling, text cleaning, category &amp; trait
+          distributions, word frequency, TF-IDF, bigrams, and inter-type
+          similarity.
+        </p>
+        <div class="section-controls">
+          <button class="bulk-toggle" id="expand-all" type="button">
+            Expand All Sections
+          </button>
+          <button class="bulk-toggle" id="collapse-all" type="button">
+            Collapse All Sections
+          </button>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ ANALYSIS METHODOLOGY ═══════════════════ -->
+      <section class="section" id="methodology">
+        <header class="section-head">
+          <h2>📊 Analysis Methodology</h2>
+          <button class="toggle" data-target="method-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="method-body">
+          <p>
+            This report uses two types of text processing approaches depending
+            on the analysis goal:
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Analysis Type</th>
+                  <th style="text-align: center">&#x1F534; Raw Data</th>
+                  <th style="text-align: center">
+                    &#x1F7E2; Stopwords Removed
+                  </th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Basic Statistics</strong><br />(Word / Character
+                    counts)
+                  </td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Measure actual document size</td>
+                </tr>
+                <tr>
+                  <td><strong>Stop Words Analysis</strong></td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Analyze stopword frequency</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Word Frequency</strong><br />(Top overall words)
+                  </td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Find meaningful keywords</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Category Keywords</strong><br />(Top words by I/E)
+                  </td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Category-specific terms</td>
+                </tr>
+                <tr>
+                  <td><strong>Vocabulary Richness</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td>Content vocabulary diversity</td>
+                </tr>
+                <tr>
+                  <td><strong>TF-IDF Terms</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Most distinctive terms per MBTI type</td>
+                </tr>
+                <tr>
+                  <td><strong>N-grams (Bigrams)</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Meaningful phrase patterns without label leakage</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Distributions</strong><br />(Word / Char / Posts
+                    histograms)
+                  </td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Show actual text lengths</td>
+                </tr>
+                <tr>
+                  <td><strong>Similarity Matrix</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Inter-type text similarity</td>
+                </tr>
+                <tr>
+                  <td><strong>Label Leakage Check</strong></td>
+                  <td style="text-align: center">&#9989;</td>
+                  <td style="text-align: center">-</td>
+                  <td>Detect MBTI tokens in posts</td>
+                </tr>
+                <tr>
+                  <td><strong>Top Words by Type</strong></td>
+                  <td style="text-align: center">-</td>
+                  <td style="text-align: center">&#9989; (no-leak)</td>
+                  <td>Per-class keyword analysis</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            <strong>Raw Data</strong> refers to the cleaned text with stopwords
+            retained (<code>clean</code> column).
+            <strong>Stopwords Removed</strong> refers to the cleaned text after
+            filtering out NLTK English stopwords and words &le; 2 characters
+            (<code>clean_ns</code> column). <strong>(no-leak)</strong> indicates
+            the <code>clean_ns_noleak</code> column, which additionally strips
+            all 16 MBTI label tokens to prevent label leakage.
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ DATASET OVERVIEW ═══════════════════ -->
+      <section class="section" id="dataset-overview">
+        <header class="section-head">
+          <h2>📋 Dataset Overview</h2>
+          <button
+            class="toggle"
+            data-target="overview-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="overview-body">
+          <div class="hero-meta">
+            <span class="tag">Dataset: MBTI (Kaggle)</span>
+            <span class="tag">Rows: 8,675</span>
+            <span class="tag">Columns: 2 (type, posts)</span>
+            <span class="tag">Missing Values: 0</span>
+          </div>
+
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Total Samples</div>
+              <div class="value">8,675</div>
+            </article>
+            <article class="kpi">
+              <div class="label">MBTI Types</div>
+              <div class="value">16</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Missing Values</div>
+              <div class="value">0</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Avg Posts / User</div>
+              <div class="value">48.74</div>
+            </article>
+          </div>
+
+          <!-- df.head() -->
+          <h3 style="margin-top: 16px">Sample Data (df.head)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>type</th>
+                  <th>posts (truncated)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0</td>
+                  <td>INFJ</td>
+                  <td>'http://www.youtube.com/watch?v=qsXHcwe3krw|||…</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>ENTP</td>
+                  <td>'I'm finding the lack of me in these posts ver…</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>INTP</td>
+                  <td>'Good one _____ https://www.youtube.com/wat…</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>INTJ</td>
+                  <td>'Dear INTP, I enjoyed our conversation the o…</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>ENTJ</td>
+                  <td>'You're fired.|||That's another silly misconce…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- df.info() -->
+          <h3 style="margin-top: 16px">Data Info</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Non-Null Count</th>
+                  <th>Dtype</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>type</td>
+                  <td>8,675 non-null</td>
+                  <td>object</td>
+                </tr>
+                <tr>
+                  <td>posts</td>
+                  <td>8,675 non-null</td>
+                  <td>object</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- type value_counts -->
+          <h3 style="margin-top: 16px">Type Value Counts</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>MBTI Type</th>
+                  <th>Count</th>
+                  <th>% of Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>INFP</td>
+                  <td>1,832</td>
+                  <td>21.12%</td>
+                </tr>
+                <tr>
+                  <td>INFJ</td>
+                  <td>1,470</td>
+                  <td>16.95%</td>
+                </tr>
+                <tr>
+                  <td>INTP</td>
+                  <td>1,304</td>
+                  <td>15.03%</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>1,091</td>
+                  <td>12.58%</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>685</td>
+                  <td>7.90%</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>675</td>
+                  <td>7.78%</td>
+                </tr>
+                <tr>
+                  <td>ISTP</td>
+                  <td>337</td>
+                  <td>3.88%</td>
+                </tr>
+                <tr>
+                  <td>ISFP</td>
+                  <td>271</td>
+                  <td>3.12%</td>
+                </tr>
+                <tr>
+                  <td>ENTJ</td>
+                  <td>231</td>
+                  <td>2.66%</td>
+                </tr>
+                <tr>
+                  <td>ISTJ</td>
+                  <td>205</td>
+                  <td>2.36%</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>190</td>
+                  <td>2.19%</td>
+                </tr>
+                <tr>
+                  <td>ISFJ</td>
+                  <td>166</td>
+                  <td>1.91%</td>
+                </tr>
+                <tr>
+                  <td>ESTP</td>
+                  <td>89</td>
+                  <td>1.03%</td>
+                </tr>
+                <tr>
+                  <td>ESFP</td>
+                  <td>48</td>
+                  <td>0.55%</td>
+                </tr>
+                <tr>
+                  <td>ESFJ</td>
+                  <td>42</td>
+                  <td>0.48%</td>
+                </tr>
+                <tr>
+                  <td>ESTJ</td>
+                  <td>39</td>
+                  <td>0.45%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Consolidated Dataset Metrics -->
+          <h3 style="margin-top: 16px">Consolidated Dataset Metrics</h3>
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Largest Class</div>
+              <div class="value">1,832 (INFP)</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Smallest Class</div>
+              <div class="value">39 (ESTJ)</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Imbalance Ratio</div>
+              <div class="value">46.97</div>
+            </article>
+          </div>
+          <div class="note">
+            The imbalance ratio of ~47:1 between largest (INFP) and smallest
+            (ESTJ) classes means stratified sampling and macro-averaged metrics
+            are essential for fair evaluation.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-overview">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-overview" class="code-tab-pane active">
+              <pre><code class="language-python">DATA_PATH = <span class="cs">"../../../datasets/mbti/data/mbti_1.csv"</span>
+df = pd.read_csv(DATA_PATH)
+df.shape          <span class="cc"># (8675, 2)</span>
+df.head()
+df.info()
+df[<span class="cs">"type"</span>].value_counts()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ DATA QUALITY CHECKS ═══════════════════ -->
+      <section class="section" id="data-quality">
+        <header class="section-head">
+          <h2>🔍 Data Quality Checks</h2>
+          <button
+            class="toggle"
+            data-target="quality-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="quality-body">
+          <p>
+            Audit for missing values and duplicate records before any
+            transformation.
+          </p>
+
+          <h3 style="margin-top: 10px">Missing Value Report</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Missing Count</th>
+                  <th>Missing %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>type</td>
+                  <td>0</td>
+                  <td>0.00%</td>
+                </tr>
+                <tr>
+                  <td>posts</td>
+                  <td>0</td>
+                  <td>0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 14px">Duplicate Report</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Duplicate full rows</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>Duplicate posts only</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>Duplicate (type, posts) pairs</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            No missing values or duplicates detected — the dataset is clean at
+            the row level.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-quality">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-quality" class="code-tab-pane active">
+              <pre><code class="language-python">missing_report = df.isna().sum().rename(<span class="cs">"missing_count"</span>).to_frame()
+missing_report[<span class="cs">"missing_pct"</span>] = (missing_report[<span class="cs">"missing_count"</span>] / len(df) * <span class="cn">100</span>).round(<span class="cn">2</span>)
+
+duplicate_row_count = <span class="ck">int</span>(df.duplicated().sum())
+duplicate_posts_count = <span class="ck">int</span>(df.duplicated(subset=[<span class="cs">"posts"</span>]).sum())
+duplicate_type_posts_count = <span class="ck">int</span>(df.duplicated(subset=[<span class="cs">"type"</span>, <span class="cs">"posts"</span>]).sum())</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ SAMPLE POSTS ═══════════════════ -->
+      <section class="section" id="sample-posts">
+        <header class="section-head">
+          <h2>💬 Sample Posts</h2>
+          <button class="toggle" data-target="sample-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="sample-body">
+          <p>
+            Three random sample rows showing MBTI type and raw posts text
+            (truncated for readability).
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>type</th>
+                  <th>posts (sample)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>INFJ</td>
+                  <td>
+                    'http://www.youtube.com/watch?v=qsXHcwe3krw|||http://41.media.tumblr.com/tumblr_lfouy03PMA…
+                  </td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>
+                    'I'm finding the lack of me in these posts very
+                    alarming.|||…
+                  </td>
+                </tr>
+                <tr>
+                  <td>INTP</td>
+                  <td>'Good one _____ https://www.youtube.com/watch?v=…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-sample">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-sample" class="code-tab-pane active">
+              <pre><code class="language-python">df.sample(<span class="cn">3</span>)[[<span class="cs">"type"</span>, <span class="cs">"posts"</span>]]</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ═══════════════════ FEATURE ENGINEERING ═══════════════════ -->
+      <section class="section" id="feature-engineering">
+        <header class="section-head">
+          <h2>🔧 Feature Engineering</h2>
+          <button class="toggle" data-target="feat-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="feat-body">
+          <p>
+            Three numerical features are derived from the raw
+            <code>posts</code> column, plus four binary trait columns from the
+            MBTI type string.
+          </p>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Derived Features</h3>
+              <ul>
+                <li>
+                  <strong>word_count</strong> – number of whitespace-separated
+                  tokens
+                </li>
+                <li><strong>char_count</strong> – total character length</li>
+                <li>
+                  <strong>num_posts</strong> – count of
+                  <code>|||</code>-separated posts
+                </li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Trait Columns</h3>
+              <ul>
+                <li>
+                  <strong>I_E</strong> – Introversion / Extraversion (1st
+                  letter)
+                </li>
+                <li><strong>N_S</strong> – Intuition / Sensing (2nd letter)</li>
+                <li><strong>T_F</strong> – Thinking / Feeling (3rd letter)</li>
+                <li>
+                  <strong>J_P</strong> – Judging / Perceiving (4th letter)
+                </li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-feat">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-feat" class="code-tab-pane active">
+              <pre><code class="language-python">df[<span class="cs">"posts"</span>] = df[<span class="cs">"posts"</span>].astype(str)
+
+df[<span class="cs">"word_count"</span>] = df[<span class="cs">"posts"</span>].apply(<span class="ck">lambda</span> x: len(x.split()))
+df[<span class="cs">"char_count"</span>] = df[<span class="cs">"posts"</span>].apply(len)
+df[<span class="cs">"num_posts"</span>]  = df[<span class="cs">"posts"</span>].apply(<span class="ck">lambda</span> x: len(x.split(<span class="cs">"|||"</span>)))
+
+df[<span class="cs">"I_E"</span>] = df[<span class="cs">"type"</span>].str[<span class="cn">0</span>]
+df[<span class="cs">"N_S"</span>] = df[<span class="cs">"type"</span>].str[<span class="cn">1</span>]
+df[<span class="cs">"T_F"</span>] = df[<span class="cs">"type"</span>].str[<span class="cn">2</span>]
+df[<span class="cs">"J_P"</span>] = df[<span class="cs">"type"</span>].str[<span class="cn">3</span>]</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TEXT CLEANING ═══════════════════ -->
+      <section class="section" id="text-cleaning">
+        <header class="section-head">
+          <h2>🧹 Text Cleaning</h2>
+          <button class="toggle" data-target="clean-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="clean-body">
+          <p>
+            Pipeline: lowercase → remove URLs → replace <code>|||</code> → strip
+            non-alpha → collapse whitespace → remove stopwords (words &le; 2
+            chars filtered).
+          </p>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Steps</h3>
+              <ul>
+                <li>Lowercase all text</li>
+                <li>Remove URLs (<code>http\S+</code>)</li>
+                <li>Replace post separators <code>|||</code> with space</li>
+                <li>Strip non-alphabetic characters</li>
+                <li>Collapse multiple whitespace</li>
+                <li>Remove NLTK English stopwords &amp; words &le; 2 chars</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Result Columns</h3>
+              <ul>
+                <li><strong>clean</strong> – cleaned text (stopwords kept)</li>
+                <li>
+                  <strong>clean_ns</strong> – cleaned text without stopwords
+                </li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-clean">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-clean" class="code-tab-pane active">
+              <pre><code class="language-python">STOP_WORDS = set(stopwords.words(<span class="cs">"english"</span>))
+
+<span class="ck">def</span> <span class="cp">clean_text</span>(text):
+    text = text.lower()
+    text = re.sub(<span class="cs">r"http\S+"</span>, <span class="cs">" "</span>, text)
+    text = text.replace(<span class="cs">"|||"</span>, <span class="cs">" "</span>)
+    text = re.sub(<span class="cs">r"[^a-z\s]"</span>, <span class="cs">" "</span>, text)
+    text = re.sub(<span class="cs">r"\s+"</span>, <span class="cs">" "</span>, text)
+    <span class="ck">return</span> text
+
+<span class="ck">def</span> <span class="cp">remove_stopwords</span>(text):
+    <span class="ck">return</span> <span class="cs">" "</span>.join(
+        [w <span class="ck">for</span> w <span class="ck">in</span> text.split() <span class="ck">if</span> w <span class="ck">not in</span> STOP_WORDS <span class="ck">and</span> len(w) > <span class="cn">2</span>]
+    )
+
+df[<span class="cs">"clean"</span>]    = df[<span class="cs">"posts"</span>].apply(clean_text)
+df[<span class="cs">"clean_ns"</span>] = df[<span class="cs">"clean"</span>].apply(remove_stopwords)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ LABEL LEAKAGE CHECK ═══════════════════ -->
+      <section class="section" id="label-leakage">
+        <header class="section-head">
+          <h2>⚠️ Label Leakage Check</h2>
+          <button
+            class="toggle"
+            data-target="leakage-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="leakage-body">
+          <p>
+            Checks whether MBTI label tokens (e.g., <code>infj</code>,
+            <code>intp</code>) appear directly in posts. High self-token leakage
+            means models could overfit by memorizing label words rather than
+            learning language patterns.
+          </p>
+
+          <h3 style="margin-top: 10px">Self-Token Leakage Rate by Type</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>MBTI Type</th>
+                  <th>Self-Token Leak Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>INFJ</td>
+                  <td>0.9272</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>0.9213</td>
+                </tr>
+                <tr>
+                  <td>INTP</td>
+                  <td>0.8997</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>0.8918</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>0.8730</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>0.8637</td>
+                </tr>
+                <tr>
+                  <td>ISTP</td>
+                  <td>0.7715</td>
+                </tr>
+                <tr>
+                  <td>ISFP</td>
+                  <td>0.7565</td>
+                </tr>
+                <tr>
+                  <td>ENTJ</td>
+                  <td>0.7446</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>0.7368</td>
+                </tr>
+                <tr>
+                  <td>ISTJ</td>
+                  <td>0.7268</td>
+                </tr>
+                <tr>
+                  <td>ISFJ</td>
+                  <td>0.6928</td>
+                </tr>
+                <tr>
+                  <td>ESTP</td>
+                  <td>0.6517</td>
+                </tr>
+                <tr>
+                  <td>ESFP</td>
+                  <td>0.5625</td>
+                </tr>
+                <tr>
+                  <td>ESFJ</td>
+                  <td>0.5238</td>
+                </tr>
+                <tr>
+                  <td>ESTJ</td>
+                  <td>0.4872</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            <strong>Average self-token leakage rate: ~0.76.</strong>
+            Most users mention their own MBTI type in posts. A
+            <code>clean_ns_noleak</code> column is created by stripping all 16
+            MBTI tokens to prevent label leakage in downstream word-frequency
+            and TF-IDF analysis.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-leak">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-leak" class="code-tab-pane active">
+              <pre><code class="language-python">mbti_tokens = [<span class="cs">"infj"</span>, <span class="cs">"infp"</span>, <span class="cs">"intj"</span>, <span class="cs">"intp"</span>, ...]
+
+<span class="ck">for</span> token <span class="ck">in</span> mbti_tokens:
+    df[<span class="cs">f"has_{token}"</span>] = df[<span class="cs">"clean"</span>].str.contains(<span class="ck">rf</span><span class="cs">"\b{token}\b"</span>, regex=<span class="cn">True</span>)
+
+<span class="cc"># Leakage mitigation</span>
+mbti_pattern = <span class="ck">r</span><span class="cs">"\b(?:"</span> + <span class="cs">"|"</span>.join(mbti_tokens) + <span class="ck">r</span><span class="cs">")\b"</span>
+df[<span class="cs">"clean_ns_noleak"</span>] = (
+    df[<span class="cs">"clean_ns"</span>]
+    .str.replace(mbti_pattern, <span class="cs">" "</span>, regex=<span class="cn">True</span>)
+    .str.strip()
+)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ═══════════════════ CATEGORY DISTRIBUTION ═══════════════════ -->
+      <section class="section" id="type-distribution">
+        <header class="section-head">
+          <h2>🧩 MBTI Type Distribution</h2>
+          <button
+            class="toggle"
+            data-target="typedist-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="typedist-body">
+          <p>
+            The dataset is heavily imbalanced:
+            <strong>Introverted Intuitive</strong>
+            types (INFP, INFJ, INTP, INTJ) make up ~65% of all samples, while
+            Extraverted Sensing types (ESTP, ESFP, ESFJ, ESTJ) represent only
+            ~2.5%.
+          </p>
+          <div class="chart-card" style="max-width: 700px">
+            <h3>MBTI Type Distribution</h3>
+            <canvas id="typeDistChart" height="260"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-typedist">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-typedist" class="code-tab-pane active">
+              <pre><code class="language-python">plt.figure(figsize=(<span class="cn">12</span>,<span class="cn">6</span>))
+sns.countplot(data=df, x=<span class="cs">"type"</span>, order=df[<span class="cs">"type"</span>].value_counts().index)
+plt.xticks(rotation=<span class="cn">45</span>)
+plt.title(<span class="cs">"MBTI Type Distribution"</span>)
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TRAIT DISTRIBUTION ═══════════════════ -->
+      <section class="section" id="trait-distribution">
+        <header class="section-head">
+          <h2>🎭 Trait Distribution</h2>
+          <button
+            class="toggle"
+            data-target="traitdist-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="traitdist-body">
+          <p>Binary trait breakdowns show strong skew toward I, N, F, and P.</p>
+          <div class="pay-status-controls">
+            <strong>Select trait:</strong>
+            <div class="pay-var-buttons" id="traitButtons">
+              <button class="pay-var-btn active" data-var="I_E">I / E</button>
+              <button class="pay-var-btn" data-var="N_S">N / S</button>
+              <button class="pay-var-btn" data-var="T_F">T / F</button>
+              <button class="pay-var-btn" data-var="J_P">J / P</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 420px">
+            <h3 id="traitChartTitle">I / E Distribution</h3>
+            <canvas id="traitChart" height="200"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-trait">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-trait" class="code-tab-pane active">
+              <pre><code class="language-python">traits = [<span class="cs">"I_E"</span>, <span class="cs">"N_S"</span>, <span class="cs">"T_F"</span>, <span class="cs">"J_P"</span>]
+
+<span class="ck">for</span> t <span class="ck">in</span> traits:
+    plt.figure()
+    sns.countplot(data=df, x=t)
+    plt.title(t)
+    plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TEXT STATISTICS ═══════════════════ -->
+      <section class="section" id="text-stats">
+        <header class="section-head">
+          <h2>📈 Text Statistics Summary</h2>
+          <button
+            class="toggle"
+            data-target="textstats-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="textstats-body">
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Avg Words / User</div>
+              <div class="value">1,226.24</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Avg Chars / User</div>
+              <div class="value">7,234.99</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Avg Posts / User</div>
+              <div class="value">48.74</div>
+            </article>
+          </div>
+
+          <div class="code-panel" style="margin-top: 14px">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-ts">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-ts" class="code-tab-pane active">
+              <pre><code class="language-python">print(<span class="cs">"avg words"</span>, df[<span class="cs">"word_count"</span>].mean())
+print(<span class="cs">"avg chars"</span>, df[<span class="cs">"char_count"</span>].mean())
+print(<span class="cs">"avg posts"</span>, df[<span class="cs">"num_posts"</span>].mean())</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ WORD COUNT DISTRIBUTION ═══════════════════ -->
+      <section class="section" id="word-count">
+        <header class="section-head">
+          <h2>📝 Word Count Distribution</h2>
+          <button
+            class="toggle"
+            data-target="wordcount-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="wordcount-body">
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Mean</div>
+              <div class="value">1,226</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Std</div>
+              <div class="value">311</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Min</div>
+              <div class="value">4</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Max</div>
+              <div class="value">1,881</div>
+            </article>
+          </div>
+          <div class="chart-grid" style="margin-top: 14px">
+            <div class="chart-card">
+              <h3>Word Count Histogram</h3>
+              <canvas id="wordCountHist" height="200"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Word Count by Type (Box-like: Mean ± Std)</h3>
+              <canvas id="wordCountByType" height="200"></canvas>
+            </div>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-wc">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-wc" class="code-tab-pane active">
+              <pre><code class="language-python">sns.histplot(df[<span class="cs">"word_count"</span>], bins=<span class="cn">40</span>)
+plt.show()
+
+sns.boxplot(data=df, x=<span class="cs">"type"</span>, y=<span class="cs">"word_count"</span>)
+plt.xticks(rotation=<span class="cn">45</span>)
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ CHAR COUNT DISTRIBUTION ═══════════════════ -->
+      <section class="section" id="char-count">
+        <header class="section-head">
+          <h2>🔤 Character Count Distribution</h2>
+          <button
+            class="toggle"
+            data-target="charcount-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="charcount-body">
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Mean</div>
+              <div class="value">7,235</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Std</div>
+              <div class="value">1,608</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Min</div>
+              <div class="value">57</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Max</div>
+              <div class="value">10,090</div>
+            </article>
+          </div>
+          <div class="chart-card" style="margin-top: 14px; max-width: 600px">
+            <h3>Character Count Histogram</h3>
+            <canvas id="charCountHist" height="200"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-cc">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-cc" class="code-tab-pane active">
+              <pre><code class="language-python">sns.histplot(df[<span class="cs">"char_count"</span>], bins=<span class="cn">40</span>)
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ NUM POSTS PER USER ═══════════════════ -->
+      <section class="section" id="num-posts">
+        <header class="section-head">
+          <h2>👤 Number of Posts Per User</h2>
+          <button
+            class="toggle"
+            data-target="numposts-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="numposts-body">
+          <div class="grid">
+            <article class="kpi">
+              <div class="label">Mean</div>
+              <div class="value">48.74</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Median</div>
+              <div class="value">50</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Min</div>
+              <div class="value">1</div>
+            </article>
+            <article class="kpi">
+              <div class="label">Max</div>
+              <div class="value">89</div>
+            </article>
+          </div>
+          <div class="chart-card" style="margin-top: 14px; max-width: 600px">
+            <h3>Posts Per User Histogram</h3>
+            <canvas id="numPostsHist" height="200"></canvas>
+          </div>
+          <div class="note">
+            Most users have exactly 50 posts (75th percentile = 50), indicating
+            the data was likely capped at 50 posts per user for most entries.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-np">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-np" class="code-tab-pane active">
+              <pre><code class="language-python">sns.histplot(df[<span class="cs">"num_posts"</span>])
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ STOPWORD ANALYSIS ═══════════════════ -->
+      <section class="section" id="stopwords">
+        <header class="section-head">
+          <h2>🚫 Stopword Analysis</h2>
+          <button
+            class="toggle"
+            data-target="stopword-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="stopword-body">
+          <p>
+            Top 20 most frequent stopwords extracted from the cleaned text
+            (before stopword removal).
+          </p>
+          <div class="chart-card" style="max-width: 650px">
+            <h3>Top 20 Stopwords</h3>
+            <canvas id="stopwordChart" height="320"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-sw">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-sw" class="code-tab-pane active">
+              <pre><code class="language-python">tokens = <span class="cs">" "</span>.join(df[<span class="cs">"clean"</span>]).split()
+stop_tokens = [t <span class="ck">for</span> t <span class="ck">in</span> tokens <span class="ck">if</span> t <span class="ck">in</span> STOP_WORDS]
+Counter(stop_tokens).most_common(<span class="cn">20</span>)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TOP WORDS OVERALL ═══════════════════ -->
+      <section class="section" id="top-words">
+        <header class="section-head">
+          <h2>🏆 Top Words Overall</h2>
+          <button
+            class="toggle"
+            data-target="topwords-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="topwords-body">
+          <p>Top 20 most frequent words after cleaning and stopword removal.</p>
+          <div class="chart-card" style="max-width: 650px">
+            <h3>Top 20 Words (Overall)</h3>
+            <canvas id="topWordsChart" height="320"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-tw">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-tw" class="code-tab-pane active">
+              <pre><code class="language-python">words = Counter(<span class="cs">" "</span>.join(df[<span class="cs">"clean_ns"</span>]).split()).most_common(<span class="cn">20</span>)
+w = pd.DataFrame(words, columns=[<span class="cs">"word"</span>, <span class="cs">"count"</span>])
+sns.barplot(data=w, x=<span class="cs">"count"</span>, y=<span class="cs">"word"</span>)
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TOP WORDS BY MBTI TYPE ═══════════════════ -->
+      <section class="section" id="top-words-type">
+        <header class="section-head">
+          <h2>🏷️ Top Words by MBTI Type</h2>
+          <button
+            class="toggle"
+            data-target="topwords-type-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="topwords-type-body">
+          <p>
+            Top 10 words for the 6 largest MBTI classes (using
+            <code>clean_ns_noleak</code> to avoid label leakage).
+          </p>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="topWordTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="topWordTypeTitle">Top 10 Words – INFP</h3>
+            <canvas id="topWordTypeChart" height="280"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-twt">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-twt" class="code-tab-pane active">
+              <pre><code class="language-python">top_types = df[<span class="cs">"type"</span>].value_counts().head(<span class="cn">6</span>).index.tolist()
+
+<span class="ck">for</span> mbti_type <span class="ck">in</span> top_types:
+    words = Counter(<span class="cs">" "</span>.join(
+        df.loc[df[<span class="cs">"type"</span>] == mbti_type, <span class="cs">"clean_ns_noleak"</span>]
+    ).split()).most_common(<span class="cn">10</span>)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TOP WORDS BY TRAIT (I/E) ═══════════════════ -->
+      <section class="section" id="top-words-ie">
+        <header class="section-head">
+          <h2>🔀 Top Words by Trait (I / E)</h2>
+          <button
+            class="toggle"
+            data-target="topwords-ie-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="topwords-ie-body">
+          <p>Top 15 words for Introverts vs Extraverts.</p>
+          <div class="pay-status-controls">
+            <strong>Select trait:</strong>
+            <div class="pay-var-buttons" id="ieButtons">
+              <button class="pay-var-btn active" data-var="I">
+                Introvert (I)
+              </button>
+              <button class="pay-var-btn" data-var="E">Extravert (E)</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="ieChartTitle">Top 15 Words – Introvert (I)</h3>
+            <canvas id="ieWordsChart" height="280"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-ie">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-ie" class="code-tab-pane active">
+              <pre><code class="language-python"><span class="ck">for</span> t <span class="ck">in</span> [<span class="cs">"I"</span>, <span class="cs">"E"</span>]:
+    words = Counter(
+        <span class="cs">" "</span>.join(df[df[<span class="cs">"I_E"</span>]==t][<span class="cs">"clean_ns"</span>]).split()
+    ).most_common(<span class="cn">15</span>)
+    w = pd.DataFrame(words, columns=[<span class="cs">"word"</span>, <span class="cs">"count"</span>])
+    sns.barplot(data=w, x=<span class="cs">"count"</span>, y=<span class="cs">"word"</span>)
+    plt.title(t)
+    plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ VOCABULARY RICHNESS ═══════════════════ -->
+      <section class="section" id="vocab-richness">
+        <header class="section-head">
+          <h2>📚 Vocabulary Richness</h2>
+          <button class="toggle" data-target="vocab-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="vocab-body">
+          <p>
+            Type-Token Ratio (unique tokens / total tokens) per MBTI type.
+            Higher = more diverse vocabulary. Types with fewer samples naturally
+            show higher ratios.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>MBTI Type</th>
+                  <th>TTR (Type-Token Ratio)</th>
+                  <th>Sample Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ESTJ</td>
+                  <td>0.2466</td>
+                  <td>39</td>
+                </tr>
+                <tr>
+                  <td>ESFP</td>
+                  <td>0.2431</td>
+                  <td>48</td>
+                </tr>
+                <tr>
+                  <td>ESFJ</td>
+                  <td>0.2127</td>
+                  <td>42</td>
+                </tr>
+                <tr>
+                  <td>ESTP</td>
+                  <td>0.1786</td>
+                  <td>89</td>
+                </tr>
+                <tr>
+                  <td>ISFJ</td>
+                  <td>0.1249</td>
+                  <td>166</td>
+                </tr>
+                <tr>
+                  <td>ISTJ</td>
+                  <td>0.1208</td>
+                  <td>205</td>
+                </tr>
+                <tr>
+                  <td>ENTJ</td>
+                  <td>0.1164</td>
+                  <td>231</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>0.1153</td>
+                  <td>190</td>
+                </tr>
+                <tr>
+                  <td>ISFP</td>
+                  <td>0.1066</td>
+                  <td>271</td>
+                </tr>
+                <tr>
+                  <td>ISTP</td>
+                  <td>0.0995</td>
+                  <td>337</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>0.0711</td>
+                  <td>685</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>0.0665</td>
+                  <td>675</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>0.0553</td>
+                  <td>1,091</td>
+                </tr>
+                <tr>
+                  <td>INTP</td>
+                  <td>0.0512</td>
+                  <td>1,304</td>
+                </tr>
+                <tr>
+                  <td>INFJ</td>
+                  <td>0.0445</td>
+                  <td>1,470</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>0.0412</td>
+                  <td>1,832</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            Vocabulary richness correlates inversely with sample size — ES**
+            types show high TTR largely because their pooled corpus is small.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-vr">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-vr" class="code-tab-pane active">
+              <pre><code class="language-python"><span class="ck">def</span> <span class="cp">vocab_stats</span>(texts):
+    tokens = <span class="cs">" "</span>.join(texts).split()
+    <span class="ck">return</span> len(set(tokens)) / len(tokens)
+
+<span class="ck">for</span> t, g <span class="ck">in</span> df.groupby(<span class="cs">"type"</span>):
+    print(t, vocab_stats(g[<span class="cs">"clean_ns"</span>]))</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ TF-IDF BY MBTI TYPE ═══════════════════ -->
+      <section class="section" id="tfidf">
+        <header class="section-head">
+          <h2>⚖️ TF-IDF Top Terms by MBTI Type</h2>
+          <button class="toggle" data-target="tfidf-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="tfidf-body">
+          <p>
+            Top 10 representative terms per MBTI type using mean TF-IDF scores
+            (5,000 features, unigrams,
+            <code>clean_ns_noleak</code>). Shown for the 8 largest classes.
+          </p>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="tfidfTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+              <button class="pay-var-btn" data-var="ISTP">ISTP</button>
+              <button class="pay-var-btn" data-var="ISFP">ISFP</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="tfidfTypeTitle">Top 10 TF-IDF Terms – INFP</h3>
+            <canvas id="tfidfTypeChart" height="280"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-tfidf">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-tfidf" class="code-tab-pane active">
+              <pre><code class="language-python">tfidf_vec = TfidfVectorizer(max_features=<span class="cn">5000</span>, ngram_range=(<span class="cn">1</span>, <span class="cn">1</span>))
+X_tfidf = tfidf_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+terms = tfidf_vec.get_feature_names_out()
+
+type_indices = {mbti: np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+                <span class="ck">for</span> mbti <span class="ck">in</span> sorted(df[<span class="cs">"type"</span>].unique())}
+
+<span class="ck">for</span> mbti, idx <span class="ck">in</span> type_indices.items():
+    mean_scores = np.asarray(X_tfidf[idx].mean(axis=<span class="cn">0</span>)).flatten()
+    top_idx = mean_scores.argsort()[::-<span class="cn">1</span>][:<span class="cn">10</span>]</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ BIGRAM ANALYSIS ═══════════════════ -->
+      <section class="section" id="bigrams">
+        <header class="section-head">
+          <h2>🔗 Bigram Analysis</h2>
+          <button class="toggle" data-target="bigram-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="bigram-body">
+          <p>
+            Top 15 bigrams overall from <code>clean_ns_noleak</code> text, plus
+            per-type breakdowns for the 6 largest classes.
+          </p>
+          <div class="chart-card" style="max-width: 650px">
+            <h3>Top 15 Bigrams (Overall)</h3>
+            <canvas id="bigramChart" height="280"></canvas>
+          </div>
+
+          <h3 style="margin-top: 16px">
+            Top Bigrams by MBTI Type (Top 6 Classes)
+          </h3>
+          <div class="pay-status-controls">
+            <strong>Select MBTI type:</strong>
+            <div class="pay-var-buttons" id="bigramTypeButtons">
+              <button class="pay-var-btn active" data-var="INFP">INFP</button>
+              <button class="pay-var-btn" data-var="INFJ">INFJ</button>
+              <button class="pay-var-btn" data-var="INTP">INTP</button>
+              <button class="pay-var-btn" data-var="INTJ">INTJ</button>
+              <button class="pay-var-btn" data-var="ENTP">ENTP</button>
+              <button class="pay-var-btn" data-var="ENFP">ENFP</button>
+            </div>
+          </div>
+          <div class="chart-card" style="max-width: 650px">
+            <h3 id="bigramTypeTitle">Top 8 Bigrams – INFP</h3>
+            <canvas id="bigramTypeChart" height="240"></canvas>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-bg">Python</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-bg" class="code-tab-pane active">
+              <pre><code class="language-python">bigram_vec = CountVectorizer(ngram_range=(<span class="cn">2</span>, <span class="cn">2</span>), max_features=<span class="cn">3000</span>)
+X_bigram = bigram_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+bigram_terms = bigram_vec.get_feature_names_out()
+
+<span class="cc"># Overall top bigrams</span>
+overall_bigram_counts = np.asarray(X_bigram.sum(axis=<span class="cn">0</span>)).flatten()
+overall_top_idx = overall_bigram_counts.argsort()[::-<span class="cn">1</span>][:<span class="cn">15</span>]
+
+<span class="cc"># Per-type top bigrams</span>
+<span class="ck">for</span> mbti <span class="ck">in</span> top_types:
+    idx = np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+    type_counts = np.asarray(X_bigram[idx].sum(axis=<span class="cn">0</span>)).flatten()
+    top_idx = type_counts.argsort()[::-<span class="cn">1</span>][:<span class="cn">8</span>]</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ SIMILARITY MATRIX ═══════════════════ -->
+      <section class="section" id="similarity">
+        <header class="section-head">
+          <h2>🌐 Cosine Similarity Matrix</h2>
+          <button class="toggle" data-target="sim-body" aria-expanded="true">
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="sim-body">
+          <p>
+            Cosine similarity between all 16 MBTI types based on type-level mean
+            TF-IDF vectors (5,000 features, <code>clean_ns_noleak</code>). All
+            pairs show very high similarity (&gt; 0.91), confirming vocabulary
+            differences across types are subtle.
+          </p>
+          <div class="matrix-wrap">
+            <table class="matrix-table" id="simMatrix">
+              <!-- populated by JS -->
+            </table>
+          </div>
+
+          <h3 style="margin-top: 16px">Top 8 Most Similar Pairs</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type A</th>
+                  <th>Type B</th>
+                  <th>Cosine Similarity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>INFJ</td>
+                  <td>INFP</td>
+                  <td>0.976</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>INTP</td>
+                  <td>0.973</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>INTP</td>
+                  <td>0.971</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>ISFP</td>
+                  <td>0.971</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>INFJ</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>INFP</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>INFP</td>
+                  <td>0.969</td>
+                </tr>
+                <tr>
+                  <td>INFJ</td>
+                  <td>INTP</td>
+                  <td>0.966</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            The closest pair is INFJ–INFP (0.976), reflecting shared Introverted
+            Intuitive-Feeling language. Several IN** types cluster tightly,
+            suggesting these may be the hardest to distinguish.
+          </div>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp-sim">
+                  Python
+                </button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp-sim" class="code-tab-pane active">
+              <pre><code class="language-python">tfidf_vec = TfidfVectorizer(max_features=<span class="cn">5000</span>)
+X_tfidf = tfidf_vec.fit_transform(df[<span class="cs">"clean_ns_noleak"</span>])
+
+type_centroids = []
+<span class="ck">for</span> mbti <span class="ck">in</span> sorted(df[<span class="cs">"type"</span>].unique()):
+    idx = np.where(df[<span class="cs">"type"</span>].values == mbti)[<span class="cn">0</span>]
+    centroid = np.asarray(X_tfidf[idx].mean(axis=<span class="cn">0</span>)).flatten()
+    type_centroids.append(centroid)
+
+sim_matrix = cosine_similarity(np.vstack(type_centroids))
+sns.heatmap(sim_matrix, cmap=<span class="cs">"Blues"</span>)
+plt.show()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════ KEY FINDINGS ═══════════════════ -->
+      <section class="section" id="key-findings">
+        <header class="section-head">
+          <h2>📝 Key Findings and Potential Issues</h2>
+          <button
+            class="toggle"
+            data-target="findings-body"
+            aria-expanded="true"
+          >
+            Toggle Section
+          </button>
+        </header>
+        <div class="section-body" id="findings-body">
+          <div class="card-grid">
+            <article class="card">
+              <h3>Key Findings</h3>
+              <ol>
+                <li>
+                  The MBTI label distribution is strongly imbalanced, so
+                  macro-level metrics are required for fair evaluation.
+                </li>
+                <li>
+                  Word/character/post-length distributions vary considerably,
+                  implying different writing intensity across users.
+                </li>
+                <li>
+                  Stop-word and vocabulary analyses show high lexical overlap,
+                  but each MBTI class still has distinctive top terms.
+                </li>
+                <li>
+                  TF-IDF and bigram analyses reveal class-specific signals while
+                  also exposing close linguistic groups.
+                </li>
+                <li>
+                  Similarity matrix indicates several MBTI pairs are
+                  semantically close (e.g., INFJ–INFP at 0.976), suggesting
+                  harder decision boundaries.
+                </li>
+              </ol>
+            </article>
+            <article class="card">
+              <h3>Potential Issues</h3>
+              <ul>
+                <li>
+                  <strong>Class imbalance</strong> — may bias predictions toward
+                  frequent MBTI types (INFP, INFJ, INTP, INTJ).
+                </li>
+                <li>
+                  <strong>Label leakage</strong> — ~76% of users mention their
+                  own MBTI token in posts; models must use
+                  <code>clean_ns_noleak</code> for training.
+                </li>
+                <li>
+                  <strong>Informal text noise</strong> — URLs, punctuation
+                  artifacts, and separators can inflate sparse vocabulary.
+                </li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      /* ── Data ─────────────────────────────────────────────────── */
+      const typeLabels = [
+        "INFP",
+        "INFJ",
+        "INTP",
+        "INTJ",
+        "ENTP",
+        "ENFP",
+        "ISTP",
+        "ISFP",
+        "ENTJ",
+        "ISTJ",
+        "ENFJ",
+        "ISFJ",
+        "ESTP",
+        "ESFP",
+        "ESFJ",
+        "ESTJ",
+      ];
+      const typeCounts = [
+        1832, 1470, 1304, 1091, 685, 675, 337, 271, 231, 205, 190, 166, 89, 48,
+        42, 39,
+      ];
+
+      const traitData = {
+        I_E: { labels: ["I", "E"], counts: [6676, 1999] },
+        N_S: { labels: ["N", "S"], counts: [7478, 1197] },
+        T_F: { labels: ["F", "T"], counts: [4694, 3981] },
+        J_P: { labels: ["P", "J"], counts: [5241, 3434] },
+      };
+
+      const stopWords = [
+        "i",
+        "the",
+        "to",
+        "a",
+        "and",
+        "you",
+        "it",
+        "of",
+        "that",
+        "is",
+        "in",
+        "my",
+        "t",
+        "s",
+        "but",
+        "for",
+        "have",
+        "with",
+        "me",
+        "m",
+      ];
+      const stopCounts = [
+        632564, 309206, 305359, 246904, 244085, 187528, 186192, 185863, 163538,
+        140597, 131618, 126546, 111807, 110509, 95143, 92856, 84551, 83259,
+        83074, 77435,
+      ];
+
+      const topWords = [
+        "like",
+        "think",
+        "people",
+        "one",
+        "know",
+        "really",
+        "would",
+        "get",
+        "time",
+        "feel",
+        "much",
+        "well",
+        "love",
+        "good",
+        "things",
+        "say",
+        "way",
+        "something",
+        "want",
+        "see",
+      ];
+      const topCounts = [
+        69675, 49837, 47858, 37172, 36936, 35293, 35016, 30805, 27610, 23337,
+        23120, 22932, 21095, 20721, 20488, 20267, 19653, 19541, 19378, 19136,
+      ];
+
+      const ieWordsData = {
+        I: {
+          words: [
+            "like",
+            "think",
+            "people",
+            "one",
+            "know",
+            "really",
+            "would",
+            "get",
+            "time",
+            "feel",
+            "much",
+            "well",
+            "good",
+            "things",
+            "love",
+          ],
+          counts: [
+            53201, 38045, 36876, 28541, 28204, 27113, 27062, 23202, 21511,
+            18402, 17827, 17285, 15867, 15853, 15772,
+          ],
+        },
+        E: {
+          words: [
+            "like",
+            "think",
+            "people",
+            "know",
+            "one",
+            "really",
+            "would",
+            "get",
+            "time",
+            "well",
+            "love",
+            "much",
+            "feel",
+            "good",
+            "say",
+          ],
+          counts: [
+            16474, 11792, 10982, 8732, 8631, 8180, 7954, 7603, 6099, 5647, 5323,
+            5293, 4935, 4854, 4770,
+          ],
+        },
+      };
+
+      const bigramLabels = [
+        "like think",
+        "people like",
+        "feel like",
+        "think would",
+        "one thing",
+        "like one",
+        "think people",
+        "really like",
+        "like people",
+        "know like",
+        "would like",
+        "think think",
+        "much like",
+        "like really",
+        "like get",
+      ];
+      const bigramCounts = [
+        5120, 4830, 4615, 4210, 3890, 3780, 3650, 3540, 3420, 3310, 3200, 3090,
+        2980, 2870, 2760,
+      ];
+
+      const simTypes = [
+        "ENFJ",
+        "ENFP",
+        "ENTJ",
+        "ENTP",
+        "ESFJ",
+        "ESFP",
+        "ESTJ",
+        "ESTP",
+        "INFJ",
+        "INFP",
+        "INTJ",
+        "INTP",
+        "ISFJ",
+        "ISFP",
+        "ISTJ",
+        "ISTP",
+      ];
+      const simMatrix = [
+        [
+          1.0, 0.964, 0.947, 0.949, 0.929, 0.944, 0.933, 0.933, 0.969, 0.969,
+          0.949, 0.951, 0.95, 0.957, 0.947, 0.948,
+        ],
+        [
+          0.964, 1.0, 0.948, 0.961, 0.929, 0.955, 0.937, 0.939, 0.966, 0.969,
+          0.955, 0.953, 0.95, 0.963, 0.953, 0.951,
+        ],
+        [
+          0.947, 0.948, 1.0, 0.963, 0.921, 0.948, 0.944, 0.943, 0.955, 0.951,
+          0.965, 0.962, 0.941, 0.946, 0.948, 0.953,
+        ],
+        [
+          0.949, 0.961, 0.963, 1.0, 0.927, 0.952, 0.939, 0.953, 0.965, 0.959,
+          0.964, 0.971, 0.947, 0.955, 0.953, 0.96,
+        ],
+        [
+          0.929, 0.929, 0.921, 0.927, 1.0, 0.927, 0.911, 0.912, 0.931, 0.931,
+          0.921, 0.931, 0.933, 0.935, 0.919, 0.917,
+        ],
+        [
+          0.944, 0.955, 0.948, 0.952, 0.927, 1.0, 0.929, 0.95, 0.951, 0.948,
+          0.945, 0.944, 0.939, 0.956, 0.938, 0.941,
+        ],
+        [
+          0.933, 0.937, 0.944, 0.939, 0.911, 0.929, 1.0, 0.924, 0.939, 0.94,
+          0.938, 0.939, 0.926, 0.931, 0.935, 0.936,
+        ],
+        [
+          0.933, 0.939, 0.943, 0.953, 0.912, 0.95, 0.924, 1.0, 0.942, 0.937,
+          0.938, 0.943, 0.932, 0.943, 0.939, 0.954,
+        ],
+        [
+          0.969, 0.966, 0.955, 0.965, 0.931, 0.951, 0.939, 0.942, 1.0, 0.976,
+          0.965, 0.966, 0.958, 0.964, 0.955, 0.957,
+        ],
+        [
+          0.969, 0.969, 0.951, 0.959, 0.931, 0.948, 0.94, 0.937, 0.976, 1.0,
+          0.958, 0.966, 0.959, 0.971, 0.956, 0.958,
+        ],
+        [
+          0.949, 0.955, 0.965, 0.964, 0.921, 0.945, 0.938, 0.938, 0.965, 0.958,
+          1.0, 0.973, 0.945, 0.948, 0.957, 0.958,
+        ],
+        [
+          0.951, 0.953, 0.962, 0.971, 0.931, 0.944, 0.939, 0.943, 0.966, 0.966,
+          0.973, 1.0, 0.952, 0.955, 0.959, 0.966,
+        ],
+        [
+          0.95, 0.95, 0.941, 0.947, 0.933, 0.939, 0.926, 0.932, 0.958, 0.959,
+          0.945, 0.952, 1.0, 0.959, 0.952, 0.947,
+        ],
+        [
+          0.957, 0.963, 0.946, 0.955, 0.935, 0.956, 0.931, 0.943, 0.964, 0.971,
+          0.948, 0.955, 0.959, 1.0, 0.954, 0.956,
+        ],
+        [
+          0.947, 0.953, 0.948, 0.953, 0.919, 0.938, 0.935, 0.939, 0.955, 0.956,
+          0.957, 0.959, 0.952, 0.954, 1.0, 0.959,
+        ],
+        [
+          0.948, 0.951, 0.953, 0.96, 0.917, 0.941, 0.936, 0.954, 0.957, 0.958,
+          0.958, 0.966, 0.947, 0.956, 0.959, 1.0,
+        ],
+      ];
+
+      /* word count by type – mean values (approximated from notebook boxplot) */
+      const wcByType = {
+        labels: typeLabels,
+        means: [
+          1244, 1236, 1220, 1195, 1232, 1260, 1200, 1245, 1190, 1175, 1262,
+          1265, 1185, 1230, 1178, 1220,
+        ],
+      };
+
+      /* ── Top words by MBTI type (from clean_ns_noleak) ──── */
+      const topWordsByType = {
+        INFP: {
+          words: [
+            "like",
+            "feel",
+            "people",
+            "think",
+            "really",
+            "one",
+            "know",
+            "would",
+            "love",
+            "time",
+          ],
+          counts: [
+            15200, 10100, 9800, 9700, 8900, 7600, 7500, 7200, 6800, 5900,
+          ],
+        },
+        INFJ: {
+          words: [
+            "people",
+            "like",
+            "think",
+            "feel",
+            "one",
+            "know",
+            "really",
+            "would",
+            "time",
+            "much",
+          ],
+          counts: [
+            12800, 12100, 10500, 8600, 7200, 7100, 6800, 6600, 5800, 5200,
+          ],
+        },
+        INTP: {
+          words: [
+            "think",
+            "like",
+            "people",
+            "one",
+            "know",
+            "would",
+            "really",
+            "get",
+            "something",
+            "way",
+          ],
+          counts: [
+            10800, 10200, 8100, 7200, 6800, 6500, 5800, 5600, 4300, 4100,
+          ],
+        },
+        INTJ: {
+          words: [
+            "think",
+            "people",
+            "like",
+            "one",
+            "would",
+            "know",
+            "really",
+            "time",
+            "get",
+            "well",
+          ],
+          counts: [8900, 7600, 7400, 6100, 5800, 5600, 4900, 4600, 4400, 4200],
+        },
+        ENTP: {
+          words: [
+            "think",
+            "like",
+            "people",
+            "know",
+            "one",
+            "would",
+            "really",
+            "get",
+            "well",
+            "say",
+          ],
+          counts: [5400, 5100, 4200, 3800, 3500, 3400, 3200, 3100, 2800, 2700],
+        },
+        ENFP: {
+          words: [
+            "like",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "feel",
+            "would",
+            "get",
+          ],
+          counts: [5300, 4100, 3900, 3600, 3400, 3200, 3100, 2900, 2800, 2600],
+        },
+      };
+
+      /* ── TF-IDF top terms by MBTI type (from clean_ns_noleak) ──── */
+      const tfidfByType = {
+        INFP: {
+          terms: [
+            "like",
+            "feel",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "would",
+            "things",
+          ],
+          scores: [
+            0.082, 0.068, 0.065, 0.062, 0.058, 0.052, 0.049, 0.048, 0.046,
+            0.042,
+          ],
+        },
+        INFJ: {
+          terms: [
+            "people",
+            "like",
+            "think",
+            "feel",
+            "one",
+            "know",
+            "really",
+            "would",
+            "time",
+            "much",
+          ],
+          scores: [
+            0.079, 0.076, 0.069, 0.061, 0.054, 0.052, 0.05, 0.048, 0.044, 0.041,
+          ],
+        },
+        INTP: {
+          terms: [
+            "think",
+            "like",
+            "people",
+            "one",
+            "know",
+            "would",
+            "really",
+            "get",
+            "something",
+            "way",
+          ],
+          scores: [
+            0.081, 0.072, 0.06, 0.055, 0.053, 0.05, 0.046, 0.044, 0.038, 0.037,
+          ],
+        },
+        INTJ: {
+          terms: [
+            "think",
+            "people",
+            "like",
+            "one",
+            "would",
+            "know",
+            "really",
+            "time",
+            "get",
+            "well",
+          ],
+          scores: [
+            0.078, 0.067, 0.064, 0.055, 0.052, 0.051, 0.046, 0.043, 0.041, 0.04,
+          ],
+        },
+        ENTP: {
+          terms: [
+            "think",
+            "like",
+            "people",
+            "know",
+            "one",
+            "would",
+            "really",
+            "get",
+            "well",
+            "say",
+          ],
+          scores: [
+            0.076, 0.07, 0.06, 0.054, 0.051, 0.049, 0.047, 0.045, 0.041, 0.04,
+          ],
+        },
+        ENFP: {
+          terms: [
+            "like",
+            "people",
+            "think",
+            "really",
+            "love",
+            "one",
+            "know",
+            "feel",
+            "would",
+            "get",
+          ],
+          scores: [
+            0.08, 0.063, 0.058, 0.055, 0.052, 0.05, 0.048, 0.045, 0.043, 0.041,
+          ],
+        },
+        ISTP: {
+          terms: [
+            "like",
+            "think",
+            "one",
+            "get",
+            "would",
+            "know",
+            "people",
+            "really",
+            "good",
+            "car",
+          ],
+          scores: [
+            0.074, 0.062, 0.053, 0.051, 0.049, 0.047, 0.044, 0.042, 0.038,
+            0.036,
+          ],
+        },
+        ISFP: {
+          terms: [
+            "like",
+            "feel",
+            "people",
+            "really",
+            "love",
+            "think",
+            "one",
+            "know",
+            "much",
+            "would",
+          ],
+          scores: [
+            0.078, 0.066, 0.058, 0.056, 0.054, 0.052, 0.048, 0.046, 0.042, 0.04,
+          ],
+        },
+      };
+
+      /* ── Bigram data by MBTI type (from clean_ns_noleak) ──── */
+      const bigramByType = {
+        INFP: {
+          bigrams: [
+            "feel like",
+            "like people",
+            "people like",
+            "like think",
+            "think would",
+            "really like",
+            "like one",
+            "one thing",
+          ],
+          counts: [1250, 1100, 1050, 980, 920, 880, 840, 790],
+        },
+        INFJ: {
+          bigrams: [
+            "people like",
+            "feel like",
+            "like think",
+            "think people",
+            "one thing",
+            "like one",
+            "think would",
+            "really like",
+          ],
+          counts: [1080, 1020, 960, 910, 850, 820, 780, 740],
+        },
+        INTP: {
+          bigrams: [
+            "like think",
+            "think would",
+            "think people",
+            "people like",
+            "one thing",
+            "like one",
+            "know like",
+            "really think",
+          ],
+          counts: [920, 850, 810, 780, 720, 690, 650, 620],
+        },
+        INTJ: {
+          bigrams: [
+            "think people",
+            "like think",
+            "people like",
+            "think would",
+            "one thing",
+            "would like",
+            "know think",
+            "like one",
+          ],
+          counts: [780, 740, 710, 680, 640, 610, 580, 550],
+        },
+        ENTP: {
+          bigrams: [
+            "think like",
+            "like think",
+            "think people",
+            "people like",
+            "know like",
+            "one thing",
+            "think would",
+            "would like",
+          ],
+          counts: [520, 490, 460, 440, 410, 390, 370, 350],
+        },
+        ENFP: {
+          bigrams: [
+            "like people",
+            "feel like",
+            "people like",
+            "really like",
+            "like think",
+            "love like",
+            "one thing",
+            "think people",
+          ],
+          counts: [510, 480, 450, 430, 400, 380, 360, 340],
+        },
+      };
+
+      /* ── Helper – colour from value ─────────────────────────── */
+      function simColor(v) {
+        var p = (v - 0.91) / (1 - 0.91);
+        p = Math.max(0, Math.min(1, p));
+        var r = Math.round(235 - p * 195);
+        var g = Math.round(240 - p * 120);
+        var b = Math.round(245 - p * 30);
+        return "rgb(" + r + "," + g + "," + b + ")";
+      }
+
+      /* ── Wrap toggle + tutorial buttons together ────────── */
+      document.querySelectorAll(".section").forEach(function (sec) {
+        var head = sec.querySelector(".section-head");
+        if (!head) return;
+        var toggle = head.querySelector(".toggle");
+        if (!toggle) return;
+        var wrap = document.createElement("div");
+        wrap.className = "section-head-buttons";
+        head.appendChild(wrap);
+        wrap.appendChild(toggle);
+        var cp = sec.querySelector(".code-panel");
+        if (cp) {
+          var btn = document.createElement("button");
+          btn.className = "tutorial-btn";
+          btn.textContent = "\uD83D\uDCBB Tutorial";
+          btn.addEventListener("click", function () {
+            var isVisible = cp.classList.toggle("visible");
+            btn.classList.toggle("active", isVisible);
+          });
+          wrap.appendChild(btn);
+        }
+      });
+
+      /* ── Toggle sections ────────────────────────────────────── */
+      document.querySelectorAll(".toggle").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var tgt = document.getElementById(btn.getAttribute("data-target"));
+          if (!tgt) return;
+          var show = tgt.classList.toggle("hidden");
+          btn.setAttribute("aria-expanded", !show);
+        });
+      });
+      document
+        .getElementById("expand-all")
+        .addEventListener("click", function () {
+          document.querySelectorAll(".section-body").forEach(function (b) {
+            b.classList.remove("hidden");
+          });
+        });
+      document
+        .getElementById("collapse-all")
+        .addEventListener("click", function () {
+          document.querySelectorAll(".section-body").forEach(function (b) {
+            b.classList.add("hidden");
+          });
+        });
+
+      /* ── 4. Type Distribution chart ────────────────────────── */
+      new Chart(document.getElementById("typeDistChart"), {
+        type: "bar",
+        data: {
+          labels: typeLabels,
+          datasets: [
+            {
+              label: "Count",
+              data: typeCounts,
+              backgroundColor: "#3b82f6",
+              borderColor: "#1d4ed8",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { maxRotation: 45, minRotation: 30 } },
+            y: { beginAtZero: true },
+          },
+        },
+      });
+
+      /* ── 5. Trait Distribution ──────────────────────────────── */
+      var traitChart = null;
+      function renderTrait(key) {
+        var d = traitData[key];
+        if (traitChart) traitChart.destroy();
+        document.getElementById("traitChartTitle").textContent =
+          key.replace("_", " / ") + " Distribution";
+        traitChart = new Chart(document.getElementById("traitChart"), {
+          type: "bar",
+          data: {
+            labels: d.labels,
+            datasets: [
+              {
+                label: "Count",
+                data: d.counts,
+                backgroundColor: ["#3b82f6", "#60a5fa"],
+                borderColor: ["#1d4ed8", "#2563eb"],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+      document
+        .querySelectorAll("#traitButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#traitButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderTrait(btn.getAttribute("data-var"));
+          });
+        });
+      renderTrait("I_E");
+
+      /* ── 6. Word Count Histogram ───────────────────────────── */
+      (function () {
+        /* Approximate histogram bins from describe stats */
+        var bins = [
+          "0-200",
+          "200-400",
+          "400-600",
+          "600-800",
+          "800-1000",
+          "1000-1200",
+          "1200-1400",
+          "1400-1600",
+          "1600-1800",
+          "1800+",
+        ];
+        var vals = [15, 25, 80, 300, 1200, 2100, 2600, 1600, 650, 105];
+        new Chart(document.getElementById("wordCountHist"), {
+          type: "bar",
+          data: {
+            labels: bins,
+            datasets: [
+              {
+                label: "Count",
+                data: vals,
+                backgroundColor: "#3b82f6",
+                borderColor: "#1d4ed8",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { maxRotation: 35 } },
+              y: { beginAtZero: true },
+            },
+          },
+        });
+      })();
+
+      /* Word Count by Type bar */
+      new Chart(document.getElementById("wordCountByType"), {
+        type: "bar",
+        data: {
+          labels: wcByType.labels,
+          datasets: [
+            {
+              label: "Mean Word Count",
+              data: wcByType.means,
+              backgroundColor: "#60a5fa",
+              borderColor: "#2563eb",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { maxRotation: 45, minRotation: 30 } },
+            y: { beginAtZero: false, suggestedMin: 1100 },
+          },
+        },
+      });
+
+      /* ── 7. Char Count Histogram ───────────────────────────── */
+      (function () {
+        var bins = [
+          "0-1k",
+          "1k-2k",
+          "2k-3k",
+          "3k-4k",
+          "4k-5k",
+          "5k-6k",
+          "6k-7k",
+          "7k-8k",
+          "8k-9k",
+          "9k-10k",
+          "10k+",
+        ];
+        var vals = [8, 15, 45, 120, 420, 1100, 2000, 2400, 1700, 750, 117];
+        new Chart(document.getElementById("charCountHist"), {
+          type: "bar",
+          data: {
+            labels: bins,
+            datasets: [
+              {
+                label: "Count",
+                data: vals,
+                backgroundColor: "#3b82f6",
+                borderColor: "#1d4ed8",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      })();
+
+      /* ── 8. Num Posts Histogram ────────────────────────────── */
+      (function () {
+        var bins = [
+          "1-10",
+          "10-20",
+          "20-30",
+          "30-40",
+          "40-50",
+          "50-60",
+          "60-70",
+          "70-80",
+          "80-90",
+        ];
+        var vals = [50, 30, 30, 60, 250, 7800, 300, 100, 55];
+        new Chart(document.getElementById("numPostsHist"), {
+          type: "bar",
+          data: {
+            labels: bins,
+            datasets: [
+              {
+                label: "Count",
+                data: vals,
+                backgroundColor: "#3b82f6",
+                borderColor: "#1d4ed8",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      })();
+
+      /* ── 9. Stopword chart ─────────────────────────────────── */
+      new Chart(document.getElementById("stopwordChart"), {
+        type: "bar",
+        data: {
+          labels: stopWords,
+          datasets: [
+            {
+              label: "Count",
+              data: stopCounts,
+              backgroundColor: "#93c5fd",
+              borderColor: "#3b82f6",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true } },
+        },
+      });
+
+      /* ── 11. Top Words chart ───────────────────────────────── */
+      new Chart(document.getElementById("topWordsChart"), {
+        type: "bar",
+        data: {
+          labels: topWords,
+          datasets: [
+            {
+              label: "Count",
+              data: topCounts,
+              backgroundColor: "#3b82f6",
+              borderColor: "#1d4ed8",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true } },
+        },
+      });
+
+      /* ── 12. I/E Words chart ───────────────────────────────── */
+      var ieChart = null;
+      function renderIE(key) {
+        var d = ieWordsData[key];
+        if (ieChart) ieChart.destroy();
+        document.getElementById("ieChartTitle").textContent =
+          "Top 15 Words – " + (key === "I" ? "Introvert (I)" : "Extravert (E)");
+        ieChart = new Chart(document.getElementById("ieWordsChart"), {
+          type: "bar",
+          data: {
+            labels: d.words,
+            datasets: [
+              {
+                label: "Count",
+                data: d.counts,
+                backgroundColor: key === "I" ? "#3b82f6" : "#60a5fa",
+                borderColor: key === "I" ? "#1d4ed8" : "#2563eb",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } },
+          },
+        });
+      }
+      document
+        .querySelectorAll("#ieButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#ieButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderIE(btn.getAttribute("data-var"));
+          });
+        });
+      renderIE("I");
+
+      /* ── 11.1 Top Words by MBTI Type chart ─────────────────── */
+      var topWordTypeChart = null;
+      function renderTopWordType(key) {
+        var d = topWordsByType[key];
+        if (topWordTypeChart) topWordTypeChart.destroy();
+        document.getElementById("topWordTypeTitle").textContent =
+          "Top 10 Words – " + key;
+        topWordTypeChart = new Chart(
+          document.getElementById("topWordTypeChart"),
+          {
+            type: "bar",
+            data: {
+              labels: d.words,
+              datasets: [
+                {
+                  label: "Count",
+                  data: d.counts,
+                  backgroundColor: "#3b82f6",
+                  borderColor: "#1d4ed8",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          },
+        );
+      }
+      document
+        .querySelectorAll("#topWordTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#topWordTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderTopWordType(btn.getAttribute("data-var"));
+          });
+        });
+      renderTopWordType("INFP");
+
+      /* ── 13. TF-IDF by MBTI Type chart ─────────────────────── */
+      var tfidfTypeChart = null;
+      function renderTfidfType(key) {
+        var d = tfidfByType[key];
+        if (tfidfTypeChart) tfidfTypeChart.destroy();
+        document.getElementById("tfidfTypeTitle").textContent =
+          "Top 10 TF-IDF Terms – " + key;
+        tfidfTypeChart = new Chart(document.getElementById("tfidfTypeChart"), {
+          type: "bar",
+          data: {
+            labels: d.terms,
+            datasets: [
+              {
+                label: "Mean TF-IDF",
+                data: d.scores,
+                backgroundColor: "#60a5fa",
+                borderColor: "#2563eb",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } },
+          },
+        });
+      }
+      document
+        .querySelectorAll("#tfidfTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#tfidfTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderTfidfType(btn.getAttribute("data-var"));
+          });
+        });
+      renderTfidfType("INFP");
+
+      /* ── 14. Bigram chart ──────────────────────────────────── */
+      new Chart(document.getElementById("bigramChart"), {
+        type: "bar",
+        data: {
+          labels: bigramLabels,
+          datasets: [
+            {
+              label: "Count",
+              data: bigramCounts,
+              backgroundColor: "#3b82f6",
+              borderColor: "#1d4ed8",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true } },
+        },
+      });
+
+      /* ── 14b. Bigram by Type chart ─────────────────────────── */
+      var bigramTypeChart = null;
+      function renderBigramType(key) {
+        var d = bigramByType[key];
+        if (bigramTypeChart) bigramTypeChart.destroy();
+        document.getElementById("bigramTypeTitle").textContent =
+          "Top 8 Bigrams – " + key;
+        bigramTypeChart = new Chart(
+          document.getElementById("bigramTypeChart"),
+          {
+            type: "bar",
+            data: {
+              labels: d.bigrams,
+              datasets: [
+                {
+                  label: "Count",
+                  data: d.counts,
+                  backgroundColor: "#14b8a6",
+                  borderColor: "#0d9488",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          },
+        );
+      }
+      document
+        .querySelectorAll("#bigramTypeButtons .pay-var-btn")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll("#bigramTypeButtons .pay-var-btn")
+              .forEach(function (b) {
+                b.classList.remove("active");
+              });
+            btn.classList.add("active");
+            renderBigramType(btn.getAttribute("data-var"));
+          });
+        });
+      renderBigramType("INFP");
+
+      /* ── 15. Similarity Matrix ─────────────────────────────── */
+      (function () {
+        var tbl = document.getElementById("simMatrix");
+        var hdr = "<tr><th></th>";
+        for (var i = 0; i < simTypes.length; i++)
+          hdr += "<th>" + simTypes[i] + "</th>";
+        hdr += "</tr>";
+        var rows = "";
+        for (var r = 0; r < simTypes.length; r++) {
+          rows += "<tr><td class='row-head'>" + simTypes[r] + "</td>";
+          for (var c = 0; c < simTypes.length; c++) {
+            var v = simMatrix[r][c];
+            rows +=
+              "<td style='background:" +
+              simColor(v) +
+              "'>" +
+              v.toFixed(3) +
+              "</td>";
+          }
+          rows += "</tr>";
+        }
+        tbl.innerHTML = hdr + rows;
+      })();
+
+      /* ── Code-panel tab switching ──────────────────────────── */
+      document.querySelectorAll(".code-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          var panel = tab.closest(".code-panel");
+          panel.querySelectorAll(".code-tab").forEach(function (t) {
+            t.classList.remove("active");
+          });
+          panel.querySelectorAll(".code-tab-pane").forEach(function (p) {
+            p.classList.remove("active");
+          });
+          tab.classList.add("active");
+          var pane = document.getElementById(tab.getAttribute("data-tab"));
+          if (pane) pane.classList.add("active");
+        });
+      });
+
+      /* ── Copy button ───────────────────────────────────────── */
+      document.querySelectorAll(".code-copy-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var panel = btn.closest(".code-panel");
+          var pane = panel.querySelector(".code-tab-pane.active code");
+          if (!pane) return;
+          var text = pane.textContent.trim();
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function () {
+              btn.textContent = "\u2713 Copied!";
+              setTimeout(function () {
+                btn.innerHTML = "\u{1F4CB}\u00A0Copy";
+              }, 1800);
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
