@@ -1238,74 +1238,74 @@ df[<span class="cs">"clean_ns"</span>] = df[<span class="cs">"clean"</span>].app
               </thead>
               <tbody>
                 <tr>
-                  <td>INFJ</td>
-                  <td>0.9272</td>
-                </tr>
-                <tr>
-                  <td>INFP</td>
-                  <td>0.9213</td>
-                </tr>
-                <tr>
-                  <td>INTP</td>
-                  <td>0.8997</td>
-                </tr>
-                <tr>
-                  <td>INTJ</td>
-                  <td>0.8918</td>
-                </tr>
-                <tr>
-                  <td>ENTP</td>
-                  <td>0.8730</td>
-                </tr>
-                <tr>
                   <td>ENFP</td>
-                  <td>0.8637</td>
-                </tr>
-                <tr>
-                  <td>ISTP</td>
-                  <td>0.7715</td>
-                </tr>
-                <tr>
-                  <td>ISFP</td>
-                  <td>0.7565</td>
-                </tr>
-                <tr>
-                  <td>ENTJ</td>
-                  <td>0.7446</td>
-                </tr>
-                <tr>
-                  <td>ENFJ</td>
-                  <td>0.7368</td>
-                </tr>
-                <tr>
-                  <td>ISTJ</td>
-                  <td>0.7268</td>
-                </tr>
-                <tr>
-                  <td>ISFJ</td>
-                  <td>0.6928</td>
+                  <td>0.9022</td>
                 </tr>
                 <tr>
                   <td>ESTP</td>
-                  <td>0.6517</td>
+                  <td>0.8989</td>
                 </tr>
                 <tr>
-                  <td>ESFP</td>
-                  <td>0.5625</td>
+                  <td>ISFJ</td>
+                  <td>0.8976</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>0.8920</td>
+                </tr>
+                <tr>
+                  <td>ENFJ</td>
+                  <td>0.8842</td>
+                </tr>
+                <tr>
+                  <td>INTJ</td>
+                  <td>0.8836</td>
+                </tr>
+                <tr>
+                  <td>ISTP</td>
+                  <td>0.8754</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>0.8684</td>
+                </tr>
+                <tr>
+                  <td>INFJ</td>
+                  <td>0.8667</td>
+                </tr>
+                <tr>
+                  <td>ISTJ</td>
+                  <td>0.8634</td>
+                </tr>
+                <tr>
+                  <td>INTP</td>
+                  <td>0.8581</td>
+                </tr>
+                <tr>
+                  <td>ENTJ</td>
+                  <td>0.8528</td>
                 </tr>
                 <tr>
                   <td>ESFJ</td>
-                  <td>0.5238</td>
+                  <td>0.8333</td>
+                </tr>
+                <tr>
+                  <td>ISFP</td>
+                  <td>0.8081</td>
                 </tr>
                 <tr>
                   <td>ESTJ</td>
-                  <td>0.4872</td>
+                  <td>0.7436</td>
+                </tr>
+                <tr>
+                  <td>ESFP</td>
+                  <td>0.7292</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="note">
-            <strong>Average self-token leakage rate: ~0.76.</strong>
+            <strong>Average self-token leakage rate: ~0.85.</strong>
             Most users mention their own MBTI type in posts. A
             <code>clean_ns_noleak</code> column is created by stripping all 16
             MBTI tokens to prevent label leakage in downstream word-frequency
@@ -2084,8 +2084,8 @@ overall_top_idx = overall_bigram_counts.argsort()[::-<span class="cn">1</span>][
           <p>
             Cosine similarity between all 16 MBTI types based on type-level mean
             TF-IDF vectors (5,000 features, <code>clean_ns_noleak</code>). All
-            pairs show very high similarity (&gt; 0.91), confirming vocabulary
-            differences across types are subtle.
+            pairs show high similarity, ranging from 0.839 to 1.0, confirming
+            vocabulary differences across types are subtle.
           </p>
           <div class="matrix-wrap">
             <table class="matrix-table" id="simMatrix">
@@ -2107,48 +2107,48 @@ overall_top_idx = overall_bigram_counts.argsort()[::-<span class="cn">1</span>][
                 <tr>
                   <td>INFJ</td>
                   <td>INFP</td>
-                  <td>0.976</td>
+                  <td>0.987</td>
                 </tr>
                 <tr>
                   <td>INTJ</td>
                   <td>INTP</td>
-                  <td>0.973</td>
-                </tr>
-                <tr>
-                  <td>ENTP</td>
-                  <td>INTP</td>
-                  <td>0.971</td>
-                </tr>
-                <tr>
-                  <td>INFP</td>
-                  <td>ISFP</td>
-                  <td>0.971</td>
-                </tr>
-                <tr>
-                  <td>ENFJ</td>
-                  <td>INFJ</td>
-                  <td>0.969</td>
-                </tr>
-                <tr>
-                  <td>ENFJ</td>
-                  <td>INFP</td>
-                  <td>0.969</td>
+                  <td>0.984</td>
                 </tr>
                 <tr>
                   <td>ENFP</td>
                   <td>INFP</td>
-                  <td>0.969</td>
+                  <td>0.979</td>
+                </tr>
+                <tr>
+                  <td>ENFP</td>
+                  <td>INFJ</td>
+                  <td>0.978</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>INTP</td>
+                  <td>0.978</td>
+                </tr>
+                <tr>
+                  <td>ENTP</td>
+                  <td>INTJ</td>
+                  <td>0.975</td>
+                </tr>
+                <tr>
+                  <td>INFP</td>
+                  <td>ISFP</td>
+                  <td>0.975</td>
                 </tr>
                 <tr>
                   <td>INFJ</td>
-                  <td>INTP</td>
-                  <td>0.966</td>
+                  <td>INTJ</td>
+                  <td>0.974</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="note">
-            The closest pair is INFJ–INFP (0.976), reflecting shared Introverted
+            The closest pair is INFJ–INFP (0.987), reflecting shared Introverted
             Intuitive-Feeling language. Several IN** types cluster tightly,
             suggesting these may be the hardest to distinguish.
           </div>
@@ -2215,7 +2215,7 @@ plt.show()</code></pre>
                 </li>
                 <li>
                   Similarity matrix indicates several MBTI pairs are
-                  semantically close (e.g., INFJ–INFP at 0.976), suggesting
+                  semantically close (e.g., INFJ–INFP at 0.987), suggesting
                   harder decision boundaries.
                 </li>
               </ol>
@@ -2228,7 +2228,7 @@ plt.show()</code></pre>
                   frequent MBTI types (INFP, INFJ, INTP, INTJ).
                 </li>
                 <li>
-                  <strong>Label leakage</strong> — ~76% of users mention their
+                  <strong>Label leakage</strong> — ~85% of users mention their
                   own MBTI token in posts; models must use
                   <code>clean_ns_noleak</code> for training.
                 </li>
@@ -2276,10 +2276,8 @@ plt.show()</code></pre>
       };
 
       const stopWords = [
-        "i",
         "the",
         "to",
-        "a",
         "and",
         "you",
         "it",
@@ -2288,19 +2286,21 @@ plt.show()</code></pre>
         "is",
         "in",
         "my",
-        "t",
-        "s",
         "but",
         "for",
         "have",
         "with",
         "me",
-        "m",
+        "this",
+        "be",
+        "not",
+        "are",
+        "on",
       ];
       const stopCounts = [
-        632564, 309206, 305359, 246904, 244085, 187528, 186192, 185863, 163538,
-        140597, 131618, 126546, 111807, 110509, 95143, 92856, 84551, 83259,
-        83074, 77435,
+        309206, 305359, 244085, 187528, 186192, 185863, 163538, 140597, 131618,
+        126546, 95143, 92856, 84551, 83259, 83074, 76786, 74741, 72342, 72202,
+        63727,
       ];
 
       const topWords = [
@@ -2380,25 +2380,25 @@ plt.show()</code></pre>
       };
 
       const bigramLabels = [
-        "like think",
-        "people like",
         "feel like",
-        "think would",
-        "one thing",
-        "like one",
-        "think people",
-        "really like",
-        "like people",
-        "know like",
+        "sounds like",
+        "pretty much",
+        "high school",
+        "would say",
+        "seems like",
+        "even though",
         "would like",
-        "think think",
-        "much like",
-        "like really",
-        "like get",
+        "best friend",
+        "really like",
+        "get along",
+        "years ago",
+        "long time",
+        "using tapatalk",
+        "personality type",
       ];
       const bigramCounts = [
-        5120, 4830, 4615, 4210, 3890, 3780, 3650, 3540, 3420, 3310, 3200, 3090,
-        2980, 2870, 2760,
+        5645, 2609, 2409, 2216, 1997, 1904, 1899, 1844, 1698, 1570, 1551, 1460,
+        1460, 1376, 1297,
       ];
 
       const simTypes = [
@@ -2421,68 +2421,68 @@ plt.show()</code></pre>
       ];
       const simMatrix = [
         [
-          1.0, 0.964, 0.947, 0.949, 0.929, 0.944, 0.933, 0.933, 0.969, 0.969,
-          0.949, 0.951, 0.95, 0.957, 0.947, 0.948,
+          1.0, 0.968, 0.937, 0.947, 0.894, 0.906, 0.891, 0.921, 0.969, 0.966,
+          0.945, 0.943, 0.949, 0.953, 0.938, 0.937,
         ],
         [
-          0.964, 1.0, 0.948, 0.961, 0.929, 0.955, 0.937, 0.939, 0.966, 0.969,
-          0.955, 0.953, 0.95, 0.963, 0.953, 0.951,
+          0.968, 1.0, 0.947, 0.965, 0.897, 0.923, 0.901, 0.935, 0.978, 0.979,
+          0.958, 0.956, 0.958, 0.968, 0.951, 0.951,
         ],
         [
-          0.947, 0.948, 1.0, 0.963, 0.921, 0.948, 0.944, 0.943, 0.955, 0.951,
-          0.965, 0.962, 0.941, 0.946, 0.948, 0.953,
+          0.937, 0.947, 1.0, 0.965, 0.878, 0.905, 0.902, 0.928, 0.957, 0.946,
+          0.969, 0.962, 0.935, 0.935, 0.944, 0.948,
         ],
         [
-          0.949, 0.961, 0.963, 1.0, 0.927, 0.952, 0.939, 0.953, 0.965, 0.959,
-          0.964, 0.971, 0.947, 0.955, 0.953, 0.96,
+          0.947, 0.965, 0.965, 1.0, 0.887, 0.918, 0.906, 0.944, 0.971, 0.964,
+          0.975, 0.978, 0.947, 0.953, 0.953, 0.963,
         ],
         [
-          0.929, 0.929, 0.921, 0.927, 1.0, 0.927, 0.911, 0.912, 0.931, 0.931,
-          0.921, 0.931, 0.933, 0.935, 0.919, 0.917,
+          0.894, 0.897, 0.878, 0.887, 1.0, 0.857, 0.839, 0.867, 0.9, 0.893,
+          0.885, 0.884, 0.896, 0.894, 0.88, 0.872,
         ],
         [
-          0.944, 0.955, 0.948, 0.952, 0.927, 1.0, 0.929, 0.95, 0.951, 0.948,
-          0.945, 0.944, 0.939, 0.956, 0.938, 0.941,
+          0.906, 0.923, 0.905, 0.918, 0.857, 1.0, 0.851, 0.902, 0.918, 0.914,
+          0.91, 0.906, 0.902, 0.914, 0.901, 0.903,
         ],
         [
-          0.933, 0.937, 0.944, 0.939, 0.911, 0.929, 1.0, 0.924, 0.939, 0.94,
-          0.938, 0.939, 0.926, 0.931, 0.935, 0.936,
+          0.891, 0.901, 0.902, 0.906, 0.839, 0.851, 1.0, 0.881, 0.907, 0.901,
+          0.908, 0.903, 0.886, 0.89, 0.896, 0.895,
         ],
         [
-          0.933, 0.939, 0.943, 0.953, 0.912, 0.95, 0.924, 1.0, 0.942, 0.937,
-          0.938, 0.943, 0.932, 0.943, 0.939, 0.954,
+          0.921, 0.935, 0.928, 0.944, 0.867, 0.902, 0.881, 1.0, 0.933, 0.93,
+          0.931, 0.933, 0.92, 0.929, 0.924, 0.939,
         ],
         [
-          0.969, 0.966, 0.955, 0.965, 0.931, 0.951, 0.939, 0.942, 1.0, 0.976,
-          0.965, 0.966, 0.958, 0.964, 0.955, 0.957,
+          0.969, 0.978, 0.957, 0.971, 0.9, 0.918, 0.907, 0.933, 1.0, 0.987,
+          0.974, 0.973, 0.965, 0.97, 0.958, 0.957,
         ],
         [
-          0.969, 0.969, 0.951, 0.959, 0.931, 0.948, 0.94, 0.937, 0.976, 1.0,
-          0.958, 0.966, 0.959, 0.971, 0.956, 0.958,
+          0.966, 0.979, 0.946, 0.964, 0.893, 0.914, 0.901, 0.93, 0.987, 1.0,
+          0.966, 0.97, 0.961, 0.975, 0.955, 0.957,
         ],
         [
-          0.949, 0.955, 0.965, 0.964, 0.921, 0.945, 0.938, 0.938, 0.965, 0.958,
-          1.0, 0.973, 0.945, 0.948, 0.957, 0.958,
+          0.945, 0.958, 0.969, 0.975, 0.885, 0.91, 0.908, 0.931, 0.974, 0.966,
+          1.0, 0.984, 0.948, 0.95, 0.961, 0.961,
         ],
         [
-          0.951, 0.953, 0.962, 0.971, 0.931, 0.944, 0.939, 0.943, 0.966, 0.966,
-          0.973, 1.0, 0.952, 0.955, 0.959, 0.966,
+          0.943, 0.956, 0.962, 0.978, 0.884, 0.906, 0.903, 0.933, 0.973, 0.97,
+          0.984, 1.0, 0.946, 0.954, 0.957, 0.966,
         ],
         [
-          0.95, 0.95, 0.941, 0.947, 0.933, 0.939, 0.926, 0.932, 0.958, 0.959,
-          0.945, 0.952, 1.0, 0.959, 0.952, 0.947,
+          0.949, 0.958, 0.935, 0.947, 0.896, 0.902, 0.886, 0.92, 0.965, 0.961,
+          0.948, 0.946, 1.0, 0.958, 0.947, 0.939,
         ],
         [
-          0.957, 0.963, 0.946, 0.955, 0.935, 0.956, 0.931, 0.943, 0.964, 0.971,
-          0.948, 0.955, 0.959, 1.0, 0.954, 0.956,
+          0.953, 0.968, 0.935, 0.953, 0.894, 0.914, 0.89, 0.929, 0.97, 0.975,
+          0.95, 0.954, 0.958, 1.0, 0.948, 0.95,
         ],
         [
-          0.947, 0.953, 0.948, 0.953, 0.919, 0.938, 0.935, 0.939, 0.955, 0.956,
-          0.957, 0.959, 0.952, 0.954, 1.0, 0.959,
+          0.938, 0.951, 0.944, 0.953, 0.88, 0.901, 0.896, 0.924, 0.958, 0.955,
+          0.961, 0.957, 0.947, 0.948, 1.0, 0.952,
         ],
         [
-          0.948, 0.951, 0.953, 0.96, 0.917, 0.941, 0.936, 0.954, 0.957, 0.958,
-          0.958, 0.966, 0.947, 0.956, 0.959, 1.0,
+          0.937, 0.951, 0.948, 0.963, 0.872, 0.903, 0.895, 0.939, 0.957, 0.957,
+          0.961, 0.966, 0.939, 0.95, 0.952, 1.0,
         ],
       ];
 
@@ -2490,8 +2490,8 @@ plt.show()</code></pre>
       const wcByType = {
         labels: typeLabels,
         means: [
-          1244, 1236, 1220, 1195, 1232, 1260, 1200, 1245, 1190, 1175, 1262,
-          1265, 1185, 1230, 1178, 1220,
+          1245, 1278, 1198, 1195, 1206, 1261, 1166, 1136, 1218, 1213, 1287,
+          1241, 1163, 1022, 1290, 1230,
         ],
       };
 
@@ -2500,98 +2500,94 @@ plt.show()</code></pre>
         INFP: {
           words: [
             "like",
-            "feel",
-            "people",
             "think",
+            "people",
             "really",
-            "one",
             "know",
+            "one",
             "would",
-            "love",
+            "feel",
+            "get",
             "time",
           ],
           counts: [
-            15200, 10100, 9800, 9700, 8900, 7600, 7500, 7200, 6800, 5900,
+            15860, 11322, 10458, 8746, 8111, 8066, 7150, 6552, 6521, 5997,
           ],
         },
         INFJ: {
           words: [
-            "people",
             "like",
             "think",
-            "feel",
-            "one",
+            "people",
             "know",
+            "one",
             "really",
             "would",
+            "get",
             "time",
-            "much",
+            "feel",
           ],
-          counts: [
-            12800, 12100, 10500, 8600, 7200, 7100, 6800, 6600, 5800, 5200,
-          ],
+          counts: [11914, 8793, 8584, 6819, 6447, 6170, 5819, 5136, 4933, 4884],
         },
         INTP: {
           words: [
-            "think",
             "like",
+            "think",
             "people",
+            "would",
             "one",
             "know",
-            "would",
             "really",
             "get",
-            "something",
-            "way",
+            "time",
+            "well",
           ],
-          counts: [
-            10800, 10200, 8100, 7200, 6800, 6500, 5800, 5600, 4300, 4100,
-          ],
+          counts: [9726, 7097, 7086, 5645, 5467, 5038, 4619, 4374, 3984, 3276],
         },
         INTJ: {
           words: [
-            "think",
-            "people",
             "like",
-            "one",
+            "people",
+            "think",
             "would",
+            "one",
             "know",
             "really",
-            "time",
             "get",
+            "time",
             "well",
           ],
-          counts: [8900, 7600, 7400, 6100, 5800, 5600, 4900, 4600, 4400, 4200],
+          counts: [7786, 5943, 5556, 4721, 4671, 4269, 3470, 3431, 3343, 2772],
         },
         ENTP: {
           words: [
-            "think",
             "like",
+            "think",
             "people",
-            "know",
             "one",
+            "know",
             "would",
             "really",
             "get",
+            "time",
             "well",
-            "say",
           ],
-          counts: [5400, 5100, 4200, 3800, 3500, 3400, 3200, 3100, 2800, 2700],
+          counts: [5353, 3917, 3697, 3021, 2781, 2681, 2589, 2491, 1978, 1878],
         },
         ENFP: {
           words: [
             "like",
-            "people",
             "think",
-            "really",
-            "love",
-            "one",
+            "people",
             "know",
-            "feel",
+            "really",
+            "one",
             "would",
             "get",
+            "love",
+            "time",
           ],
-          counts: [5300, 4100, 3900, 3600, 3400, 3200, 3100, 2900, 2800, 2600],
+          counts: [6037, 4019, 3706, 3160, 3125, 2954, 2673, 2606, 2455, 2218],
         },
       };
 
@@ -2600,139 +2596,145 @@ plt.show()</code></pre>
         INFP: {
           terms: [
             "like",
-            "feel",
-            "people",
             "think",
+            "people",
             "really",
-            "love",
-            "one",
             "know",
+            "one",
+            "feel",
             "would",
-            "things",
+            "love",
+            "get",
           ],
           scores: [
-            0.082, 0.068, 0.065, 0.062, 0.058, 0.052, 0.049, 0.048, 0.046,
-            0.042,
+            0.1054, 0.0765, 0.0713, 0.0624, 0.0561, 0.0552, 0.0513, 0.0501,
+            0.0472, 0.0461,
           ],
         },
         INFJ: {
           terms: [
-            "people",
             "like",
             "think",
-            "feel",
-            "one",
+            "people",
             "know",
+            "one",
             "really",
             "would",
+            "feel",
+            "get",
             "time",
-            "much",
           ],
           scores: [
-            0.079, 0.076, 0.069, 0.061, 0.054, 0.052, 0.05, 0.048, 0.044, 0.041,
+            0.0973, 0.0733, 0.0715, 0.0579, 0.0543, 0.0542, 0.0506, 0.0469,
+            0.0446, 0.0433,
           ],
         },
         INTP: {
           terms: [
-            "think",
             "like",
+            "think",
             "people",
+            "would",
             "one",
             "know",
-            "would",
             "really",
             "get",
-            "something",
-            "way",
+            "time",
+            "intps",
           ],
           scores: [
-            0.081, 0.072, 0.06, 0.055, 0.053, 0.05, 0.046, 0.044, 0.038, 0.037,
+            0.092, 0.0687, 0.0686, 0.0568, 0.0536, 0.0499, 0.0474, 0.0441,
+            0.0403, 0.0367,
           ],
         },
         INTJ: {
           terms: [
-            "think",
-            "people",
             "like",
-            "one",
+            "people",
+            "think",
             "would",
+            "one",
             "know",
             "really",
-            "time",
+            "intjs",
             "get",
-            "well",
+            "time",
           ],
           scores: [
-            0.078, 0.067, 0.064, 0.055, 0.052, 0.051, 0.046, 0.043, 0.041, 0.04,
+            0.0881, 0.069, 0.0641, 0.0565, 0.0544, 0.0504, 0.0423, 0.0417,
+            0.0415, 0.0406,
           ],
         },
         ENTP: {
           terms: [
-            "think",
             "like",
+            "think",
             "people",
-            "know",
             "one",
+            "know",
             "would",
             "really",
+            "entps",
             "get",
             "well",
-            "say",
           ],
           scores: [
-            0.076, 0.07, 0.06, 0.054, 0.051, 0.049, 0.047, 0.045, 0.041, 0.04,
+            0.0964, 0.0718, 0.0678, 0.0566, 0.0523, 0.0513, 0.0504, 0.0485,
+            0.0481, 0.0387,
           ],
         },
         ENFP: {
           terms: [
             "like",
-            "people",
             "think",
+            "people",
             "really",
+            "know",
             "love",
             "one",
-            "know",
-            "feel",
             "would",
             "get",
+            "enfps",
           ],
           scores: [
-            0.08, 0.063, 0.058, 0.055, 0.052, 0.05, 0.048, 0.045, 0.043, 0.041,
+            0.1076, 0.073, 0.0676, 0.0602, 0.0584, 0.0545, 0.0543, 0.0506,
+            0.0496, 0.0452,
           ],
         },
         ISTP: {
           terms: [
             "like",
+            "people",
             "think",
-            "one",
             "get",
             "would",
-            "know",
-            "people",
             "really",
-            "good",
-            "car",
+            "know",
+            "one",
+            "istps",
+            "time",
           ],
           scores: [
-            0.074, 0.062, 0.053, 0.051, 0.049, 0.047, 0.044, 0.042, 0.038,
-            0.036,
+            0.0924, 0.0634, 0.0626, 0.0545, 0.0521, 0.0505, 0.0505, 0.0496,
+            0.0446, 0.0433,
           ],
         },
         ISFP: {
           terms: [
             "like",
-            "feel",
-            "people",
-            "really",
-            "love",
             "think",
-            "one",
+            "really",
+            "people",
             "know",
-            "much",
+            "get",
+            "one",
             "would",
+            "love",
+            "feel",
           ],
           scores: [
-            0.078, 0.066, 0.058, 0.056, 0.054, 0.052, 0.048, 0.046, 0.042, 0.04,
+            0.109, 0.0722, 0.064, 0.0617, 0.0518, 0.0495, 0.0494, 0.0446,
+            0.0424, 0.0423,
           ],
         },
       };
@@ -2742,86 +2744,86 @@ plt.show()</code></pre>
         INFP: {
           bigrams: [
             "feel like",
-            "like people",
-            "people like",
-            "like think",
-            "think would",
-            "really like",
-            "like one",
-            "one thing",
+            "high school",
+            "pretty much",
+            "even though",
+            "sounds like",
+            "seems like",
+            "would like",
+            "best friend",
           ],
-          counts: [1250, 1100, 1050, 980, 920, 880, 840, 790],
+          counts: [1617, 542, 525, 487, 476, 406, 405, 404],
         },
         INFJ: {
           bigrams: [
-            "people like",
             "feel like",
-            "like think",
-            "think people",
-            "one thing",
-            "like one",
-            "think would",
-            "really like",
+            "sounds like",
+            "pretty much",
+            "would say",
+            "even though",
+            "seems like",
+            "high school",
+            "best friend",
           ],
-          counts: [1080, 1020, 960, 910, 850, 820, 780, 740],
+          counts: [1151, 476, 374, 357, 341, 338, 337, 327],
         },
         INTP: {
           bigrams: [
-            "like think",
-            "think would",
-            "think people",
-            "people like",
-            "one thing",
-            "like one",
-            "know like",
-            "really think",
+            "feel like",
+            "pretty much",
+            "high school",
+            "sounds like",
+            "would like",
+            "seems like",
+            "would say",
+            "even though",
           ],
-          counts: [920, 850, 810, 780, 720, 690, 650, 620],
+          counts: [611, 361, 341, 318, 280, 276, 256, 250],
         },
         INTJ: {
           bigrams: [
-            "think people",
-            "like think",
-            "people like",
-            "think would",
-            "one thing",
+            "feel like",
+            "sounds like",
+            "high school",
             "would like",
-            "know think",
-            "like one",
+            "would say",
+            "pretty much",
+            "something like",
+            "seems like",
           ],
-          counts: [780, 740, 710, 680, 640, 610, 580, 550],
+          counts: [454, 316, 269, 264, 251, 246, 196, 194],
         },
         ENTP: {
           bigrams: [
-            "think like",
-            "like think",
-            "think people",
-            "people like",
-            "know like",
-            "one thing",
-            "think would",
-            "would like",
+            "feel like",
+            "sounds like",
+            "pretty much",
+            "seems like",
+            "would say",
+            "high school",
+            "get along",
+            "really like",
           ],
-          counts: [520, 490, 460, 440, 410, 390, 370, 350],
+          counts: [320, 210, 190, 163, 156, 151, 150, 127],
         },
         ENFP: {
           bigrams: [
-            "like people",
             "feel like",
-            "people like",
-            "really like",
-            "like think",
-            "love like",
-            "one thing",
-            "think people",
+            "sounds like",
+            "pretty much",
+            "seems like",
+            "best friend",
+            "even though",
+            "would say",
+            "using tapatalk",
           ],
-          counts: [510, 480, 450, 430, 400, 380, 360, 340],
+          counts: [563, 239, 199, 178, 165, 158, 156, 138],
         },
       };
 
       /* ── Helper – colour from value ─────────────────────────── */
       function simColor(v) {
-        var p = (v - 0.91) / (1 - 0.91);
+        var p = (v - 0.83) / (1 - 0.83);
         p = Math.max(0, Math.min(1, p));
         var r = Math.round(235 - p * 195);
         var g = Math.round(240 - p * 120);
@@ -2959,7 +2961,7 @@ plt.show()</code></pre>
           "1600-1800",
           "1800+",
         ];
-        var vals = [15, 25, 80, 300, 1200, 2100, 2600, 1600, 650, 105];
+        var vals = [31, 100, 269, 490, 969, 1596, 2358, 2132, 714, 16];
         new Chart(document.getElementById("wordCountHist"), {
           type: "bar",
           data: {
@@ -3025,7 +3027,7 @@ plt.show()</code></pre>
           "9k-10k",
           "10k+",
         ];
-        var vals = [8, 15, 45, 120, 420, 1100, 2000, 2400, 1700, 750, 117];
+        var vals = [10, 40, 100, 231, 478, 889, 1507, 2241, 2200, 965, 14];
         new Chart(document.getElementById("charCountHist"), {
           type: "bar",
           data: {
@@ -3061,7 +3063,7 @@ plt.show()</code></pre>
           "70-80",
           "80-90",
         ];
-        var vals = [50, 30, 30, 60, 250, 7800, 300, 100, 55];
+        var vals = [16, 44, 143, 266, 522, 7627, 32, 21, 4];
         new Chart(document.getElementById("numPostsHist"), {
           type: "bar",
           data: {

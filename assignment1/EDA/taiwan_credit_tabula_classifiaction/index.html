@@ -1796,15 +1796,9 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 <h3>Counts by Group</h3>
                 <canvas id="billAmtCountChart" height="190"></canvas>
               </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="billAmtRateChart" height="190"></canvas>
-              </article>
             </div>
             <div class="note" style="margin-top:10px">
               <strong>Chart finding:</strong> Bill amounts are <strong>heavily right-skewed</strong>.
-              Clients in Q1 (lowest bills, including negative credit balances) show elevated default rates (~27 &thinsp;%),
-              counter-intuitively &mdash; these may be clients who stopped using the card after falling behind.
             </div>
           </details>
 
@@ -1814,9 +1808,7 @@ plt.tight_layout(); plt.show()</code></pre></div>
               Distribution and default-rate trend for payment amount variables.
               A <strong>log&#x2081;&#x2080;(amt&thinsp;+&thinsp;1)</strong> transformation is applied
               below to reveal the shape of non-zero payments, which span several orders of magnitude
-              (NT$1 to ~NT$870&thinsp;K). Adding 1 before taking the log safely handles zero values,
-              and shifting the distribution to a near-normal shape is useful for distance-based models
-              and visualisation.
+              (NT$1 to ~NT$870&thinsp;K). Adding 1 before taking the log safely handles zero values.
             </p>
 
             <div class="pay-status-controls">
@@ -1848,10 +1840,6 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 <h3>Counts by Group</h3>
                 <canvas id="payAmtCountChart" height="190"></canvas>
               </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="payAmtRateChart" height="190"></canvas>
-              </article>
             </div>
             <div class="chart-grid" style="margin-top:12px">
               <article class="chart-card">
@@ -1860,81 +1848,16 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 </h3>
                 <canvas id="payAmtLogChart" height="200"></canvas>
               </article>
-              <article class="chart-card">
-                <h3>Default Composition by Payment Group</h3>
-                <canvas id="payAmtTargetChart" height="200"></canvas>
-              </article>
             </div>
             <div class="note" style="margin-top:10px">
               <strong>Chart finding:</strong> 17&ndash;24 % of clients made <strong>zero payment</strong>
-              in each given month. These clients default at ~29&ndash;36 % vs ~19&ndash;20 % for clients who made
-              any payment &mdash; a strong binary split.
+              in each given month.
               The log-scale histogram of non-zero payments shows a <strong>roughly bell-shaped</strong>
               distribution centred around log&#x2081;&#x2080;&thinsp;&asymp;&thinsp;3.1&ndash;3.4
-              (NT$1&thinsp;000&ndash;2&thinsp;500), confirming the heavy right-skew present in raw values.
-              The stacked bar confirms the <strong>~15&ndash;16 pp gap</strong> in default rate between
-              zero-payment and paid groups is consistent across all six months.</div>
+              (NT$1&thinsp;000&ndash;2&thinsp;500), confirming the heavy right-skew present in raw values.</div>
           </details>
 
 
-          <div class="code-panel tut-toggle" data-section="numerical-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp3a-plotly">Plotly</button>
-                <button class="code-tab" data-tab="cp3a-matplotlib">Matplotlib</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp3a-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
-<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
-<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
-
-num_col = <span class="cs">'BILL_AMT_1'</span>  <span class="cc"># or BILL_AMT_2 … 6</span>
-
-<span class="cc"># Bin into 10 equal-width intervals</span>
-df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
-counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
-drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labs     = [str(i) for i in counts_b.index]
-
-fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
-    subplot_titles=[<span class="cs">f'{num_col} Histogram'</span>,
-                    <span class="cs">f'Default Rate by {num_col} Bin'</span>])
-fig.add_trace(go.Bar(x=labs, y=counts_b.values,
-                     marker_color=<span class="cs">'#1864ab'</span>), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.add_trace(go.Scatter(x=labs, y=drate_b.values,
-                         mode=<span class="cs">'lines+markers'</span>,
-                         line=dict(color=<span class="cs">'#d9480f'</span>, width=<span class="cn">2</span>)),
-              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
-fig.update_layout(showlegend=<span class="cs">False</span>)
-fig.show()</code></pre></div>
-            <div id="cp3a-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
-
-num_col = <span class="cs">'BILL_AMT_1'</span>
-
-df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
-counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
-drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labs = [str(i) for i in counts_b.index]
-
-fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">13</span>, <span class="cn">5</span>))
-
-ax1.bar(range(<span class="cn">len</span>(labs)), counts_b.values, color=<span class="cs">'#1864ab'</span>)
-ax1.set_xticks(range(<span class="cn">len</span>(labs)))
-ax1.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
-ax1.set_title(<span class="cs">f'{num_col} Histogram (binned)'</span>)
-
-ax2.plot(range(<span class="cn">len</span>(labs)), drate_b.values,
-         marker=<span class="cs">'o'</span>, color=<span class="cs">'#d9480f'</span>, linewidth=<span class="cn">2</span>)
-ax2.fill_between(range(<span class="cn">len</span>(labs)), drate_b.values,
-                 alpha=<span class="cn">0.15</span>, color=<span class="cs">'#d9480f'</span>)
-ax2.set_xticks(range(<span class="cn">len</span>(labs)))
-ax2.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
-ax2.set_title(<span class="cs">f'Default Rate by {num_col} Bin'</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-          </div>
           <details open>
             <summary>Age Analysis</summary>
             <div class="chart-grid" style="margin-top: 10px">
@@ -1942,15 +1865,10 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 <h3>Counts by Group</h3>
                 <canvas id="ageCountChart" height="190"></canvas>
               </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="ageRateChart" height="190"></canvas>
-              </article>
             </div>
             <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> Age shows a <strong>weak U-shaped pattern</strong>.
-              Young adults (20&ndash;30) and clients 60+ have slightly elevated default rates;
-              the 30&ndash;40 group is the most financially stable. Age alone has low predictive power.
+              <strong>Chart finding:</strong> Age distribution is <strong>concentrated in 20&ndash;40</strong> range.
+              The 30&ndash;40 group is the largest cohort. Age alone has low predictive power.
             </div>
           </details>
 
@@ -1961,15 +1879,11 @@ plt.tight_layout(); plt.show()</code></pre></div>
                 <h3>Counts by Group</h3>
                 <canvas id="limitBalanceCountChart" height="190"></canvas>
               </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="limitBalanceRateChart" height="190"></canvas>
-              </article>
             </div>
             <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> <strong>Strong inverse relationship</strong> between credit limit and default risk.
-              Clients with limit &le;&nbsp;NT$50&thinsp;K default at ~32 % vs ~14 % for those above NT$270&thinsp;K.
-              Credit limit is a proxy for creditworthiness and is the most important continuous feature.
+              <strong>Chart finding:</strong> Credit limit distribution is <strong>right-skewed</strong>.
+              Most clients have limits &le;&nbsp;NT$200&thinsp;K.
+              Credit limit is a proxy for creditworthiness and is an important continuous feature.
             </div>
           </details>
         </div>
@@ -2668,9 +2582,7 @@ print(mi_series)</code></pre></div>
       let payStatusCountChart;
       let payStatusDefaultRateChart;
       let billAmtCountChart;
-      let billAmtRateChart;
       let payAmtCountChart;
-      let payAmtRateChart;
 
       const billAmtData = {
         BILL_AMT_1: {
@@ -2818,16 +2730,6 @@ print(mi_series)</code></pre></div>
             0.0, 0.0, 0.0,
           ],
         },
-      };
-
-      // Binary group breakdown: zero payment vs paid, with default/no-default counts
-      const payAmtGroupData = {
-        PAY_AMT_1: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1887, 4749], nodefault_counts: [3362, 20002] },
-        PAY_AMT_2: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1799, 4837], nodefault_counts: [3597, 19767] },
-        PAY_AMT_3: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1931, 4705], nodefault_counts: [4037, 19327] },
-        PAY_AMT_4: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1993, 4643], nodefault_counts: [4415, 18949] },
-        PAY_AMT_5: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [1970, 4666], nodefault_counts: [4733, 18631] },
-        PAY_AMT_6: { groups: ["No Payment (0)", "Paid (>0)"], default_counts: [2078, 4558], nodefault_counts: [5095, 18269] },
       };
 
       // log₁₀(amt+1) histogram data for non-zero payments (20 equal-width bins)
@@ -3590,13 +3492,9 @@ print(mi_series)</code></pre></div>
         variable,
         chartRefs,
         countCanvasId,
-        rateCanvasId,
       ) {
         const data = dataObj[variable];
         const labels = buildBinLabels(data.bins, data.counts.length);
-        const ratesPct = data.bin_default_rates.map((x) =>
-          Number((x * 100).toFixed(2)),
-        );
 
         const countCtx = document.getElementById(countCanvasId);
         if (chartRefs.count) {
@@ -3621,36 +3519,6 @@ print(mi_series)</code></pre></div>
             plugins: { legend: { display: false } },
             scales: {
               x: { ticks: { maxRotation: 45, minRotation: 25 } },
-            },
-          },
-        });
-
-        const rateCtx = document.getElementById(rateCanvasId);
-        if (chartRefs.rate) {
-          chartRefs.rate.destroy();
-        }
-        chartRefs.rate = new Chart(rateCtx, {
-          type: "line",
-          data: {
-            labels,
-            datasets: [
-              {
-                label: "Default rate (%)",
-                data: ratesPct,
-                borderColor: "#d9480f",
-                backgroundColor: "rgba(217, 72, 15, 0.14)",
-                tension: 0.22,
-                fill: true,
-                pointRadius: 3,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { maxRotation: 45, minRotation: 25 } },
-              y: { beginAtZero: true, suggestedMax: 100 },
             },
           },
         });
@@ -3735,14 +3603,10 @@ print(mi_series)</code></pre></div>
       function renderSingleGroupAnalysis(
         variableKey,
         countCanvasId,
-        rateCanvasId,
       ) {
         const data = ageLimitData[variableKey];
         const labels = Object.keys(data.counts);
         const counts = labels.map((k) => data.counts[k]);
-        const ratePct = labels.map((k) =>
-          Number((data.default_rates[k] * 100).toFixed(2)),
-        );
 
         new Chart(document.getElementById(countCanvasId), {
           type: "bar",
@@ -3762,82 +3626,6 @@ print(mi_series)</code></pre></div>
             responsive: true,
             plugins: { legend: { display: false } },
             scales: { x: { ticks: { maxRotation: 35, minRotation: 15 } } },
-          },
-        });
-
-        new Chart(document.getElementById(rateCanvasId), {
-          type: "line",
-          data: {
-            labels,
-            datasets: [
-              {
-                label: "Default rate (%)",
-                data: ratePct,
-                borderColor: "#d9480f",
-                backgroundColor: "rgba(217, 72, 15, 0.14)",
-                fill: true,
-                tension: 0.2,
-                pointRadius: 3,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, suggestedMax: 100 } },
-          },
-        });
-      }
-
-      let payAmtTargetChart = null;
-      function renderPayAmtTargetChart(variable) {
-        const d = payAmtGroupData[variable];
-        const totals = d.default_counts.map((dc, i) => dc + d.nodefault_counts[i]);
-        const defPct  = d.default_counts.map((dc, i) => Number(((dc / totals[i]) * 100).toFixed(2)));
-        const nodefPct = defPct.map((v) => Number((100 - v).toFixed(2)));
-        const ctx = document.getElementById("payAmtTargetChart");
-        if (payAmtTargetChart) payAmtTargetChart.destroy();
-        payAmtTargetChart = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels: d.groups,
-            datasets: [
-              {
-                label: "No Default (0)",
-                data: nodefPct,
-                backgroundColor: "#2f855a",
-                borderColor: "#1f5c3d",
-                borderWidth: 1,
-              },
-              {
-                label: "Default (1)",
-                data: defPct,
-                backgroundColor: "#c05621",
-                borderColor: "#8f3f17",
-                borderWidth: 1,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: "bottom" },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) =>
-                    ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} %`,
-                },
-              },
-            },
-            scales: {
-              x: { stacked: true },
-              y: {
-                stacked: true,
-                beginAtZero: true,
-                max: 100,
-                title: { display: true, text: "Share (%)" },
-              },
-            },
           },
         });
       }
@@ -3917,7 +3705,7 @@ print(mi_series)</code></pre></div>
       const billButtons = document.querySelectorAll(
         "#billAmtButtons .pay-var-btn",
       );
-      const billCharts = { count: null, rate: null };
+      const billCharts = { count: null };
       if (billButtons.length > 0) {
         billButtons.forEach((button) => {
           button.addEventListener("click", () => {
@@ -3928,7 +3716,6 @@ print(mi_series)</code></pre></div>
               button.getAttribute("data-var"),
               billCharts,
               "billAmtCountChart",
-              "billAmtRateChart",
             );
           });
         });
@@ -3937,14 +3724,13 @@ print(mi_series)</code></pre></div>
           "BILL_AMT_1",
           billCharts,
           "billAmtCountChart",
-          "billAmtRateChart",
         );
       }
 
       const payAmtButtons = document.querySelectorAll(
         "#payAmtButtons .pay-var-btn",
       );
-      const payAmtCharts = { count: null, rate: null };
+      const payAmtCharts = { count: null };
       if (payAmtButtons.length > 0) {
         payAmtButtons.forEach((button) => {
           button.addEventListener("click", () => {
@@ -3956,10 +3742,8 @@ print(mi_series)</code></pre></div>
               v,
               payAmtCharts,
               "payAmtCountChart",
-              "payAmtRateChart",
             );
             renderPayAmtLogChart(v);
-            renderPayAmtTargetChart(v);
           });
         });
         renderBinnedAnalysis(
@@ -3967,10 +3751,8 @@ print(mi_series)</code></pre></div>
           "PAY_AMT_1",
           payAmtCharts,
           "payAmtCountChart",
-          "payAmtRateChart",
         );
         renderPayAmtLogChart("PAY_AMT_1");
-        renderPayAmtTargetChart("PAY_AMT_1");
       }
 
       const catButtons = document.querySelectorAll(
@@ -3987,12 +3769,8 @@ print(mi_series)</code></pre></div>
         renderCategorical("Gender");
       }
 
-      renderSingleGroupAnalysis("Age", "ageCountChart", "ageRateChart");
-      renderSingleGroupAnalysis(
-        "Credit_Limit",
-        "limitBalanceCountChart",
-        "limitBalanceRateChart",
-      );
+      renderSingleGroupAnalysis("Age", "ageCountChart");
+      renderSingleGroupAnalysis("Credit_Limit", "limitBalanceCountChart");
 
       function renderTargetDistribution() {
         const labels = ["No Default (0)", "Default (1)"];
