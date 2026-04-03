@@ -1,0 +1,56 @@
+{
+  "name": "Default of Credit Card Clients",
+  "uci_id": 350,
+  "source": "https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients",
+  "task": "Binary Classification",
+  "domain": "Finance",
+  "n_instances": 30000,
+  "n_features": 23,
+  "n_targets": 1,
+  "target": "Default_Payment_Next_Month",
+  "target_values": { "0": "No Default", "1": "Default" },
+  "class_distribution": {
+    "No Default (0)": 23364,
+    "Default (1)": 6636,
+    "imbalance_ratio": 3.52
+  },
+  "period": "April 2005 – September 2005",
+  "country": "Taiwan",
+  "missing_values": 0,
+  "features": {
+    "categorical": ["Gender", "Education", "Marriage"],
+    "ordinal": ["PAY_1", "PAY_2", "PAY_3", "PAY_4", "PAY_5", "PAY_6"],
+    "numeric": [
+      "Credit_Limit",
+      "Age",
+      "BILL_AMT_1",
+      "BILL_AMT_2",
+      "BILL_AMT_3",
+      "BILL_AMT_4",
+      "BILL_AMT_5",
+      "BILL_AMT_6",
+      "PAY_AMT_1",
+      "PAY_AMT_2",
+      "PAY_AMT_3",
+      "PAY_AMT_4",
+      "PAY_AMT_5",
+      "PAY_AMT_6"
+    ]
+  },
+  "key_findings": {
+    "strongest_predictor": "PAY_1 (recent repayment status)",
+    "class_imbalance": "77.88% no-default vs 22.12% default",
+    "recommended_metrics": ["F1-score", "AUC-ROC", "Precision-Recall AUC"],
+    "collinear_group": "BILL_AMT_1 through BILL_AMT_6 (r ≈ 0.80–0.95)"
+  },
+  "citation": "Yeh, I.C., & Lien, C.H. (2009). Expert Systems with Applications, 36(2), 2473-2480.",
+  "files": {
+    "taiwan_credit_default.csv": {
+      "path": "data/taiwan_credit_default.csv",
+      "rows": 30000,
+      "columns": 24,
+      "size_mb": 2.6,
+      "description": "Full cleaned dataset with renamed columns matching the EDA notebook."
+    }
+  }
+}

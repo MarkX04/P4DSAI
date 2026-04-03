@@ -883,8 +883,8 @@
         </header>
                 <div class="section-body" id="methodology-body">
           <p>
-            Tabular EDA on the <strong>UCI Taiwan Credit Default dataset</strong> (30,000 records, 23 features, Apr–Sep 2005).
-            Analysis covers data quality, distributions, relationships, and feature importance.
+            This report analyzes tabular data (structured CSV format) with focus on data quality,
+            feature distributions, and relationships. Different from text analysis, we examine:
           </p>
           <div class="table-wrap">
             <table>
@@ -897,49 +897,24 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Target Distribution</strong></td>
-                  <td>Check class balance</td>
-                  <td>Class counts, imbalance ratio</td>
+                  <td><strong>Numerical Features</strong></td>
+                  <td>Distribution &amp; outliers</td>
+                  <td>Mean, Median, Std, IQR, Outliers</td>
                 </tr>
                 <tr>
                   <td><strong>Categorical Features</strong></td>
-                  <td>Category frequencies &amp; default rate per group</td>
-                  <td>Value counts, mode, default rate</td>
-                </tr>
-                <tr>
-                  <td><strong>Ordinal Features</strong></td>
-                  <td>Repayment status distribution by delay code</td>
-                  <td>Count &amp; default rate per PAY code</td>
-                </tr>
-                <tr>
-                  <td><strong>Numerical Features</strong></td>
-                  <td>Distribution shape &amp; outliers</td>
-                  <td>Mean, Median, Std, IQR</td>
+                  <td>Category frequencies</td>
+                  <td>Unique values, Mode, Cardinality</td>
                 </tr>
                 <tr>
                   <td><strong>Correlation</strong></td>
-                  <td>Linear relationships between features</td>
-                  <td>Pearson r, heatmap</td>
+                  <td>Feature relationships</td>
+                  <td>Pearson r, Multicollinearity</td>
                 </tr>
                 <tr>
-                  <td><strong>Outlier Analysis</strong></td>
-                  <td>Detect extreme values per column</td>
-                  <td>IQR fence, outlier count &amp; %</td>
-                </tr>
-                <tr>
-                  <td><strong>Cramér's V</strong></td>
-                  <td>Association strength between categorical features and target</td>
-                  <td>V = √(χ²/n·k), range 0–1</td>
-                </tr>
-                <tr>
-                  <td><strong>Mutual Information</strong></td>
-                  <td>Feature importance — captures linear &amp; non-linear signal</td>
-                  <td>MI score (sklearn), ranked per feature</td>
-                </tr>
-                <tr>
-                  <td><strong>Feature Engineering</strong></td>
-                  <td>Derive new predictive features before modelling</td>
-                  <td><code>delay_count</code>, <code>util_rate</code></td>
+                  <td><strong>Target Analysis</strong></td>
+                  <td>Class balance &amp; relationships</td>
+                  <td>Distribution, Target vs features</td>
                 </tr>
               </tbody>
             </table>
@@ -1197,7 +1172,889 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- SAMPLE ROWS BY CLASS                                         -->
+      <!-- TARGET DISTRIBUTION                                             -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="categorical-analysis">
+        <header class="section-head">
+          <h2>📂 Categorical Variables Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="categorical-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="categorical-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="categorical-body">
+          <p>
+            Distribution counts and default-rate comparison for major
+            categorical variables.
+          </p>
+
+          <div class="pay-status-controls">
+            <strong>Select variable:</strong>
+            <div class="pay-var-buttons" id="categoricalButtons">
+              <button class="pay-var-btn active" data-var="Gender">
+                Gender
+              </button>
+              <button class="pay-var-btn" data-var="Education">
+                Education
+              </button>
+              <button class="pay-var-btn" data-var="Marriage">Marriage</button>
+            </div>
+          </div>
+
+          <div class="chart-grid">
+            <article class="chart-card">
+              <h3>Counts by Group</h3>
+              <canvas id="catCountChart" height="190"></canvas>
+            </article>
+            <article class="chart-card">
+              <h3>Default Composition by Group (Stacked %)</h3>
+              <canvas id="catRateChart" height="190"></canvas>
+            </article>
+          </div>
+
+          <div class="note" style="margin-top:12px">
+            <strong>Chart findings:</strong>
+            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.7">
+              <li><strong>Gender</strong> — Dataset is ~60 % female. Men default at a slightly higher rate (~24 %) than women (~21 %).</li>
+              <li><strong>Education</strong> — Graduate school clients have the lowest default rate (~19 %); high school has the highest (~25 %). The &ldquo;Others&rdquo; category (~7 %) is abnormally low &mdash; likely a data artefact from merged undocumented codes.</li>
+              <li><strong>Marriage</strong> — Married clients default at ~23.5 % vs single at ~18.6 %. Differences are modest; demographics provide only weak individual signal.</li>
+            </ul>
+          </div>
+
+          <div class="code-panel tut-toggle" data-section="categorical-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp1-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp1-matplotlib">Matplotlib</button>
+                <button class="code-tab" data-tab="cp1-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp1-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.express</span> <span class="ck">as</span> px
+<span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+
+cat_col = <span class="cs">'EDUCATION'</span>   <span class="cc"># or 'SEX', 'MARRIAGE'</span>
+
+<span class="cc"># 1. Count distribution</span>
+counts = df[cat_col].value_counts().reset_index()
+counts.columns = [cat_col, <span class="cs">'Count'</span>]
+fig1 = px.bar(counts, x=cat_col, y=<span class="cs">'Count'</span>,
+              color=cat_col, title=<span class="cs">f'{cat_col} Count Distribution'</span>,
+              color_discrete_sequence=px.colors.qualitative.Set2)
+fig1.show()
+
+<span class="cc"># 2. Stacked 100 % default-rate bar</span>
+grp = df.groupby(cat_col)[<span class="cs">'Default'</span>].value_counts(normalize=<span class="cs">True</span>).unstack()
+grp.columns = [<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>]
+fig2 = px.bar(grp.reset_index(), x=cat_col,
+              y=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
+              barmode=<span class="cs">'relative'</span>,
+              color_discrete_map={<span class="cs">'No Default'</span>: <span class="cs">'#2f855a'</span>, <span class="cs">'Default'</span>: <span class="cs">'#c05621'</span>},
+              title=<span class="cs">f'Default Composition by {cat_col} (%)'</span>)
+fig2.show()</code></pre></div>
+            <div id="cp1-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+<span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
+
+cat_col = <span class="cs">'EDUCATION'</span>
+counts  = df[cat_col].value_counts()
+drate   = df.groupby(cat_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+non_dr  = <span class="cn">100</span> - drate
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+<span class="cc"># Count bar</span>
+axes[<span class="cn">0</span>].bar(counts.index, counts.values, color=<span class="cs">'#0f766e'</span>)
+axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Distribution'</span>)
+axes[<span class="cn">0</span>].set_xlabel(cat_col); axes[<span class="cn">0</span>].set_ylabel(<span class="cs">'Count'</span>)
+
+<span class="cc"># Stacked 100 % bar</span>
+x = np.arange(len(drate))
+axes[<span class="cn">1</span>].bar(x, non_dr.values, label=<span class="cs">'No Default'</span>, color=<span class="cs">'#2f855a'</span>)
+axes[<span class="cn">1</span>].bar(x, drate.values, bottom=non_dr.values,
+            label=<span class="cs">'Default'</span>, color=<span class="cs">'#c05621'</span>)
+axes[<span class="cn">1</span>].set_xticks(x); axes[<span class="cn">1</span>].set_xticklabels(drate.index, rotation=<span class="cn">15</span>)
+axes[<span class="cn">1</span>].legend(); axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Rate by {cat_col}'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp1-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+cat_col = <span class="cs">'EDUCATION'</span>
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+sns.countplot(data=df, x=cat_col, ax=axes[<span class="cn">0</span>], palette=<span class="cs">'Set2'</span>,
+              order=df[cat_col].value_counts().index)
+axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Count'</span>)
+
+<span class="cc"># 100 % fill (proportion per class)</span>
+sns.histplot(data=df, x=cat_col, hue=<span class="cs">'Default'</span>,
+             multiple=<span class="cs">'fill'</span>, stat=<span class="cs">'proportion'</span>,
+             ax=axes[<span class="cn">1</span>], palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>},
+             order=df[cat_col].value_counts().index)
+axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Proportion by {cat_col}'</span>)
+axes[<span class="cn">1</span>].set_ylim(<span class="cn">0</span>, <span class="cn">1</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!--  ORDINAL VARIABLES – PAY_1 to PAY_6                            -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <section class="section" id="ordinal-analysis">
+        <header class="section-head">
+          <h2>📶 Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
+          <div class="section-head-actions">
+            <button class="toggle" data-target="ordinal-body" aria-expanded="true">
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="ordinal-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="ordinal-body">
+
+          <h3 style="margin-top:16px">PAY Code Reference Scale</h3>
+          <div class="ordinal-scale">
+            <span class="ord-chip ord-neg2">&minus;2 &nbsp;No consumption</span>
+            <span class="ord-chip ord-neg1">&minus;1 &nbsp;Paid duly (on time)</span>
+            <span class="ord-chip ord-zero">&nbsp;0 &nbsp;Revolving / minimum paid</span>
+            <span class="ord-chip ord-pos">&nbsp;1 &nbsp;1-month delay</span>
+            <span class="ord-chip ord-pos">&nbsp;2 &nbsp;2-month delay</span>
+            <span class="ord-chip ord-pos">&nbsp;3 &nbsp;3-month delay</span>
+            <span class="ord-chip ord-high">&ge;4 &nbsp;Severe delay (4–8 months)</span>
+          </div>
+
+          <p style="margin-top:14px">
+            Select a PAY variable below. The <strong>count bar</strong> shows how often each
+            delay code occurs; the <strong>default-rate line</strong> shows what fraction of
+            clients with that code actually defaulted — revealing the monotonic risk gradient.
+          </p>
+
+          <div class="pay-status-controls">
+            <strong>Select variable:</strong>
+            <div class="pay-var-buttons" id="payVarButtons">
+              <button class="pay-var-btn active" data-var="PAY_1">PAY_1</button>
+              <button class="pay-var-btn" data-var="PAY_2">PAY_2</button>
+              <button class="pay-var-btn" data-var="PAY_3">PAY_3</button>
+              <button class="pay-var-btn" data-var="PAY_4">PAY_4</button>
+              <button class="pay-var-btn" data-var="PAY_5">PAY_5</button>
+              <button class="pay-var-btn" data-var="PAY_6">PAY_6</button>
+            </div>
+          </div>
+
+          <div class="chart-grid">
+            <article class="chart-card">
+              <h3>Counts by Ordinal Code</h3>
+              <canvas id="payStatusCountChart" height="190"></canvas>
+              <p class="mini-note">
+                Bar chart respects ordered scale (−2 at left → 8 at right).
+                Most clients cluster around codes −1, 0 (on time or revolving).
+              </p>
+            </article>
+            <article class="chart-card">
+              <h3>Default Rate by Ordinal Code</h3>
+              <canvas id="payStatusDefaultRateChart" height="190"></canvas>
+              <p class="mini-note">
+                Line chart shows the <strong>monotonic rise</strong> in default probability.
+                PAY code ≥ 2 is a strong default signal (&gt;55 %).
+              </p>
+            </article>
+          </div>
+
+          <div class="note" style="margin-top:12px">
+            <strong>Key finding:</strong> Default rate jumps from ~13&nbsp;% at code &minus;2
+            (no consumption) to <strong>~69–76&nbsp;%</strong> at codes 2–3 (two/three-month
+            payment delay). PAY_1 is the single strongest predictor in the dataset.
+          </div>
+
+          <div class="code-panel tut-toggle" data-section="ordinal-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp2-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp2-matplotlib">Matplotlib</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp2-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+
+pay_col = <span class="cs">'PAY_1'</span>  <span class="cc"># ordinal: -2 no-consumption … 8 eight-month delay</span>
+
+<span class="cc"># Count per ordinal level (sort by code value)</span>
+counts = df[pay_col].value_counts().sort_index()
+drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labels = counts.index.astype(str).tolist()
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
+    subplot_titles=[<span class="cs">f'{pay_col} Frequency (Ordered)'</span>,
+                    <span class="cs">f'Default Rate by {pay_col}'</span>])
+
+fig.add_trace(go.Bar(x=labels, y=counts.values,
+                     marker_color=<span class="cs">'#2f855a'</span>, name=<span class="cs">'Count'</span>),
+              row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Scatter(x=labels, y=drate.values,
+                         mode=<span class="cs">'lines+markers'</span>,
+                         marker=dict(color=<span class="cs">'#c05621'</span>, size=<span class="cn">7</span>),
+                         line=dict(color=<span class="cs">'#c05621'</span>, width=<span class="cn">2</span>),
+                         name=<span class="cs">'Default %'</span>),
+              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+
+fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>)
+fig.update_yaxes(title_text=<span class="cs">'Count'</span>, row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.update_yaxes(title_text=<span class="cs">'Default Rate (%)'</span>, row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.show()</code></pre></div>
+            <div id="cp2-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+pay_col = <span class="cs">'PAY_1'</span>
+
+counts = df[pay_col].value_counts().sort_index()
+drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labels = [str(c) for c in counts.index]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
+
+<span class="cc"># Ordered bar for counts</span>
+ax1.bar(labels, counts.values, color=<span class="cs">'#2f855a'</span>, edgecolor=<span class="cs">'#1f5c3d'</span>)
+ax1.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+ax1.set_ylabel(<span class="cs">'Count'</span>)
+ax1.set_title(<span class="cs">f'{pay_col} Distribution (Ordered Bar)'</span>)
+
+<span class="cc"># Line chart for default rate</span>
+ax2.plot(labels, drate.values, marker=<span class="cs">'o'</span>,
+         color=<span class="cs">'#c05621'</span>, linewidth=<span class="cn">2</span>, markersize=<span class="cn">6</span>)
+ax2.fill_between(range(<span class="cn">len</span>(labels)), drate.values,
+                 alpha=<span class="cn">0.18</span>, color=<span class="cs">'#c05621'</span>)
+ax2.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
+ax2.set_ylabel(<span class="cs">'Default Rate (%)'</span>)
+ax2.set_title(<span class="cs">f'Default Rate by {pay_col} (Monotonic Trend)'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="section" id="numerical-analysis">
+        <header class="section-head">
+          <h2>📈 Numerical Variables Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="numerical-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="numerical-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="numerical-body">
+
+          <details open>
+            <summary>Bill Amount Analysis (BILL_AMT_1 to BILL_AMT_6)</summary>
+            <p>
+              Distribution and default-rate trend for billing amount variables.
+            </p>
+
+            <div class="pay-status-controls">
+              <strong>Select variable:</strong>
+              <div class="pay-var-buttons" id="billAmtButtons">
+                <button class="pay-var-btn active" data-var="BILL_AMT_1">
+                  BILL_AMT_1
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_2">
+                  BILL_AMT_2
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_3">
+                  BILL_AMT_3
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_4">
+                  BILL_AMT_4
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_5">
+                  BILL_AMT_5
+                </button>
+                <button class="pay-var-btn" data-var="BILL_AMT_6">
+                  BILL_AMT_6
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="billAmtCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="billAmtRateChart" height="190"></canvas>
+              </article>
+            </div>
+            <div class="note" style="margin-top:10px">
+              <strong>Chart finding:</strong> Bill amounts are <strong>heavily right-skewed</strong>.
+              Clients in Q1 (lowest bills, including negative credit balances) show elevated default rates (~27 &thinsp;%),
+              counter-intuitively &mdash; these may be clients who stopped using the card after falling behind.
+              BILL_AMT_1 through BILL_AMT_6 have pairwise r &asymp; 0.82&ndash;0.95 (near-collinear) &mdash;
+              use only <code>BILL_AMT_1</code> or apply PCA in linear models.
+            </div>
+          </details>
+
+          <details open>
+            <summary>Payment Amount Analysis (PAY_AMT_1 to PAY_AMT_6)</summary>
+            <p>
+              Distribution and default-rate trend for payment amount variables.
+            </p>
+
+            <div class="pay-status-controls">
+              <strong>Select variable:</strong>
+              <div class="pay-var-buttons" id="payAmtButtons">
+                <button class="pay-var-btn active" data-var="PAY_AMT_1">
+                  PAY_AMT_1
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_2">
+                  PAY_AMT_2
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_3">
+                  PAY_AMT_3
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_4">
+                  PAY_AMT_4
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_5">
+                  PAY_AMT_5
+                </button>
+                <button class="pay-var-btn" data-var="PAY_AMT_6">
+                  PAY_AMT_6
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="payAmtCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="payAmtRateChart" height="190"></canvas>
+              </article>
+            </div>
+            <div class="note" style="margin-top:10px">
+              <strong>Chart finding:</strong> 27&ndash;30 % of clients made <strong>zero payment</strong>
+              in each given month. These clients default at ~32&ndash;35 % vs ~17&ndash;19 % for clients who made
+              any payment &mdash; a clear binary split. Engineer <em>has_paid_k = (PAY_AMT_k &gt; 0)</em>
+              binary indicator features as compact proxies.
+            </div>
+          </details>
+
+
+          <div class="code-panel tut-toggle" data-section="numerical-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp3a-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp3a-matplotlib">Matplotlib</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp3a-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+num_col = <span class="cs">'BILL_AMT_1'</span>  <span class="cc"># or BILL_AMT_2 … 6</span>
+
+<span class="cc"># Bin into 10 equal-width intervals</span>
+df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
+counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
+drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labs     = [str(i) for i in counts_b.index]
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
+    subplot_titles=[<span class="cs">f'{num_col} Histogram'</span>,
+                    <span class="cs">f'Default Rate by {num_col} Bin'</span>])
+fig.add_trace(go.Bar(x=labs, y=counts_b.values,
+                     marker_color=<span class="cs">'#1864ab'</span>), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Scatter(x=labs, y=drate_b.values,
+                         mode=<span class="cs">'lines+markers'</span>,
+                         line=dict(color=<span class="cs">'#d9480f'</span>, width=<span class="cn">2</span>)),
+              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.update_layout(showlegend=<span class="cs">False</span>)
+fig.show()</code></pre></div>
+            <div id="cp3a-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+num_col = <span class="cs">'BILL_AMT_1'</span>
+
+df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
+counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
+drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
+labs = [str(i) for i in counts_b.index]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">13</span>, <span class="cn">5</span>))
+
+ax1.bar(range(<span class="cn">len</span>(labs)), counts_b.values, color=<span class="cs">'#1864ab'</span>)
+ax1.set_xticks(range(<span class="cn">len</span>(labs)))
+ax1.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
+ax1.set_title(<span class="cs">f'{num_col} Histogram (binned)'</span>)
+
+ax2.plot(range(<span class="cn">len</span>(labs)), drate_b.values,
+         marker=<span class="cs">'o'</span>, color=<span class="cs">'#d9480f'</span>, linewidth=<span class="cn">2</span>)
+ax2.fill_between(range(<span class="cn">len</span>(labs)), drate_b.values,
+                 alpha=<span class="cn">0.15</span>, color=<span class="cs">'#d9480f'</span>)
+ax2.set_xticks(range(<span class="cn">len</span>(labs)))
+ax2.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
+ax2.set_title(<span class="cs">f'Default Rate by {num_col} Bin'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <details open>
+            <summary>Age Analysis</summary>
+            <div class="chart-grid" style="margin-top: 10px">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="ageCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="ageRateChart" height="190"></canvas>
+              </article>
+            </div>
+            <div class="note" style="margin-top:10px">
+              <strong>Chart finding:</strong> Age shows a <strong>weak U-shaped pattern</strong>.
+              Young adults (20&ndash;30) and clients 60+ have slightly elevated default rates;
+              the 30&ndash;40 group is the most financially stable. Age alone has low predictive power
+              but adds value in non-linear tree-based models.
+            </div>
+          </details>
+
+          <details open>
+            <summary>Limit Balance Analysis</summary>
+            <div class="chart-grid" style="margin-top: 10px">
+              <article class="chart-card">
+                <h3>Counts by Group</h3>
+                <canvas id="limitBalanceCountChart" height="190"></canvas>
+              </article>
+              <article class="chart-card">
+                <h3>Default Rate by Group</h3>
+                <canvas id="limitBalanceRateChart" height="190"></canvas>
+              </article>
+            </div>
+            <div class="note" style="margin-top:10px">
+              <strong>Chart finding:</strong> <strong>Strong inverse relationship</strong> between credit limit and default risk.
+              Clients with limit &le;&nbsp;NT$50&thinsp;K default at ~32 % vs ~14 % for those above NT$270&thinsp;K.
+              Credit limit is a proxy for creditworthiness and is the most important continuous feature.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" id="target-distribution">
+        <header class="section-head">
+          <h2>🎯 Target Variable Distribution</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="target-dist-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="target-dist-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="target-dist-body">
+          <p>
+            The target variable <strong>Default_Payment_Next_Month</strong>
+            indicates whether a client defaulted (<code>1</code>) or not
+            (<code>0</code>) on their next month's payment. Checking class
+            balance is the very first EDA step for any classification task — it
+            determines which evaluation metrics (F1, AUC-ROC) and resampling
+            strategies (SMOTE, class weighting) are appropriate.
+          </p>
+
+          <div class="grid" style="margin-bottom: 16px">
+            <article class="kpi">
+              <div class="label">No Default (Class 0)</div>
+              <div class="value" style="color: #2f855a">23,364</div>
+              <div class="label" style="margin-top: 4px">
+                77.88 % of clients
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Default (Class 1)</div>
+              <div class="value" style="color: #c05621">6,636</div>
+              <div class="label" style="margin-top: 4px">
+                22.12 % of clients
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Imbalance Ratio</div>
+              <div class="value">3.52 : 1</div>
+              <div class="label" style="margin-top: 4px">
+                No Default : Default
+              </div>
+            </article>
+            <article class="kpi">
+              <div class="label">Total Records</div>
+              <div class="value">30,000</div>
+              <div class="label" style="margin-top: 4px">
+                Apr – Sep 2005, Taiwan
+              </div>
+            </article>
+          </div>
+
+          <div class="chart-grid" style="max-width:700px;grid-template-columns:1fr 1fr">
+            <article class="chart-card">
+              <h3>Class Distribution (Doughnut)</h3>
+              <canvas id="targetDoughnut" height="160"></canvas>
+            </article>
+            <article class="chart-card">
+              <h3>Class Counts (Bar)</h3>
+              <canvas id="targetBar" height="160"></canvas>
+            </article>
+          </div>
+
+
+          <div class="code-panel tut-toggle" data-section="target-dist-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp4-plotly">Plotly</button>
+                <button class="code-tab" data-tab="cp4-matplotlib">Matplotlib</button>
+                <button class="code-tab" data-tab="cp4-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp4-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
+<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
+
+target_col = <span class="cs">'Default'</span>
+counts = df[target_col].value_counts().sort_index()
+labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
+colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
+
+fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>, specs=[[{<span class="cs">'type'</span>: <span class="cs">'domain'</span>},
+                                     {<span class="cs">'type'</span>: <span class="cs">'xy'</span>}]],
+    subplot_titles=[<span class="cs">'Doughnut: Class Proportion'</span>,
+                    <span class="cs">'Bar: Class Counts'</span>])
+
+fig.add_trace(go.Pie(labels=labels, values=counts.values,
+                     hole=<span class="cn">0.55</span>, marker_colors=colors), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
+fig.add_trace(go.Bar(x=labels, y=counts.values,
+                     marker_color=colors), row=<span class="cn">1</span>, col=<span class="cn">2</span>)
+fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>,
+                  title_text=<span class="cs">'Target Variable Distribution'</span>)
+fig.show()</code></pre></div>
+            <div id="cp4-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
+labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
+colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
+
+fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
+
+<span class="cc"># Doughnut</span>
+ax1.pie(counts.values, labels=labels, colors=colors,
+        autopct=<span class="cs">'%1.1f%%'</span>, startangle=<span class="cn">90</span>,
+        wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
+ax1.set_title(<span class="cs">'Class Distribution (Doughnut)'</span>)
+
+<span class="cc"># Bar</span>
+bars = ax2.bar(labels, counts.values, color=colors,
+               edgecolor=[<span class="cs">'#1f5c3d'</span>, <span class="cs">'#8f3f17'</span>])
+ax2.set_title(<span class="cs">'Class Counts'</span>)
+<span class="ck">for</span> bar, v <span class="ck">in</span> zip(bars, counts.values):
+    ax2.text(bar.get_x() + bar.get_width()/<span class="cn">2</span>, v + <span class="cn">200</span>,
+             f<span class="cs">'{v:,}'</span>, ha=<span class="cs">'center'</span>, fontweight=<span class="cs">'bold'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp4-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
+
+<span class="cc"># Countplot (Seaborn strength)</span>
+sns.countplot(data=df, x=<span class="cs">'Default'</span>, ax=axes[<span class="cn">0</span>],
+              palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>})
+axes[<span class="cn">0</span>].set_xticklabels([<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>])
+axes[<span class="cn">0</span>].set_title(<span class="cs">'Class Counts (Seaborn countplot)'</span>)
+<span class="ck">for</span> p <span class="ck">in</span> axes[<span class="cn">0</span>].patches:
+    axes[<span class="cn">0</span>].annotate(f<span class="cs">'{int(p.get_height()):,}'</span>,
+                     (p.get_x() + p.get_width()/<span class="cn">2</span>, p.get_height()),
+                     ha=<span class="cs">'center'</span>, va=<span class="cs">'bottom'</span>)
+
+<span class="cc"># Doughnut via matplotlib (Seaborn has no pie)</span>
+counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
+axes[<span class="cn">1</span>].pie(counts.values, labels=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
+            colors=[<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>],
+            autopct=<span class="cs">'%1.1f%%'</span>, wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
+axes[<span class="cn">1</span>].set_title(<span class="cs">'Doughnut Chart'</span>)
+
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <div class="note" style="margin-top: 12px">
+            <strong>Imbalance finding:</strong> Only ~22 % of clients defaulted.
+            A naive classifier that always predicts "no default" achieves ~78 %
+            accuracy — making accuracy a misleading metric. Use
+            <strong>F1-score, AUC-ROC or Precision-Recall curve</strong>;
+            consider SMOTE oversampling or class-weight adjustment when training
+            models.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="correlation-analysis">
+        <header class="section-head">
+          <h2>🔗 Correlation Matrix Analysis</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="correlation-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="correlation-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="correlation-body">
+          <p>
+            Pearson correlations measured on <strong>continuous numeric</strong> features only.
+            PAY_1–6 (ordinal) are intentionally excluded — see the method explanation below.
+          </p>
+
+
+          <div class="code-panel tut-toggle" style="margin-top:16px" data-section="correlation-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp5-seaborn">Seaborn</button>
+                <button class="code-tab" data-tab="cp5-plotly">Plotly</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp5-seaborn" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+<span class="cc"># Only continuous numeric columns (ordinal PAY_1-6 excluded intentionally)</span>
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
+    <span class="cs">'Default'</span>
+]
+
+corr = df[num_cols].corr()  <span class="cc"># Pearson by default</span>
+
+plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">12</span>))
+sns.heatmap(corr, annot=<span class="cs">True</span>, fmt=<span class="cs">'.2f'</span>,
+            cmap=<span class="cs">'RdBu_r'</span>, center=<span class="cn">0</span>, vmin=-<span class="cn">1</span>, vmax=<span class="cn">1</span>,
+            square=<span class="cs">True</span>, linewidths=<span class="cn">0.5</span>,
+            cbar_kws={<span class="cs">'shrink'</span>: <span class="cn">0.8</span>})
+plt.title(<span class="cs">'Pearson Correlation Heatmap
+(Continuous features + Target)'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp5-plotly" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.figure_factory</span> <span class="ck">as</span> ff
+
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
+    <span class="cs">'Default'</span>
+]
+
+corr = df[num_cols].corr()
+z    = corr.values.round(<span class="cn">2</span>).tolist()
+
+fig = ff.create_annotated_heatmap(
+    z=z,
+    x=corr.columns.tolist(),
+    y=corr.index.tolist(),
+    colorscale=<span class="cs">'RdBu'</span>, zmin=-<span class="cn">1</span>, zmax=<span class="cn">1</span>,
+    reversescale=<span class="cs">True</span>)
+fig.update_layout(title=<span class="cs">'Pearson Correlation Heatmap'</span>, height=<span class="cn">700</span>)
+fig.show()</code></pre></div>
+          </div>
+          <div class="heatmap-zoom-controls" style="margin-top:20px">
+            <span>Zoom:</span>
+            <button onclick="adjustHeatmapZoom(-0.15)">&#8722;</button>
+            <span class="zoom-label" id="heatmapZoomLabel">100%</span>
+            <button onclick="adjustHeatmapZoom(0.15)">+</button>
+            <button onclick="resetHeatmapZoom()" style="font-size:0.78rem;font-weight:500">Reset</button>
+          </div>
+          <div class="note" style="margin-top:14px">
+            <strong>Key findings from the correlation matrix:</strong>
+            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.8">
+              <li><strong>BILL_AMT_1&ndash;6</strong>: pairwise r &asymp; 0.82&ndash;0.95 &mdash; severe multicollinearity within this group. For linear models, keep only <code>BILL_AMT_1</code> or apply PCA.</li>
+              <li><strong>PAY_AMT_1&ndash;6</strong>: pairwise r &asymp; 0.50&ndash;0.76 &mdash; moderate collinearity. PAY_AMT_1 (most recent) has the strongest negative correlation with default.</li>
+              <li><strong>Credit_Limit vs Default</strong>: r &asymp; &minus;0.15 &mdash; the strongest continuous feature correlation.</li>
+              <li><strong>Age vs Default</strong>: r &asymp; 0.01 &mdash; essentially uncorrelated (non-linear pattern not captured by Pearson).</li>
+              <li><strong>Note</strong>: PAY_1&ndash;6 ordinal features (excluded here) have far stronger association with the target &mdash; measured separately via Cram&eacute;r&rsquo;s V (see Section 3.6 below).</li>
+            </ul>
+          </div>
+
+          <div class="heatmap-zoom-wrap">
+            <div class="matrix-scalable" id="matrixScalable">
+              <div class="matrix-wrap">
+                <table class="matrix-table" id="corrMatrixTable"></table>
+              </div>
+              <div class="matrix-legend">
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(120,150,200)"></span>
+                  <span>Negative correlation (r &lt; 0)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(216,210,218);border:1px solid #e2e8f0"></span>
+                  <span>Weak correlation (r near 0)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:rgb(139,42,42)"></span>
+                  <span>Strong positive (r near +1)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="outlier-analysis">
+        <header class="section-head">
+          <h2>🔍 Outlier Detection Analysis (IQR)</h2>
+          <div class="section-head-actions">
+            <button
+              class="toggle"
+              data-target="outlier-body"
+              aria-expanded="true"
+            >
+              Toggle Section
+            </button>
+            <button class="btn-tutorial" data-tutorial="outlier-body">&#x1F4D6;&nbsp;Tutorial</button>
+          </div>
+        </header>
+        <div class="section-body" id="outlier-body">
+          <p>
+            Outlier statistics computed via the <strong>IQR method</strong> on all
+            <em>continuous numeric</em> columns (ordinal PAY_1–6 excluded).
+            See method explanation below.
+          </p>
+          <div class="table-wrap">
+            <table class="outlier-format">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Outlier Count</th>
+                  <th>Percentage</th>
+                  <th>Severity</th>
+                  <th>Valid Range (IQR)</th>
+                </tr>
+              </thead>
+              <tbody id="outlierSummaryTbody"></tbody>
+            </table>
+          </div>
+
+
+          <div class="code-panel tut-toggle" style="margin-top:14px" data-section="outlier-body">
+            <div class="code-panel-header">
+              <div class="code-tabs">
+                <button class="code-tab active" data-tab="cp6-iqr">IQR Function</button>
+                <button class="code-tab" data-tab="cp6-matplotlib">Box Plot</button>
+                <button class="code-tab" data-tab="cp6-seaborn">Seaborn</button>
+              </div>
+              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
+            </div>
+            <div id="cp6-iqr" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
+
+<span class="ck">def</span> <span class="cp">detect_outliers_iqr</span>(df, col):
+    q1 = df[col].quantile(<span class="cn">0.25</span>)
+    q3 = df[col].quantile(<span class="cn">0.75</span>)
+    iqr = q3 - q1
+    lower = q1 - <span class="cn">1.5</span> * iqr
+    upper = q3 + <span class="cn">1.5</span> * iqr
+    mask  = (df[col] &lt; lower) | (df[col] &gt; upper)
+    <span class="ck">return</span> {
+        <span class="cs">'feature'</span>: col, <span class="cs">'Q1'</span>: q1, <span class="cs">'Q3'</span>: q3, <span class="cs">'IQR'</span>: iqr,
+        <span class="cs">'lower_bound'</span>: lower, <span class="cs">'upper_bound'</span>: upper,
+        <span class="cs">'num_outliers'</span>: mask.sum(),
+        <span class="cs">'pct_outliers'</span>: round(mask.mean() * <span class="cn">100</span>, <span class="cn">2</span>)
+    }
+
+num_cols = [
+    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
+    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
+    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
+    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
+    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>
+]
+
+outlier_df = pd.DataFrame([detect_outliers_iqr(df, c) <span class="ck">for</span> c <span class="ck">in</span> num_cols])
+print(outlier_df[[<span class="cs">'feature'</span>, <span class="cs">'num_outliers'</span>, <span class="cs">'pct_outliers'</span>,
+                   <span class="cs">'lower_bound'</span>, <span class="cs">'upper_bound'</span>]].to_string(index=<span class="cs">False</span>))</code></pre></div>
+            <div id="cp6-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
+            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>, <span class="cs">'Age'</span>]
+
+fig, axes = plt.subplots(<span class="cn">2</span>, <span class="cn">4</span>, figsize=(<span class="cn">16</span>, <span class="cn">8</span>))
+axes = axes.flatten()
+
+<span class="ck">for</span> i, col <span class="ck">in</span> enumerate(num_cols):
+    axes[i].boxplot(df[col].dropna(), patch_artist=<span class="cs">True</span>,
+                    boxprops={<span class="cs">'facecolor'</span>: <span class="cs">'#c6efea'</span>, <span class="cs">'color'</span>: <span class="cs">'#0f766e'</span>},
+                    medianprops={<span class="cs">'color'</span>: <span class="cs">'#c05621'</span>, <span class="cs">'linewidth'</span>: <span class="cn">2</span>},
+                    flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
+    axes[i].set_title(col, fontsize=<span class="cn">9</span>)
+    q1, q3 = df[col].quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
+    iqr = q3 - q1
+    <span class="ck">for</span> bound <span class="ck">in</span> [q1 - <span class="cn">1.5</span>*iqr, q3 + <span class="cn">1.5</span>*iqr]:
+        axes[i].axhline(bound, color=<span class="cs">'red'</span>,
+                        linestyle=<span class="cs">'--'</span>, linewidth=<span class="cn">0.8</span>, alpha=<span class="cn">0.7</span>)
+
+plt.suptitle(<span class="cs">'IQR Box Plots — Outlier Detection'</span>, fontsize=<span class="cn">12</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+            <div id="cp6-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
+<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
+
+num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
+            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>]
+
+<span class="cc"># Long-form melt for seaborn boxplot</span>
+df_melt = df[num_cols].melt(var_name=<span class="cs">'Feature'</span>, value_name=<span class="cs">'Value'</span>)
+
+plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">6</span>))
+sns.boxplot(data=df_melt, x=<span class="cs">'Feature'</span>, y=<span class="cs">'Value'</span>,
+            palette=<span class="cs">'Set2'</span>, width=<span class="cn">0.5</span>,
+            flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
+plt.title(<span class="cs">'IQR Box Plots — Seaborn'</span>)
+plt.xticks(rotation=<span class="cn">25</span>, ha=<span class="cs">'right'</span>)
+plt.tight_layout(); plt.show()</code></pre></div>
+          </div>
+          <div class="note" style="margin-top:14px">
+            <strong>Key findings from outlier detection:</strong>
+            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.8">
+              <li><strong>BILL_AMT &amp; PAY_AMT columns</strong>: 8&ndash;10 % IQR outlier rate &mdash; <span class="badge badge-medium">Medium&ndash;High severity</span>. Heavy right tail due to very large credit lines.</li>
+              <li><strong>Credit_Limit</strong>: 3&ndash;5 % outlier rate &mdash; VIP clients with very high credit limits.</li>
+              <li><strong>Age</strong>: &lt;1 % outlier rate &mdash; a few clients aged 70+.</li>
+              <li><strong>Do NOT remove outliers</strong> &mdash; extreme values in credit data often carry real predictive signal (large spenders, lump-sum repayers).</li>
+              <li><strong>Recommended treatment</strong>: Apply <code>RobustScaler</code> or winsorise at the 1st/99th percentile before training linear or distance-based models.</li>
+            </ul>
+          </div>
+
+          <details style="margin-top: 12px">
+            <summary>Show Full Outlier Export (Exact Values)</summary>
+            <pre class="mono-block" id="outlierRaw"></pre>
+          </details>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- SAMPLE ROWS BY CLASS                                            -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="sample-rows">
         <header class="section-head">
@@ -1378,894 +2235,17 @@
           </div>
 
           <div class="note" style="margin-top: 12px">
-            Non-default clients show negative PAY codes (paid-in-full <code>−1</code> or no-consumption
+            <strong>Observable patterns:</strong> Non-default clients show
+            negative PAY codes (paid-in-full <code>−1</code> or no-consumption
             <code>−2</code>) and non-zero payment amounts. Default clients
             consistently display PAY codes ≥ 2 (2–3+ month payment delays), zero
-            or minimal payment amounts.
+            or minimal payment amounts, and bills close to their credit limit.
           </div>
         </div>
       </section>
 
-
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- TARGET VARIABLE DISTRIBUTION                                 -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="target-distribution">
-        <header class="section-head">
-          <h2>🎯 Target Variable Distribution</h2>
-          <div class="section-head-actions">
-            <button
-              class="toggle"
-              data-target="target-dist-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="target-dist-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="target-dist-body">
-          <p>
-            The target variable <strong>Default_Payment_Next_Month</strong>
-            indicates whether a client defaulted (<code>1</code>) or not
-            (<code>0</code>) on their next month's payment.</p>
-
-          <div class="grid" style="margin-bottom: 16px">
-            <article class="kpi">
-              <div class="label">No Default (Class 0)</div>
-              <div class="value" style="color: #2f855a">23,364</div>
-              <div class="label" style="margin-top: 4px">
-                77.88 % of clients
-              </div>
-            </article>
-            <article class="kpi">
-              <div class="label">Default (Class 1)</div>
-              <div class="value" style="color: #c05621">6,636</div>
-              <div class="label" style="margin-top: 4px">
-                22.12 % of clients
-              </div>
-            </article>
-            <article class="kpi">
-              <div class="label">Imbalance Ratio</div>
-              <div class="value">3.52 : 1</div>
-              <div class="label" style="margin-top: 4px">
-                No Default : Default
-              </div>
-            </article>
-            <article class="kpi">
-              <div class="label">Total Records</div>
-              <div class="value">30,000</div>
-              <div class="label" style="margin-top: 4px">
-                Apr – Sep 2005, Taiwan
-              </div>
-            </article>
-          </div>
-
-          <div class="chart-grid" style="max-width:700px;grid-template-columns:1fr 1fr">
-            <article class="chart-card">
-              <h3>Class Distribution (Doughnut)</h3>
-              <canvas id="targetDoughnut" height="160"></canvas>
-            </article>
-            <article class="chart-card">
-              <h3>Class Counts (Bar)</h3>
-              <canvas id="targetBar" height="160"></canvas>
-            </article>
-          </div>
-
-
-          <div class="code-panel tut-toggle" data-section="target-dist-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp4-plotly">Plotly</button>
-                <button class="code-tab" data-tab="cp4-matplotlib">Matplotlib</button>
-                <button class="code-tab" data-tab="cp4-seaborn">Seaborn</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp4-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
-<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
-
-target_col = <span class="cs">'Default'</span>
-counts = df[target_col].value_counts().sort_index()
-labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
-colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
-
-fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>, specs=[[{<span class="cs">'type'</span>: <span class="cs">'domain'</span>},
-                                     {<span class="cs">'type'</span>: <span class="cs">'xy'</span>}]],
-    subplot_titles=[<span class="cs">'Doughnut: Class Proportion'</span>,
-                    <span class="cs">'Bar: Class Counts'</span>])
-
-fig.add_trace(go.Pie(labels=labels, values=counts.values,
-                     hole=<span class="cn">0.55</span>, marker_colors=colors), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.add_trace(go.Bar(x=labels, y=counts.values,
-                     marker_color=colors), row=<span class="cn">1</span>, col=<span class="cn">2</span>)
-fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>,
-                  title_text=<span class="cs">'Target Variable Distribution'</span>)
-fig.show()</code></pre></div>
-            <div id="cp4-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
-labels = [<span class="cs">'No Default (0)'</span>, <span class="cs">'Default (1)'</span>]
-colors = [<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>]
-
-fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
-
-<span class="cc"># Doughnut</span>
-ax1.pie(counts.values, labels=labels, colors=colors,
-        autopct=<span class="cs">'%1.1f%%'</span>, startangle=<span class="cn">90</span>,
-        wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
-ax1.set_title(<span class="cs">'Class Distribution (Doughnut)'</span>)
-
-<span class="cc"># Bar</span>
-bars = ax2.bar(labels, counts.values, color=colors,
-               edgecolor=[<span class="cs">'#1f5c3d'</span>, <span class="cs">'#8f3f17'</span>])
-ax2.set_title(<span class="cs">'Class Counts'</span>)
-<span class="ck">for</span> bar, v <span class="ck">in</span> zip(bars, counts.values):
-    ax2.text(bar.get_x() + bar.get_width()/<span class="cn">2</span>, v + <span class="cn">200</span>,
-             f<span class="cs">'{v:,}'</span>, ha=<span class="cs">'center'</span>, fontweight=<span class="cs">'bold'</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-            <div id="cp4-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
-<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">10</span>, <span class="cn">5</span>))
-
-<span class="cc"># Countplot (Seaborn strength)</span>
-sns.countplot(data=df, x=<span class="cs">'Default'</span>, ax=axes[<span class="cn">0</span>],
-              palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>})
-axes[<span class="cn">0</span>].set_xticklabels([<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>])
-axes[<span class="cn">0</span>].set_title(<span class="cs">'Class Counts (Seaborn countplot)'</span>)
-<span class="ck">for</span> p <span class="ck">in</span> axes[<span class="cn">0</span>].patches:
-    axes[<span class="cn">0</span>].annotate(f<span class="cs">'{int(p.get_height()):,}'</span>,
-                     (p.get_x() + p.get_width()/<span class="cn">2</span>, p.get_height()),
-                     ha=<span class="cs">'center'</span>, va=<span class="cs">'bottom'</span>)
-
-<span class="cc"># Doughnut via matplotlib (Seaborn has no pie)</span>
-counts = df[<span class="cs">'Default'</span>].value_counts().sort_index()
-axes[<span class="cn">1</span>].pie(counts.values, labels=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
-            colors=[<span class="cs">'#2f855a'</span>, <span class="cs">'#c05621'</span>],
-            autopct=<span class="cs">'%1.1f%%'</span>, wedgeprops={<span class="cs">'width'</span>: <span class="cn">0.55</span>})
-axes[<span class="cn">1</span>].set_title(<span class="cs">'Doughnut Chart'</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-          </div>
-          <div class="note" style="margin-top: 12px">
-            <strong>Imbalance finding:</strong> Only ~22 % of clients defaulted.
-            A naive classifier that always predicts "no default" achieves ~78 %
-            accuracy — making accuracy a misleading metric. Use
-            <strong>F1-score, AUC-ROC or Precision-Recall curve</strong> when training
-            models.
-          </div>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- CATEGORICAL VARIABLES                                        -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="categorical-analysis">
-        <header class="section-head">
-          <h2>📂 Categorical Variables Analysis</h2>
-          <div class="section-head-actions">
-            <button
-              class="toggle"
-              data-target="categorical-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="categorical-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="categorical-body">
-          <p>
-            Distribution counts and default-rate comparison for major
-            categorical variables.
-          </p>
-
-          <div class="pay-status-controls">
-            <strong>Select variable:</strong>
-            <div class="pay-var-buttons" id="categoricalButtons">
-              <button class="pay-var-btn active" data-var="Gender">
-                Gender
-              </button>
-              <button class="pay-var-btn" data-var="Education">
-                Education
-              </button>
-              <button class="pay-var-btn" data-var="Marriage">Marriage</button>
-            </div>
-          </div>
-
-          <div class="chart-grid">
-            <article class="chart-card">
-              <h3>Counts by Group</h3>
-              <canvas id="catCountChart" height="190"></canvas>
-            </article>
-            <article class="chart-card">
-              <h3>Default Composition by Group (Stacked %)</h3>
-              <canvas id="catRateChart" height="190"></canvas>
-            </article>
-          </div>
-
-          <div class="note" style="margin-top:12px">
-            <strong>Chart findings:</strong>
-            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.7">
-              <li><strong>Gender</strong> — Dataset is ~60 % female. Men default at a slightly higher rate (~24 %) than women (~21 %).</li>
-              <li><strong>Education</strong> — Graduate school clients have the lowest default rate (~19 %); high school has the highest (~25 %). The &ldquo;Others&rdquo; category (~7 %) is low.</li>
-              <li><strong>Marriage</strong> — Married clients default at ~23.5 % vs single at ~18.6 %.</li>
-            </ul>
-          </div>
-
-          <div class="code-panel tut-toggle" data-section="categorical-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp1-plotly">Plotly</button>
-                <button class="code-tab" data-tab="cp1-matplotlib">Matplotlib</button>
-                <button class="code-tab" data-tab="cp1-seaborn">Seaborn</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp1-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.express</span> <span class="ck">as</span> px
-<span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
-
-cat_col = <span class="cs">'EDUCATION'</span>   <span class="cc"># or 'SEX', 'MARRIAGE'</span>
-
-<span class="cc"># 1. Count distribution</span>
-counts = df[cat_col].value_counts().reset_index()
-counts.columns = [cat_col, <span class="cs">'Count'</span>]
-fig1 = px.bar(counts, x=cat_col, y=<span class="cs">'Count'</span>,
-              color=cat_col, title=<span class="cs">f'{cat_col} Count Distribution'</span>,
-              color_discrete_sequence=px.colors.qualitative.Set2)
-fig1.show()
-
-<span class="cc"># 2. Stacked 100 % default-rate bar</span>
-grp = df.groupby(cat_col)[<span class="cs">'Default'</span>].value_counts(normalize=<span class="cs">True</span>).unstack()
-grp.columns = [<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>]
-fig2 = px.bar(grp.reset_index(), x=cat_col,
-              y=[<span class="cs">'No Default'</span>, <span class="cs">'Default'</span>],
-              barmode=<span class="cs">'relative'</span>,
-              color_discrete_map={<span class="cs">'No Default'</span>: <span class="cs">'#2f855a'</span>, <span class="cs">'Default'</span>: <span class="cs">'#c05621'</span>},
-              title=<span class="cs">f'Default Composition by {cat_col} (%)'</span>)
-fig2.show()</code></pre></div>
-            <div id="cp1-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-<span class="ck">import</span> <span class="cm">numpy</span> <span class="ck">as</span> np
-
-cat_col = <span class="cs">'EDUCATION'</span>
-counts  = df[cat_col].value_counts()
-drate   = df.groupby(cat_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-non_dr  = <span class="cn">100</span> - drate
-
-fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
-
-<span class="cc"># Count bar</span>
-axes[<span class="cn">0</span>].bar(counts.index, counts.values, color=<span class="cs">'#0f766e'</span>)
-axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Distribution'</span>)
-axes[<span class="cn">0</span>].set_xlabel(cat_col); axes[<span class="cn">0</span>].set_ylabel(<span class="cs">'Count'</span>)
-
-<span class="cc"># Stacked 100 % bar</span>
-x = np.arange(len(drate))
-axes[<span class="cn">1</span>].bar(x, non_dr.values, label=<span class="cs">'No Default'</span>, color=<span class="cs">'#2f855a'</span>)
-axes[<span class="cn">1</span>].bar(x, drate.values, bottom=non_dr.values,
-            label=<span class="cs">'Default'</span>, color=<span class="cs">'#c05621'</span>)
-axes[<span class="cn">1</span>].set_xticks(x); axes[<span class="cn">1</span>].set_xticklabels(drate.index, rotation=<span class="cn">15</span>)
-axes[<span class="cn">1</span>].legend(); axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Rate by {cat_col}'</span>)
-plt.tight_layout(); plt.show()</code></pre></div>
-            <div id="cp1-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
-<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-cat_col = <span class="cs">'EDUCATION'</span>
-
-fig, axes = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
-
-sns.countplot(data=df, x=cat_col, ax=axes[<span class="cn">0</span>], palette=<span class="cs">'Set2'</span>,
-              order=df[cat_col].value_counts().index)
-axes[<span class="cn">0</span>].set_title(<span class="cs">f'{cat_col} Count'</span>)
-
-<span class="cc"># 100 % fill (proportion per class)</span>
-sns.histplot(data=df, x=cat_col, hue=<span class="cs">'Default'</span>,
-             multiple=<span class="cs">'fill'</span>, stat=<span class="cs">'proportion'</span>,
-             ax=axes[<span class="cn">1</span>], palette={<span class="cn">0</span>: <span class="cs">'#2f855a'</span>, <span class="cn">1</span>: <span class="cs">'#c05621'</span>},
-             order=df[cat_col].value_counts().index)
-axes[<span class="cn">1</span>].set_title(<span class="cs">f'Default Proportion by {cat_col}'</span>)
-axes[<span class="cn">1</span>].set_ylim(<span class="cn">0</span>, <span class="cn">1</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- ORDINAL VARIABLES — PAY_1 TO PAY_6                           -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="ordinal-analysis">
-        <header class="section-head">
-          <h2>📶 Ordinal Variables Analysis (PAY_1 &ndash; PAY_6)</h2>
-          <div class="section-head-actions">
-            <button class="toggle" data-target="ordinal-body" aria-expanded="true">
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="ordinal-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="ordinal-body">
-
-          <h3 style="margin-top:16px">PAY Code Reference Scale</h3>
-          <div class="ordinal-scale">
-            <span class="ord-chip ord-neg2">&minus;2 &nbsp;No consumption</span>
-            <span class="ord-chip ord-neg1">&minus;1 &nbsp;Paid duly (on time)</span>
-            <span class="ord-chip ord-zero">&nbsp;0 &nbsp;Revolving / minimum paid</span>
-            <span class="ord-chip ord-pos">&nbsp;1 &nbsp;1-month delay</span>
-            <span class="ord-chip ord-pos">&nbsp;2 &nbsp;2-month delay</span>
-            <span class="ord-chip ord-pos">&nbsp;3 &nbsp;3-month delay</span>
-            <span class="ord-chip ord-high">&ge;4 &nbsp;Severe delay (4–8 months)</span>
-          </div>
-
-          <p style="margin-top:14px">
-            Select a PAY variable below. The <strong>count bar</strong> shows how often each
-            delay code occurs; the <strong>default-rate line</strong> shows what fraction of
-            clients with that code actually defaulted — revealing the monotonic risk gradient.
-          </p>
-
-          <div class="pay-status-controls">
-            <strong>Select variable:</strong>
-            <div class="pay-var-buttons" id="payVarButtons">
-              <button class="pay-var-btn active" data-var="PAY_1">PAY_1</button>
-              <button class="pay-var-btn" data-var="PAY_2">PAY_2</button>
-              <button class="pay-var-btn" data-var="PAY_3">PAY_3</button>
-              <button class="pay-var-btn" data-var="PAY_4">PAY_4</button>
-              <button class="pay-var-btn" data-var="PAY_5">PAY_5</button>
-              <button class="pay-var-btn" data-var="PAY_6">PAY_6</button>
-            </div>
-          </div>
-
-          <div class="chart-grid">
-            <article class="chart-card">
-              <h3>Counts by Ordinal Code</h3>
-              <canvas id="payStatusCountChart" height="190"></canvas>
-              <p class="mini-note">
-                Bar chart respects ordered scale (−2 at left → 8 at right).
-                Most clients cluster around codes −1, 0 (on time or revolving).
-              </p>
-            </article>
-            <article class="chart-card">
-              <h3>Default Rate by Ordinal Code</h3>
-              <canvas id="payStatusDefaultRateChart" height="190"></canvas>
-              <p class="mini-note">
-                Line chart shows the <strong>monotonic rise</strong> in default probability.
-                PAY code ≥ 2 is a strong default signal (&gt;55 %).
-              </p>
-            </article>
-          </div>
-
-          <div class="note" style="margin-top:12px">
-            <strong>Key finding:</strong> Default rate jumps from ~13&nbsp;% at code &minus;2
-            (no consumption) to <strong>~69–76&nbsp;%</strong> at codes 2–3 (two/three-month
-            payment delay). PAY_1 is the single strongest predictor in the dataset.
-          </div>
-
-          <div class="code-panel tut-toggle" data-section="ordinal-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp2-plotly">Plotly</button>
-                <button class="code-tab" data-tab="cp2-matplotlib">Matplotlib</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp2-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
-<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
-
-pay_col = <span class="cs">'PAY_1'</span>  <span class="cc"># ordinal: -2 no-consumption … 8 eight-month delay</span>
-
-<span class="cc"># Count per ordinal level (sort by code value)</span>
-counts = df[pay_col].value_counts().sort_index()
-drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labels = counts.index.astype(str).tolist()
-
-fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
-    subplot_titles=[<span class="cs">f'{pay_col} Frequency (Ordered)'</span>,
-                    <span class="cs">f'Default Rate by {pay_col}'</span>])
-
-fig.add_trace(go.Bar(x=labels, y=counts.values,
-                     marker_color=<span class="cs">'#2f855a'</span>, name=<span class="cs">'Count'</span>),
-              row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.add_trace(go.Scatter(x=labels, y=drate.values,
-                         mode=<span class="cs">'lines+markers'</span>,
-                         marker=dict(color=<span class="cs">'#c05621'</span>, size=<span class="cn">7</span>),
-                         line=dict(color=<span class="cs">'#c05621'</span>, width=<span class="cn">2</span>),
-                         name=<span class="cs">'Default %'</span>),
-              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
-
-fig.update_layout(showlegend=<span class="cs">False</span>, height=<span class="cn">420</span>)
-fig.update_yaxes(title_text=<span class="cs">'Count'</span>, row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.update_yaxes(title_text=<span class="cs">'Default Rate (%)'</span>, row=<span class="cn">1</span>, col=<span class="cn">2</span>)
-fig.show()</code></pre></div>
-            <div id="cp2-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-pay_col = <span class="cs">'PAY_1'</span>
-
-counts = df[pay_col].value_counts().sort_index()
-drate  = df.groupby(pay_col)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labels = [str(c) for c in counts.index]
-
-fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">12</span>, <span class="cn">5</span>))
-
-<span class="cc"># Ordered bar for counts</span>
-ax1.bar(labels, counts.values, color=<span class="cs">'#2f855a'</span>, edgecolor=<span class="cs">'#1f5c3d'</span>)
-ax1.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
-ax1.set_ylabel(<span class="cs">'Count'</span>)
-ax1.set_title(<span class="cs">f'{pay_col} Distribution (Ordered Bar)'</span>)
-
-<span class="cc"># Line chart for default rate</span>
-ax2.plot(labels, drate.values, marker=<span class="cs">'o'</span>,
-         color=<span class="cs">'#c05621'</span>, linewidth=<span class="cn">2</span>, markersize=<span class="cn">6</span>)
-ax2.fill_between(range(<span class="cn">len</span>(labels)), drate.values,
-                 alpha=<span class="cn">0.18</span>, color=<span class="cs">'#c05621'</span>)
-ax2.set_xlabel(<span class="cs">f'{pay_col} Ordinal Code'</span>)
-ax2.set_ylabel(<span class="cs">'Default Rate (%)'</span>)
-ax2.set_title(<span class="cs">f'Default Rate by {pay_col} (Monotonic Trend)'</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-          </div>
-
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- NUMERICAL VARIABLES                                          -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="numerical-analysis">
-        <header class="section-head">
-          <h2>📈 Numerical Variables Analysis</h2>
-          <div class="section-head-actions">
-            <button
-              class="toggle"
-              data-target="numerical-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="numerical-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="numerical-body">
-
-          <details open>
-            <summary>Bill Amount Analysis (BILL_AMT_1 to BILL_AMT_6)</summary>
-            <p>
-              Distribution and default-rate trend for billing amount variables.
-            </p>
-
-            <div class="pay-status-controls">
-              <strong>Select variable:</strong>
-              <div class="pay-var-buttons" id="billAmtButtons">
-                <button class="pay-var-btn active" data-var="BILL_AMT_1">
-                  BILL_AMT_1
-                </button>
-                <button class="pay-var-btn" data-var="BILL_AMT_2">
-                  BILL_AMT_2
-                </button>
-                <button class="pay-var-btn" data-var="BILL_AMT_3">
-                  BILL_AMT_3
-                </button>
-                <button class="pay-var-btn" data-var="BILL_AMT_4">
-                  BILL_AMT_4
-                </button>
-                <button class="pay-var-btn" data-var="BILL_AMT_5">
-                  BILL_AMT_5
-                </button>
-                <button class="pay-var-btn" data-var="BILL_AMT_6">
-                  BILL_AMT_6
-                </button>
-              </div>
-            </div>
-
-            <div class="chart-grid">
-              <article class="chart-card">
-                <h3>Counts by Group</h3>
-                <canvas id="billAmtCountChart" height="190"></canvas>
-              </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="billAmtRateChart" height="190"></canvas>
-              </article>
-            </div>
-            <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> Bill amounts are <strong>heavily right-skewed</strong>.
-              Clients in Q1 (lowest bills, including negative credit balances) show elevated default rates (~27 &thinsp;%),
-              counter-intuitively &mdash; these may be clients who stopped using the card after falling behind.
-            </div>
-          </details>
-
-          <details open>
-            <summary>Payment Amount Analysis (PAY_AMT_1 to PAY_AMT_6)</summary>
-            <p>
-              Distribution and default-rate trend for payment amount variables.
-            </p>
-
-            <div class="pay-status-controls">
-              <strong>Select variable:</strong>
-              <div class="pay-var-buttons" id="payAmtButtons">
-                <button class="pay-var-btn active" data-var="PAY_AMT_1">
-                  PAY_AMT_1
-                </button>
-                <button class="pay-var-btn" data-var="PAY_AMT_2">
-                  PAY_AMT_2
-                </button>
-                <button class="pay-var-btn" data-var="PAY_AMT_3">
-                  PAY_AMT_3
-                </button>
-                <button class="pay-var-btn" data-var="PAY_AMT_4">
-                  PAY_AMT_4
-                </button>
-                <button class="pay-var-btn" data-var="PAY_AMT_5">
-                  PAY_AMT_5
-                </button>
-                <button class="pay-var-btn" data-var="PAY_AMT_6">
-                  PAY_AMT_6
-                </button>
-              </div>
-            </div>
-
-            <div class="chart-grid">
-              <article class="chart-card">
-                <h3>Counts by Group</h3>
-                <canvas id="payAmtCountChart" height="190"></canvas>
-              </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="payAmtRateChart" height="190"></canvas>
-              </article>
-            </div>
-            <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> 27&ndash;30 % of clients made <strong>zero payment</strong>
-              in each given month. These clients default at ~32&ndash;35 % vs ~17&ndash;19 % for clients who made
-              any payment &mdash; a clear binary split.</div>
-          </details>
-
-
-          <div class="code-panel tut-toggle" data-section="numerical-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp3a-plotly">Plotly</button>
-                <button class="code-tab" data-tab="cp3a-matplotlib">Matplotlib</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp3a-plotly" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.graph_objects</span> <span class="ck">as</span> go
-<span class="ck">from</span> <span class="cm">plotly.subplots</span> <span class="ck">import</span> make_subplots
-<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
-
-num_col = <span class="cs">'BILL_AMT_1'</span>  <span class="cc"># or BILL_AMT_2 … 6</span>
-
-<span class="cc"># Bin into 10 equal-width intervals</span>
-df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
-counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
-drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labs     = [str(i) for i in counts_b.index]
-
-fig = make_subplots(<span class="cn">1</span>, <span class="cn">2</span>,
-    subplot_titles=[<span class="cs">f'{num_col} Histogram'</span>,
-                    <span class="cs">f'Default Rate by {num_col} Bin'</span>])
-fig.add_trace(go.Bar(x=labs, y=counts_b.values,
-                     marker_color=<span class="cs">'#1864ab'</span>), row=<span class="cn">1</span>, col=<span class="cn">1</span>)
-fig.add_trace(go.Scatter(x=labs, y=drate_b.values,
-                         mode=<span class="cs">'lines+markers'</span>,
-                         line=dict(color=<span class="cs">'#d9480f'</span>, width=<span class="cn">2</span>)),
-              row=<span class="cn">1</span>, col=<span class="cn">2</span>)
-fig.update_layout(showlegend=<span class="cs">False</span>)
-fig.show()</code></pre></div>
-            <div id="cp3a-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-<span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
-
-num_col = <span class="cs">'BILL_AMT_1'</span>
-
-df[<span class="cs">'_bin'</span>] = pd.cut(df[num_col], bins=<span class="cn">10</span>)
-counts_b = df.groupby(<span class="cs">'_bin'</span>)[num_col].count()
-drate_b  = df.groupby(<span class="cs">'_bin'</span>)[<span class="cs">'Default'</span>].mean() * <span class="cn">100</span>
-labs = [str(i) for i in counts_b.index]
-
-fig, (ax1, ax2) = plt.subplots(<span class="cn">1</span>, <span class="cn">2</span>, figsize=(<span class="cn">13</span>, <span class="cn">5</span>))
-
-ax1.bar(range(<span class="cn">len</span>(labs)), counts_b.values, color=<span class="cs">'#1864ab'</span>)
-ax1.set_xticks(range(<span class="cn">len</span>(labs)))
-ax1.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
-ax1.set_title(<span class="cs">f'{num_col} Histogram (binned)'</span>)
-
-ax2.plot(range(<span class="cn">len</span>(labs)), drate_b.values,
-         marker=<span class="cs">'o'</span>, color=<span class="cs">'#d9480f'</span>, linewidth=<span class="cn">2</span>)
-ax2.fill_between(range(<span class="cn">len</span>(labs)), drate_b.values,
-                 alpha=<span class="cn">0.15</span>, color=<span class="cs">'#d9480f'</span>)
-ax2.set_xticks(range(<span class="cn">len</span>(labs)))
-ax2.set_xticklabels(labs, rotation=<span class="cn">30</span>, ha=<span class="cs">'right'</span>, fontsize=<span class="cn">7</span>)
-ax2.set_title(<span class="cs">f'Default Rate by {num_col} Bin'</span>)
-
-plt.tight_layout(); plt.show()</code></pre></div>
-          </div>
-          <details open>
-            <summary>Age Analysis</summary>
-            <div class="chart-grid" style="margin-top: 10px">
-              <article class="chart-card">
-                <h3>Counts by Group</h3>
-                <canvas id="ageCountChart" height="190"></canvas>
-              </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="ageRateChart" height="190"></canvas>
-              </article>
-            </div>
-            <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> Age shows a <strong>weak U-shaped pattern</strong>.
-              Young adults (20&ndash;30) and clients 60+ have slightly elevated default rates;
-              the 30&ndash;40 group is the most financially stable. Age alone has low predictive power.
-            </div>
-          </details>
-
-          <details open>
-            <summary>Limit Balance Analysis</summary>
-            <div class="chart-grid" style="margin-top: 10px">
-              <article class="chart-card">
-                <h3>Counts by Group</h3>
-                <canvas id="limitBalanceCountChart" height="190"></canvas>
-              </article>
-              <article class="chart-card">
-                <h3>Default Rate by Group</h3>
-                <canvas id="limitBalanceRateChart" height="190"></canvas>
-              </article>
-            </div>
-            <div class="note" style="margin-top:10px">
-              <strong>Chart finding:</strong> <strong>Strong inverse relationship</strong> between credit limit and default risk.
-              Clients with limit &le;&nbsp;NT$50&thinsp;K default at ~32 % vs ~14 % for those above NT$270&thinsp;K.
-              Credit limit is a proxy for creditworthiness and is the most important continuous feature.
-            </div>
-          </details>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- CORRELATION MATRIX ANALYSIS                                  -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="correlation-analysis">
-        <header class="section-head">
-          <h2>🔗 Correlation Matrix Analysis</h2>
-          <div class="section-head-actions">
-            <button
-              class="toggle"
-              data-target="correlation-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="correlation-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="correlation-body">
-          <p>
-            Pearson correlations measured on <strong>continuous numeric</strong> features only.
-          </p>
-
-
-          <div class="code-panel tut-toggle" style="margin-top:16px" data-section="correlation-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp5-seaborn">Seaborn</button>
-                <button class="code-tab" data-tab="cp5-plotly">Plotly</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp5-seaborn" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
-<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-<span class="cc"># Only continuous numeric columns (ordinal PAY_1-6 excluded intentionally)</span>
-num_cols = [
-    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
-    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
-    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
-    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
-    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
-    <span class="cs">'Default'</span>
-]
-
-corr = df[num_cols].corr()  <span class="cc"># Pearson by default</span>
-
-plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">12</span>))
-sns.heatmap(corr, annot=<span class="cs">True</span>, fmt=<span class="cs">'.2f'</span>,
-            cmap=<span class="cs">'RdBu_r'</span>, center=<span class="cn">0</span>, vmin=-<span class="cn">1</span>, vmax=<span class="cn">1</span>,
-            square=<span class="cs">True</span>, linewidths=<span class="cn">0.5</span>,
-            cbar_kws={<span class="cs">'shrink'</span>: <span class="cn">0.8</span>})
-plt.title(<span class="cs">'Pearson Correlation Heatmap
-(Continuous features + Target)'</span>)
-plt.tight_layout(); plt.show()</code></pre></div>
-            <div id="cp5-plotly" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">plotly.figure_factory</span> <span class="ck">as</span> ff
-
-num_cols = [
-    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
-    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
-    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
-    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
-    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>,
-    <span class="cs">'Default'</span>
-]
-
-corr = df[num_cols].corr()
-z    = corr.values.round(<span class="cn">2</span>).tolist()
-
-fig = ff.create_annotated_heatmap(
-    z=z,
-    x=corr.columns.tolist(),
-    y=corr.index.tolist(),
-    colorscale=<span class="cs">'RdBu'</span>, zmin=-<span class="cn">1</span>, zmax=<span class="cn">1</span>,
-    reversescale=<span class="cs">True</span>)
-fig.update_layout(title=<span class="cs">'Pearson Correlation Heatmap'</span>, height=<span class="cn">700</span>)
-fig.show()</code></pre></div>
-          </div>
-          <div class="heatmap-zoom-controls" style="margin-top:20px">
-            <span>Zoom:</span>
-            <button onclick="adjustHeatmapZoom(-0.15)">&#8722;</button>
-            <span class="zoom-label" id="heatmapZoomLabel">100%</span>
-            <button onclick="adjustHeatmapZoom(0.15)">+</button>
-            <button onclick="resetHeatmapZoom()" style="font-size:0.78rem;font-weight:500">Reset</button>
-          </div>
-          <div class="note" style="margin-top:14px">
-            <strong>Key findings from the correlation matrix:</strong>
-            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.8">
-              <li><strong>BILL_AMT_1&ndash;6</strong>: pairwise r &asymp; 0.82&ndash;0.95 &mdash; severe multicollinearity within this group. For linear models, keep only <code>BILL_AMT_1</code> or apply PCA.</li>
-              <li><strong>PAY_AMT_1&ndash;6</strong>: pairwise r &asymp; 0.50&ndash;0.76 &mdash; moderate collinearity. PAY_AMT_1 (most recent) has the strongest negative correlation with default.</li>
-              <li><strong>Credit_Limit vs Default</strong>: r &asymp; &minus;0.15 &mdash; the strongest continuous feature correlation.</li>
-              <li><strong>Age vs Default</strong>: r &asymp; 0.01 &mdash; essentially uncorrelated (non-linear pattern not captured by Pearson).</li>
-              <li><strong>Note</strong>: PAY_1&ndash;6 ordinal features (excluded here) have far stronger association with the target &mdash; measured separately via Cram&eacute;r&rsquo;s V (see Section 3.6 below).</li>
-            </ul>
-          </div>
-
-          <div class="heatmap-zoom-wrap">
-            <div class="matrix-scalable" id="matrixScalable">
-              <div class="matrix-wrap">
-                <table class="matrix-table" id="corrMatrixTable"></table>
-              </div>
-              <div class="matrix-legend">
-                <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(120,150,200)"></span>
-                  <span>Negative correlation (r &lt; 0)</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(216,210,218);border:1px solid #e2e8f0"></span>
-                  <span>Weak correlation (r near 0)</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-swatch" style="background:rgb(139,42,42)"></span>
-                  <span>Strong positive (r near +1)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- OUTLIER ANALYSIS                                             -->
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <section class="section" id="outlier-analysis">
-        <header class="section-head">
-          <h2>🔍 Outlier Detection Analysis (IQR)</h2>
-          <div class="section-head-actions">
-            <button
-              class="toggle"
-              data-target="outlier-body"
-              aria-expanded="true"
-            >
-              Toggle Section
-            </button>
-            <button class="btn-tutorial" data-tutorial="outlier-body">&#x1F4D6;&nbsp;Tutorial</button>
-          </div>
-        </header>
-        <div class="section-body" id="outlier-body">
-          <p>
-            Outlier statistics computed via the <strong>IQR method</strong> on all
-            <em>continuous numeric</em> columns.
-          </p>
-          <div class="table-wrap">
-            <table class="outlier-format">
-              <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th>Outlier Count</th>
-                  <th>Percentage</th>
-                  <th>Severity</th>
-                  <th>Valid Range (IQR)</th>
-                </tr>
-              </thead>
-              <tbody id="outlierSummaryTbody"></tbody>
-            </table>
-          </div>
-
-
-          <div class="code-panel tut-toggle" style="margin-top:14px" data-section="outlier-body">
-            <div class="code-panel-header">
-              <div class="code-tabs">
-                <button class="code-tab active" data-tab="cp6-iqr">IQR Function</button>
-                <button class="code-tab" data-tab="cp6-matplotlib">Box Plot</button>
-                <button class="code-tab" data-tab="cp6-seaborn">Seaborn</button>
-              </div>
-              <button class="code-copy-btn">&#128203;&nbsp;Copy</button>
-            </div>
-            <div id="cp6-iqr" class="code-tab-pane active"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">pandas</span> <span class="ck">as</span> pd
-
-<span class="ck">def</span> <span class="cp">detect_outliers_iqr</span>(df, col):
-    q1 = df[col].quantile(<span class="cn">0.25</span>)
-    q3 = df[col].quantile(<span class="cn">0.75</span>)
-    iqr = q3 - q1
-    lower = q1 - <span class="cn">1.5</span> * iqr
-    upper = q3 + <span class="cn">1.5</span> * iqr
-    mask  = (df[col] &lt; lower) | (df[col] &gt; upper)
-    <span class="ck">return</span> {
-        <span class="cs">'feature'</span>: col, <span class="cs">'Q1'</span>: q1, <span class="cs">'Q3'</span>: q3, <span class="cs">'IQR'</span>: iqr,
-        <span class="cs">'lower_bound'</span>: lower, <span class="cs">'upper_bound'</span>: upper,
-        <span class="cs">'num_outliers'</span>: mask.sum(),
-        <span class="cs">'pct_outliers'</span>: round(mask.mean() * <span class="cn">100</span>, <span class="cn">2</span>)
-    }
-
-num_cols = [
-    <span class="cs">'Credit_Limit'</span>, <span class="cs">'Age'</span>,
-    <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>, <span class="cs">'BILL_AMT_3'</span>,
-    <span class="cs">'BILL_AMT_4'</span>, <span class="cs">'BILL_AMT_5'</span>, <span class="cs">'BILL_AMT_6'</span>,
-    <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>,
-    <span class="cs">'PAY_AMT_4'</span>, <span class="cs">'PAY_AMT_5'</span>, <span class="cs">'PAY_AMT_6'</span>
-]
-
-outlier_df = pd.DataFrame([detect_outliers_iqr(df, c) <span class="ck">for</span> c <span class="ck">in</span> num_cols])
-print(outlier_df[[<span class="cs">'feature'</span>, <span class="cs">'num_outliers'</span>, <span class="cs">'pct_outliers'</span>,
-                   <span class="cs">'lower_bound'</span>, <span class="cs">'upper_bound'</span>]].to_string(index=<span class="cs">False</span>))</code></pre></div>
-            <div id="cp6-matplotlib" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
-            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>, <span class="cs">'PAY_AMT_3'</span>, <span class="cs">'Age'</span>]
-
-fig, axes = plt.subplots(<span class="cn">2</span>, <span class="cn">4</span>, figsize=(<span class="cn">16</span>, <span class="cn">8</span>))
-axes = axes.flatten()
-
-<span class="ck">for</span> i, col <span class="ck">in</span> enumerate(num_cols):
-    axes[i].boxplot(df[col].dropna(), patch_artist=<span class="cs">True</span>,
-                    boxprops={<span class="cs">'facecolor'</span>: <span class="cs">'#c6efea'</span>, <span class="cs">'color'</span>: <span class="cs">'#0f766e'</span>},
-                    medianprops={<span class="cs">'color'</span>: <span class="cs">'#c05621'</span>, <span class="cs">'linewidth'</span>: <span class="cn">2</span>},
-                    flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
-    axes[i].set_title(col, fontsize=<span class="cn">9</span>)
-    q1, q3 = df[col].quantile([<span class="cn">0.25</span>, <span class="cn">0.75</span>])
-    iqr = q3 - q1
-    <span class="ck">for</span> bound <span class="ck">in</span> [q1 - <span class="cn">1.5</span>*iqr, q3 + <span class="cn">1.5</span>*iqr]:
-        axes[i].axhline(bound, color=<span class="cs">'red'</span>,
-                        linestyle=<span class="cs">'--'</span>, linewidth=<span class="cn">0.8</span>, alpha=<span class="cn">0.7</span>)
-
-plt.suptitle(<span class="cs">'IQR Box Plots — Outlier Detection'</span>, fontsize=<span class="cn">12</span>)
-plt.tight_layout(); plt.show()</code></pre></div>
-            <div id="cp6-seaborn" class="code-tab-pane"><pre><code class="language-python"><span class="ck">import</span> <span class="cm">seaborn</span> <span class="ck">as</span> sns
-<span class="ck">import</span> <span class="cm">matplotlib.pyplot</span> <span class="ck">as</span> plt
-
-num_cols = [<span class="cs">'Credit_Limit'</span>, <span class="cs">'BILL_AMT_1'</span>, <span class="cs">'BILL_AMT_2'</span>,
-            <span class="cs">'BILL_AMT_3'</span>, <span class="cs">'PAY_AMT_1'</span>, <span class="cs">'PAY_AMT_2'</span>]
-
-<span class="cc"># Long-form melt for seaborn boxplot</span>
-df_melt = df[num_cols].melt(var_name=<span class="cs">'Feature'</span>, value_name=<span class="cs">'Value'</span>)
-
-plt.figure(figsize=(<span class="cn">14</span>, <span class="cn">6</span>))
-sns.boxplot(data=df_melt, x=<span class="cs">'Feature'</span>, y=<span class="cs">'Value'</span>,
-            palette=<span class="cs">'Set2'</span>, width=<span class="cn">0.5</span>,
-            flierprops={<span class="cs">'marker'</span>: <span class="cs">'.'</span>, <span class="cs">'alpha'</span>: <span class="cn">0.3</span>})
-plt.title(<span class="cs">'IQR Box Plots — Seaborn'</span>)
-plt.xticks(rotation=<span class="cn">25</span>, ha=<span class="cs">'right'</span>)
-plt.tight_layout(); plt.show()</code></pre></div>
-
-          <details style="margin-top: 12px">
-            <summary>Show Full Outlier Export (Exact Values)</summary>
-            <pre class="mono-block" id="outlierRaw"></pre>
-          </details>
-        </div>
-      </section>
-
-
-      <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- CRAMÉR’S V — CATEGORICAL ASSOCIATION                         -->
+      <!-- CRAMÉR'S V — CATEGORICAL ASSOCIATION                           -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="cramers-v">
         <header class="section-head">
@@ -2327,9 +2307,8 @@ print(pd.Series(results).sort_values(ascending=<span class="cs">False</span>))</
         </div>
       </section>
 
-
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- MUTUAL INFORMATION — FEATURE IMPORTANCE                      -->
+      <!-- MUTUAL INFORMATION — FEATURE IMPORTANCE                        -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="mutual-info">
         <header class="section-head">
@@ -2386,9 +2365,8 @@ print(mi_series)</code></pre></div>
         </div>
       </section>
 
-
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- ENGINEERED FEATURES                                          -->
+      <!-- ENGINEERED FEATURES                                             -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="engineered-features">
         <header class="section-head">
@@ -2438,12 +2416,22 @@ print(mi_series)</code></pre></div>
               </p>
             </article>
           </div>
+
+          <div class="note" style="margin-top:12px">
+            <strong>Recommended new features for modelling:</strong>
+            <ul style="margin:6px 0 0 1.2em;font-size:0.92rem;line-height:1.8">
+              <li><code>delay_count</code> = <em>(PAY_k &ge; 1).sum(axis=1)</em> &mdash; ordinal delinquency score (0&ndash;6)</li>
+              <li><code>max_pay_code</code> = <em>max(PAY_1&hellip;PAY_6)</em> &mdash; worst single-month delay in history</li>
+              <li><code>util_rate</code> = <em>BILL_AMT_1 / Credit_Limit</em> &mdash; current credit utilisation</li>
+              <li><code>repay_ratio</code> = <em>PAY_AMT_1 / (|BILL_AMT_1| + 1)</em> &mdash; fraction of bill repaid last month</li>
+              <li><code>has_paid_k</code> = <em>(PAY_AMT_k &gt; 0)</em> for k&thinsp;=&thinsp;1&hellip;6 &mdash; binary monthly payment indicators</li>
+            </ul>
+          </div>
         </div>
       </section>
 
-
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- KEY INSIGHTS & CONCLUSION                                    -->
+      <!-- KEY INSIGHTS & CONCLUSION                                       -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <section class="section" id="key-insights">
         <header class="section-head">
@@ -2457,50 +2445,148 @@ print(mi_series)</code></pre></div>
           </button>
         </header>
         <div class="section-body" id="insights-body">
+          <div class="card-grid">
+            <article class="card">
+              <h3>1. Class Imbalance (~78 % / ~22 %)</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Only 1 in ~4.5 clients defaulted. Accuracy is a misleading
+                optimisation target.
+              </p>
+              <div class="note">
+                Use F1-score, AUC-ROC, or Precision-Recall. Consider SMOTE
+                oversampling or class-weight adjustments when training.
+              </div>
+            </article>
 
-          <p style="font-weight:600;color:#2f855a;margin:0 0 8px">Dataset &amp; Class Balance</p>
-          <ul style="margin:0 0 16px 1.2em;line-height:1.9;font-size:0.93rem">
-            <li>30,000 samples, 23 features, 0 missing values</li>
-            <li>⚠️ Imbalanced target: No Default 77.88 % vs Default 22.12 % — ratio 3.52 : 1</li>
-            <li>💡 Avoid accuracy as a metric; use F1-score, AUC-ROC, or Precision-Recall</li>
-          </ul>
+            <article class="card">
+              <h3>2. PAY_1 is the Strongest Single Predictor</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Default rate rises from ~13 % at PAY_1 = −2 to ~69 % at PAY_1 =
+                2, and ~76 % at PAY_1 = 3.
+              </p>
+              <div class="note">
+                Recent repayment behaviour (last 1–2 months) is the dominant
+                predictive feature by a wide margin over demographics or bill
+                amounts.
+              </div>
+            </article>
 
-          <p style="font-weight:600;color:#2f855a;margin:0 0 8px">Payment History (PAY_1–PAY_6)</p>
-          <ul style="margin:0 0 16px 1.2em;line-height:1.9;font-size:0.93rem">
-            <li>PAY_1 is the strongest single predictor — default rate rises from ~13 % (PAY_1 = −2) to ~76 % (PAY_1 = 3)</li>
-            <li>Cramér's V: PAY_1 ≈ 0.38 vs demographics &lt; 0.06 — PAY features dominate by a wide margin</li>
-            <li>Mutual Information: all 6 PAY variables occupy the top 6 ranks before any other feature type</li>
-            <li>💡 Engineer <code>delay_count</code> = (PAY_k ≥ 1).sum() as a single ordinal risk score (0–6)</li>
-            <li>💡 Engineer binary <code>has_paid_k</code> = (PAY_AMT_k &gt; 0) for each month as a compact default signal</li>
-          </ul>
+            <article class="card">
+              <h3>3. Lower Credit Limit → Higher Default Risk</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Clients with credit limit ≤ NT$50 K default at ~32 % vs ~14 %
+                for those above NT$270 K.
+              </p>
+              <div class="note">
+                Credit limit acts as a proxy for creditworthiness. It is a
+                strong feature to keep in all models.
+              </div>
+            </article>
 
-          <p style="font-weight:600;color:#2f855a;margin:0 0 8px">Numerical Features</p>
-          <ul style="margin:0 0 16px 1.2em;line-height:1.9;font-size:0.93rem">
-            <li>Lower credit limit → higher default risk: ≤ NT$50 K defaults at ~32 % vs ~14 % above NT$270 K</li>
-            <li>BILL_AMT_1–6 are near-collinear (Pearson r ≈ 0.80–0.95) — severe multicollinearity within the group</li>
-            <li>8–10 % outlier rate in all BILL_AMT and PAY_AMT columns (IQR method)</li>
-            <li>Over-limit clients (util_rate &gt; 100 %) default at ≈ 37 %</li>
-            <li>💡 For linear models: use only BILL_AMT_1 or apply PCA; tree-based models handle collinearity natively</li>
-            <li>💡 Engineer <code>util_rate</code> = BILL_AMT_1 / Credit_Limit as a credit utilization feature</li>
-          </ul>
+            <article class="card">
+              <h3>4. Education Has Modest Signal</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Graduate school clients default at ~19 % vs high school at ~25
+                %. The "Others" category is unexpectedly low at ~7 %.
+              </p>
+              <div class="note">
+                Modest discriminatory power — best combined with payment history
+                and credit limit features.
+              </div>
+            </article>
 
-          <p style="font-weight:600;color:#2f855a;margin:0 0 8px">Categorical &amp; Demographic Features</p>
-          <ul style="margin:0 0 16px 1.2em;line-height:1.9;font-size:0.93rem">
-            <li>Education: grad school ~19 % default vs high school ~25 % — modest signal</li>
-            <li>Age: clients 20–30 and 60+ have slightly elevated risk; 30–40 group is the safest</li>
-            <li>Gender and Marriage have negligible association with default (Cramér's V &lt; 0.04)</li>
-            <li>💡 Demographics are best used in combination with payment history, not alone</li>
-          </ul>
+            <article class="card">
+              <h3>5. BILL_AMT Columns Are Near-Collinear</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                BILL_AMT_1–6 show pairwise Pearson r ≈ 0.80–0.95 with each other
+                — severe multicollinearity.
+              </p>
+              <div class="note">
+                For linear models: use only BILL_AMT_1 or apply PCA. Treebased
+                models (RF, XGBoost) handle this natively.
+              </div>
+            </article>
 
-          <div class="note" style="margin-top:4px;border-left-color:#2f855a;background:#f0fdf4">
-            <strong>Overall Conclusion:</strong> Payment history (PAY_1–PAY_6) dominates predictive power — confirmed by
-            Pearson correlation, Cramér's V, and Mutual Information. Demographics add modest independent signal.
-            Recommended modelling steps: handle class imbalance → engineer <code>delay_count</code> &amp; <code>has_paid</code> flags →
-            reduce BILL_AMT dimensions via PCA → benchmark <strong>Random Forest and XGBoost</strong>.
+            <article class="card">
+              <h3>6. Zero-Payment Months Signal Default</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Months with PAY_AMT = 0 consistently coincide with higher
+                default rates across all 6 billing periods.
+              </p>
+              <div class="note">
+                Engineer binary <em>has_paid</em> indicator features for each of
+                the 6 months — a compact and robust signal.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>7. Age Has a Weak Non-Linear Pattern</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Clients aged 20–30 and 60+ have slightly elevated default rates;
+                the 30–40 group is the safest.
+              </p>
+              <div class="note">
+                Moderate signal; useful when combined with payment features in
+                tree-based models that capture non-linear interactions.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>8. Heavy Outliers in Financial Columns</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                8–10 % outlier rate in all BILL_AMT and PAY_AMT columns by the
+                IQR method.
+              </p>
+              <div class="note">
+                Apply <strong>RobustScaler</strong> or winsorise at the 1st/99th
+                percentile before training distance-based or linear models.
+              </div>
+            </article>
+
+            <article class="card">
+              <h3>9. PAY Features Dominate All Association Metrics</h3>
+              <p style="margin: 0; font-size: 0.93rem">
+                Cram&eacute;r&rsquo;s V confirms PAY_1 (V&thinsp;&asymp;&thinsp;0.38) far outperforms
+                demographics (V&thinsp;&lt;&thinsp;0.06). Mutual Information places all 6 PAY
+                variables in the top 6 ranks before any other feature type.
+              </p>
+              <div class="note">
+                Compress the 6 PAY columns into <code>delay_count</code> = (PAY_k &ge; 1).sum()
+                — a single ordinal score that retains most signal while reducing dimensionality.
+                Over-limit clients (util_rate &gt;&thinsp;100&thinsp;%) default at &asymp;&thinsp;37&thinsp;%.
+              </div>
+            </article>
+          </div>
+
+          <div
+            class="note"
+            style="
+              margin-top: 18px;
+              border-left-color: #2f855a;
+              background: #f0fdf4;
+            "
+          >
+            <strong>Overall Conclusion:</strong> Payment history (PAY_1–PAY_6)
+            dominates predictive power — confirmed by Pearson correlation,
+            Cram&eacute;r&rsquo;s V, and Mutual Information alike. PAY_1 alone
+            separates default and non-default clients more than any other variable.
+            Demographics (education, age, gender) add modest, independent signal.
+            Bill and payment amount features are informative but suffer from heavy
+            right-skew and high inter-correlation within each group. Recommended
+            next steps: (1) handle class imbalance via SMOTE or class weights,
+            (2) engineer <code>delay_count</code> and <em>has_paid</em> binary flags per month,
+            (3) reduce BILL_AMT dimensionality via PCA, and (4) benchmark
+            <strong>Random Forest and XGBoost</strong> — tree-based ensembles
+            that handle outliers, collinearity, and non-linearity natively
+            without extensive pre-processing.
           </div>
         </div>
       </section>
 
+      <p class="footer">
+        Built as a static companion report for assignment EDA notebook:
+        eda_taiwan_credit_tabular.ipynb
+      </p>
     </main>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css" />
