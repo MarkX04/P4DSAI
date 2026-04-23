@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI Traditional ML | Assignment 2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #f3f8fb;
+            --paper: #ffffff;
+            --ink: #12253a;
+            --muted: #4f6072;
+            --line: #d6e0e9;
+            --brand: #0e5a8a;
+            --brand-2: #1f7a6e;
+            --brand-soft: #e4f2fb;
+            --ok: #15803d;
+            --warn: #b45309;
+            --danger: #b91c1c;
+            --shadow: 0 8px 30px rgba(17, 37, 57, 0.08);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 8% 8%, #d8eefb 0%, rgba(216, 238, 251, 0) 34%),
+                radial-gradient(circle at 92% 12%, #d6f3e8 0%, rgba(214, 243, 232, 0) 30%),
+                linear-gradient(160deg, #f3f8fb 0%, #f8fbfd 48%, #eef5fa 100%);
+            line-height: 1.55;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .top-nav-inner {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand {
+            color: var(--brand);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .hero {
+            margin-top: 14px;
+            border: 1px solid #b7d8ea;
+            background: linear-gradient(135deg, #0e5a8a 0%, #1d6c97 38%, #1f7a6e 100%);
+            color: #eaf7ff;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: clamp(1.55rem, 2.7vw, 2.4rem);
+            line-height: 1.18;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .hero p {
+            color: #d6edf8;
+            max-width: 860px;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .chip-link {
+            border: 1px solid rgba(220, 240, 252, 0.55);
+            color: #f2fbff;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .section {
+            margin-top: 16px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-head {
+            border-bottom: 1px solid var(--line);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .section-head h2 {
+            font-size: 1.2rem;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+
+        .section-body {
+            padding: 16px;
+        }
+
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .stage {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fbfdff;
+            padding: 14px;
+            min-height: 120px;
+        }
+
+        .stage.interactive {
+            border-style: dashed;
+            border-color: #6caed3;
+            background: linear-gradient(160deg, #ebf5fc 0%, #f8fbff 100%);
+        }
+
+        .stage .emoji {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .stage .title {
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .stage .meta {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 1px solid var(--line);
+            background: #f5f9fc;
+            color: var(--ink);
+            border-radius: 10px;
+            padding: 9px 13px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        button.primary {
+            background: var(--brand);
+            color: #fff;
+            border-color: #0c527f;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .method-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            background: linear-gradient(160deg, #ffffff 0%, #f8fbfe 100%);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .method-card.selected {
+            border-color: #3382b4;
+            box-shadow: 0 10px 24px rgba(31, 122, 110, 0.11);
+            background: linear-gradient(145deg, #e7f3fb 0%, #f8fffd 100%);
+        }
+
+        .method-top {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 8px;
+        }
+
+        .method-name {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            flex: 1;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .badge.best {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.fast {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .method-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .method-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.86rem;
+        }
+
+        .method-metrics div {
+            border: 1px dashed #d5e3ef;
+            border-radius: 8px;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .kpi {
+            border: 1px solid var(--line);
+            background: #f7fbff;
+            border-radius: 10px;
+            padding: 11px;
+        }
+
+        .kpi .label {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+
+        .kpi .value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .tab-btn {
+            border-radius: 999px;
+            border: 1px solid #bdd4e3;
+            padding: 8px 12px;
+            background: #f0f7fc;
+            font-weight: 700;
+            color: #1d4e73;
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: var(--brand);
+            border-color: #0d547f;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 12px;
+        }
+
+        .compare-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            background: #ffffff;
+        }
+
+        .compare-card h3 {
+            margin-bottom: 8px;
+            color: var(--brand);
+            font-size: 1.06rem;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .metrics-table td {
+            border-bottom: 1px dashed #dce7ef;
+            padding: 7px 0;
+            font-size: 0.9rem;
+        }
+
+        .metrics-table td:last-child {
+            text-align: right;
+            font-weight: 800;
+        }
+
+        .chart-box {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fafeff;
+        }
+
+        .cm-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .cm-btn.active {
+            background: #0f6aa3;
+            color: #fff;
+            border-color: #0f6aa3;
+        }
+
+        .cm-wrap {
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            max-height: 460px;
+            background: #fff;
+        }
+
+        .cm-table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .cm-table th,
+        .cm-table td {
+            border: 1px solid #dce7ef;
+            padding: 5px 7px;
+            text-align: center;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .cm-table th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f4f9fd;
+        }
+
+        .walk-step {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+
+        .walk-step h4 {
+            color: var(--brand);
+            margin-bottom: 6px;
+        }
+
+        .formula {
+            margin-top: 6px;
+            margin-bottom: 6px;
+            border-left: 4px solid #5aa4cf;
+            background: #f2f8fc;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-family: "Consolas", "Menlo", monospace;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+        }
+
+        .config-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 11px;
+            background: #fbfeff;
+        }
+
+        .config-card h3 {
+            color: var(--brand);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .kv {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed #dce7ef;
+            padding: 6px 0;
+        }
+
+        .status {
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            border: 1px solid #d6e0e9;
+            background: #f7fbff;
+            color: #1d4e73;
+        }
+
+        .status.warn {
+            background: #fff8e7;
+            border-color: #f3d3a3;
+            color: #92400e;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+        }
+
+        .link-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .link-card h3 {
+            margin-bottom: 6px;
+            color: #12507b;
+            font-size: 1rem;
+        }
+
+        .link-card a {
+            color: #0e5a8a;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .pipeline {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="../" class="brand">MBTI A2 Traditional ML</a>
+            <div class="nav-links">
+                <a href="../../">Home</a>
+                <a href="../">Assignment 2</a>
+                <a href="../../assignment1/EDA/mbti_text_classification/">A1 MBTI EDA</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero">
+            <h1>TF-IDF + Traditional Machine Learning</h1>
+            <p>
+                Fast, interpretable MBTI text classification pipeline with model comparison,
+                confusion matrix analysis, and metric walkthrough. Data is loaded directly from notebook outputs.
+            </p>
+            <div class="hero-links">
+                <a class="chip-link" href="mbti_ml_pipeline.ipynb">Pipeline Notebook</a>
+                <a class="chip-link" href="../results/model_results.json">JSON Results</a>
+                <a class="chip-link" href="https://github.com/LTSACH/AILearningHub" target="_blank" rel="noreferrer">Reference Repo</a>
+                <a class="chip-link" href="https://ltsach.github.io/AILearningHub/04_Natural_Language_Processing/text_classification/pages/traditional_ml/index.html" target="_blank" rel="noreferrer">Reference Page</a>
+            </div>
+        </header>
+
+        <section class="section">
+            <div class="section-head">
+                <h2>Pipeline Overview</h2>
+            </div>
+            <div class="section-body">
+                <div class="pipeline">
+                    <article class="stage">
+                        <span class="emoji">📝</span>
+                        <div class="title">Text Input</div>
+                        <div class="meta">8,675 MBTI posts, 16 classes</div>
+                    </article>
+                    <article class="stage">
+                        <span class="emoji">🧹</span>
+                        <div class="title">Cleaning</div>
+                        <div class="meta">URL/noise removal + MBTI token leakage mitigation</div>
+                    </article>
+                    <article class="stage">
+                        <span class="emoji">🔢</span>
+                        <div class="title">TF-IDF</div>
+                        <div class="meta">Fixed feature space, sparse vectors</div>
+                    </article>
+                    <article class="stage interactive">
+                        <span class="emoji">🤖</span>
+                        <div class="title">Classifier Selection</div>
+                        <div class="meta">Select one or multiple models below</div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <h2>Select Methods to Compare</h2>
+                <div class="toolbar">
+                    <button id="btnSelectAll" type="button">Select All</button>
+                    <button id="btnClearAll" type="button">Clear All</button>
+                    <button id="btnCompare" class="primary" type="button">Compare Selected</button>
+                </div>
+            </div>
+            <div class="section-body">
+                <div id="statusBox" class="status">Loading model metadata...</div>
+                <div id="methodGrid" class="method-grid"></div>
+            </div>
+        </section>
+
+        <section id="resultsSection" class="section hidden">
+            <div class="section-head">
+                <h2>Comparison Results</h2>
+            </div>
+            <div class="section-body">
+                <div class="kpis" id="kpiGrid"></div>
+
+                <div class="tabs" id="tabs">
+                    <button class="tab-btn active" data-tab="overview">Overview</button>
+                    <button class="tab-btn" data-tab="confusion">Confusion Matrix</button>
+                    <button class="tab-btn" data-tab="walkthrough">Metrics Walkthrough</button>
+                    <button class="tab-btn" data-tab="config">Configuration</button>
+                </div>
+
+                <div id="pane-overview" class="tab-pane active">
+                    <div class="chart-box">
+                        <canvas id="metricsChart" height="120"></canvas>
+                    </div>
+                    <div id="compareGrid" class="compare-grid"></div>
+                </div>
+
+                <div id="pane-confusion" class="tab-pane">
+                    <div id="cmControls" class="cm-controls"></div>
+                    <div id="cmImageHint" class="status"></div>
+                    <div class="cm-wrap">
+                        <table id="cmTable" class="cm-table"></table>
+                    </div>
+                </div>
+
+                <div id="pane-walkthrough" class="tab-pane">
+                    <div id="walkthrough"></div>
+                </div>
+
+                <div id="pane-config" class="tab-pane">
+                    <div id="configGrid" class="config-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <h2>Additional Links</h2>
+            </div>
+            <div class="section-body links-grid">
+                <article class="link-card">
+                    <h3>Project Pages</h3>
+                    <p><a href="../../">Landing page</a></p>
+                    <p><a href="../">Assignment 2 index</a></p>
+                    <p><a href="../../assignment1/EDA/mbti_text_classification/">Assignment 1 MBTI EDA</a></p>
+                </article>
+                <article class="link-card">
+                    <h3>Notebook Artifacts</h3>
+                    <p><a href="../results/model_results.json">Model JSON</a></p>
+                    <p><a href="../results/model_comparison.csv">Comparison CSV</a></p>
+                    <p><a href="../results/model_comparison.png">Comparison Figure</a></p>
+                </article>
+                <article class="link-card">
+                    <h3>Reference (AILearningHub)</h3>
+                    <p><a target="_blank" rel="noreferrer" href="https://ltsach.github.io/AILearningHub/04_Natural_Language_Processing/text_classification/index.html">NLP Overview</a></p>
+                    <p><a target="_blank" rel="noreferrer" href="https://ltsach.github.io/AILearningHub/04_Natural_Language_Processing/text_classification/pages/traditional_ml/index.html">Traditional ML</a></p>
+                    <p><a target="_blank" rel="noreferrer" href="https://github.com/LTSACH/AILearningHub">GitHub Repository</a></p>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const fallbackData = {
+            models: [
+                { id: "xgboost", name: "XGBoost", accuracy: 0.6599, precision: 0.6064, recall: 0.4601, f1_score: 0.5043, train_time: 96.8, inference_time: 0.0472 },
+                { id: "linear_svm", name: "Linear SVM", accuracy: 0.6098, precision: 0.6106, recall: 0.4439, f1_score: 0.4857, train_time: 4.88, inference_time: 0.0084 },
+                { id: "logistic_regression", name: "Logistic Regression", accuracy: 0.6219, precision: 0.5449, recall: 0.3442, f1_score: 0.3759, train_time: 5.89, inference_time: 0.0078 },
+                { id: "mlp", name: "MLP", accuracy: 0.5193, precision: 0.4291, recall: 0.3335, f1_score: 0.3530, train_time: 22.1, inference_time: 0.0402 },
+                { id: "random_forest", name: "Random Forest", accuracy: 0.5781, precision: 0.5681, recall: 0.2755, f1_score: 0.2925, train_time: 4.96, inference_time: 0.0799 },
+                { id: "naive_bayes", name: "Naive Bayes", accuracy: 0.3954, precision: 0.2186, recall: 0.1417, f1_score: 0.1196, train_time: 0.07, inference_time: 0.0102 }
+            ],
+            class_labels: [],
+            confusion_matrices: {},
+            dataset_info: { total_samples: 8675, num_classes: 16, train_size: 6940, test_size: 1735 },
+            tfidf_config: { max_features: 5000, ngram_range: "(1, 2)", min_df: 5, max_df: 0.8, stop_words: "english" }
+        };
+
+        const methodDescriptions = {
+            xgboost: "Gradient boosting trees, strong tabular/text baseline with balanced speed-performance.",
+            logistic_regression: "Linear baseline, fast and robust with sparse TF-IDF features.",
+            linear_svm: "Maximum-margin classifier, strong performance for high-dimensional text data.",
+            random_forest: "Bagged decision trees, less sensitive to scaling and useful for non-linear signals.",
+            mlp: "Neural baseline that can learn non-linear patterns from TF-IDF vectors.",
+            naive_bayes: "Very fast probabilistic baseline, often used for quick text classification benchmarks."
+        };
+
+        let appData = null;
+        let selected = new Set();
+        let activeCMModelId = null;
+        let chartRef = null;
+
+        function fmtPct(v) {
+            return `${(v * 100).toFixed(2)}%`;
+        }
+
+        function fmtSec(v) {
+            return `${Number(v).toFixed(2)}s`;
+        }
+
+        function getBadge(model, models) {
+            const bestByF1 = models.slice().sort((a, b) => b.f1_score - a.f1_score)[0]?.id;
+            const fastest = models.slice().sort((a, b) => a.train_time - b.train_time)[0]?.id;
+            if (model.id === bestByF1) return { text: "BEST", cls: "best" };
+            if (model.id === fastest) return { text: "FAST", cls: "fast" };
+            return null;
+        }
+
+        async function loadData() {
+            const status = document.getElementById("statusBox");
+            try {
+                const resp = await fetch("../results/model_results.json", { cache: "no-store" });
+                if (!resp.ok) throw new Error("Cannot fetch model_results.json");
+                const data = await resp.json();
+                if (!Array.isArray(data.models) || data.models.length === 0) throw new Error("Invalid JSON payload");
+                appData = data;
+                status.textContent = "Loaded live notebook results from model_results.json";
+            } catch (err) {
+                appData = fallbackData;
+                status.classList.add("warn");
+                status.textContent = "Using fallback results. Run notebook and refresh to load live artifacts.";
+            }
+
+            renderMethodGrid();
+            selectDefaultModels();
+        }
+
+        function renderMethodGrid() {
+            const grid = document.getElementById("methodGrid");
+            const models = appData.models;
+            grid.innerHTML = models.map((m) => {
+                const badge = getBadge(m, models);
+                const desc = methodDescriptions[m.id] || "Traditional machine learning method for TF-IDF text vectors.";
+                return `
+                    <article class="method-card" data-model="${m.id}">
+                        <div class="method-top">
+                            <input type="checkbox" id="chk-${m.id}" aria-label="select ${m.name}" />
+                            <div class="method-name">${m.name}</div>
+                            ${badge ? `<span class="badge ${badge.cls}">${badge.text}</span>` : ""}
+                        </div>
+                        <p class="method-desc">${desc}</p>
+                        <div class="method-metrics">
+                            <div><span>Accuracy</span><strong>${fmtPct(m.accuracy)}</strong></div>
+                            <div><span>F1</span><strong>${fmtPct(m.f1_score)}</strong></div>
+                            <div><span>Train</span><strong>${fmtSec(m.train_time)}</strong></div>
+                            <div><span>Infer</span><strong>${(m.inference_time * 1000).toFixed(2)}ms</strong></div>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+
+            models.forEach((m) => {
+                const card = grid.querySelector(`[data-model='${m.id}']`);
+                const chk = card.querySelector("input[type='checkbox']");
+                card.addEventListener("click", (e) => {
+                    if (e.target.tagName !== "INPUT") chk.checked = !chk.checked;
+                    toggleModel(m.id, chk.checked, card);
+                });
+                chk.addEventListener("change", () => toggleModel(m.id, chk.checked, card));
+            });
+        }
+
+        function toggleModel(modelId, checked, cardEl) {
+            if (checked) selected.add(modelId);
+            else selected.delete(modelId);
+            cardEl.classList.toggle("selected", checked);
+        }
+
+        function selectDefaultModels() {
+            const all = appData.models;
+            const sorted = all.slice().sort((a, b) => b.f1_score - a.f1_score);
+            const defaults = sorted.slice(0, Math.min(3, sorted.length)).map((m) => m.id);
+            defaults.forEach((id) => {
+                const card = document.querySelector(`[data-model='${id}']`);
+                const chk = document.getElementById(`chk-${id}`);
+                if (card && chk) {
+                    chk.checked = true;
+                    toggleModel(id, true, card);
+                }
+            });
+            compareSelected();
+        }
+
+        function selectedModels() {
+            const set = selected;
+            return appData.models.filter((m) => set.has(m.id));
+        }
+
+        function compareSelected() {
+            const models = selectedModels();
+            if (models.length === 0) {
+                alert("Select at least one model to compare.");
+                return;
+            }
+
+            document.getElementById("resultsSection").classList.remove("hidden");
+            renderKPIs(models);
+            renderOverview(models);
+            renderConfusion(models);
+            renderWalkthrough(models[0]);
+            renderConfig();
+            document.getElementById("resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function renderKPIs(models) {
+            const bestByF1 = models.slice().sort((a, b) => b.f1_score - a.f1_score)[0];
+            const fastest = models.slice().sort((a, b) => a.train_time - b.train_time)[0];
+            const avgAcc = models.reduce((s, m) => s + m.accuracy, 0) / models.length;
+
+            const kpiGrid = document.getElementById("kpiGrid");
+            kpiGrid.innerHTML = `
+                <div class="kpi"><div class="label">Selected Models</div><div class="value">${models.length}</div></div>
+                <div class="kpi"><div class="label">Best F1 Model</div><div class="value">${bestByF1.name}</div></div>
+                <div class="kpi"><div class="label">Best F1-Score</div><div class="value">${fmtPct(bestByF1.f1_score)}</div></div>
+                <div class="kpi"><div class="label">Fastest Training</div><div class="value">${fastest.name} (${fmtSec(fastest.train_time)})</div></div>
+                <div class="kpi"><div class="label">Average Accuracy</div><div class="value">${fmtPct(avgAcc)}</div></div>
+            `;
+        }
+
+        function renderOverview(models) {
+            const grid = document.getElementById("compareGrid");
+            grid.innerHTML = models.map((m) => `
+                <article class="compare-card">
+                    <h3>${m.name}</h3>
+                    <table class="metrics-table">
+                        <tr><td>Accuracy</td><td>${fmtPct(m.accuracy)}</td></tr>
+                        <tr><td>Precision</td><td>${fmtPct(m.precision)}</td></tr>
+                        <tr><td>Recall</td><td>${fmtPct(m.recall)}</td></tr>
+                        <tr><td>F1-Score</td><td>${fmtPct(m.f1_score)}</td></tr>
+                        <tr><td>Train Time</td><td>${fmtSec(m.train_time)}</td></tr>
+                        <tr><td>Inference</td><td>${(m.inference_time * 1000).toFixed(2)}ms</td></tr>
+                    </table>
+                </article>
+            `).join("");
+
+            const ctx = document.getElementById("metricsChart");
+            if (chartRef) chartRef.destroy();
+            chartRef = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: models.map((m) => m.name),
+                    datasets: [
+                        { label: "Accuracy", data: models.map((m) => (m.accuracy * 100).toFixed(2)), backgroundColor: "#2f80c1" },
+                        { label: "F1-Score", data: models.map((m) => (m.f1_score * 100).toFixed(2)), backgroundColor: "#2ca58d" },
+                        { label: "Precision", data: models.map((m) => (m.precision * 100).toFixed(2)), backgroundColor: "#4c96d7" }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: "Percent" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderConfusion(models) {
+            const controls = document.getElementById("cmControls");
+            controls.innerHTML = models.map((m, idx) => `<button class="cm-btn ${idx === 0 ? "active" : ""}" data-cm="${m.id}">${m.name}</button>`).join("");
+
+            activeCMModelId = models[0].id;
+            controls.querySelectorAll("button").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    controls.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    activeCMModelId = btn.dataset.cm;
+                    drawConfusionTable(activeCMModelId);
+                    renderWalkthrough(models.find((m) => m.id === activeCMModelId));
+                });
+            });
+
+            drawConfusionTable(activeCMModelId);
+        }
+
+        function drawConfusionTable(modelId) {
+            const hint = document.getElementById("cmImageHint");
+            const table = document.getElementById("cmTable");
+            const cmData = appData.confusion_matrices?.[modelId]?.matrix;
+            const labels = appData.class_labels || [];
+
+            if (!cmData || !Array.isArray(cmData) || cmData.length === 0) {
+                table.innerHTML = `<tr><td style="padding:14px; color:#64748b;">No confusion matrix available for this model. Re-run notebook to export detailed confusion data.</td></tr>`;
+                hint.classList.add("warn");
+                hint.textContent = "Matrix not found in JSON payload.";
+                return;
+            }
+
+            const max = Math.max(...cmData.flat());
+            const headCols = labels.length === cmData.length ? labels : cmData.map((_, i) => `c${i}`);
+
+            let html = `<thead><tr><th>True \\ Pred</th>${headCols.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>`;
+            cmData.forEach((row, rIdx) => {
+                html += `<tr><th>${headCols[rIdx] || `r${rIdx}`}</th>`;
+                row.forEach((v) => {
+                    const alpha = max > 0 ? (v / max) : 0;
+                    const bg = `rgba(30, 120, 179, ${Math.max(0.08, alpha * 0.95)})`;
+                    const color = alpha > 0.52 ? "#fff" : "#16354d";
+                    html += `<td style="background:${bg}; color:${color};">${v}</td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody>`;
+            table.innerHTML = html;
+
+            hint.classList.remove("warn");
+            hint.textContent = `Confusion matrix loaded from JSON for ${appData.confusion_matrices?.[modelId]?.name || modelId}.`;
+        }
+
+        function renderWalkthrough(model) {
+            if (!model) return;
+            const box = document.getElementById("walkthrough");
+            const p = model.precision;
+            const r = model.recall;
+            const f = model.f1_score;
+            const harmonic = (2 * p * r) / (p + r || 1);
+
+            box.innerHTML = `
+                <article class="walk-step">
+                    <h4>1) Precision</h4>
+                    <p class="muted">How many predicted samples are correct.</p>
+                    <div class="formula">Precision = TP / (TP + FP)</div>
+                    <strong>${model.name}: ${fmtPct(model.precision)}</strong>
+                </article>
+                <article class="walk-step">
+                    <h4>2) Recall</h4>
+                    <p class="muted">How many true samples are captured.</p>
+                    <div class="formula">Recall = TP / (TP + FN)</div>
+                    <strong>${model.name}: ${fmtPct(model.recall)}</strong>
+                </article>
+                <article class="walk-step">
+                    <h4>3) F1-Score</h4>
+                    <p class="muted">Harmonic mean of precision and recall.</p>
+                    <div class="formula">F1 = 2 * (Precision * Recall) / (Precision + Recall)</div>
+                    <div class="muted">2 * (${p.toFixed(4)} * ${r.toFixed(4)}) / (${p.toFixed(4)} + ${r.toFixed(4)}) = ${harmonic.toFixed(4)}</div>
+                    <strong>${model.name}: ${fmtPct(f)}</strong>
+                </article>
+                <article class="walk-step">
+                    <h4>4) Accuracy</h4>
+                    <div class="formula">Accuracy = Correct Predictions / Total Predictions</div>
+                    <strong>${model.name}: ${fmtPct(model.accuracy)}</strong>
+                </article>
+            `;
+        }
+
+        function renderConfig() {
+            const cfg = appData.tfidf_config || {};
+            const ds = appData.dataset_info || {};
+            const best = appData.models.slice().sort((a, b) => b.f1_score - a.f1_score)[0];
+
+            const el = document.getElementById("configGrid");
+            el.innerHTML = `
+                <article class="config-card">
+                    <h3>TF-IDF Setup</h3>
+                    <div class="kv"><span>Max features</span><strong>${cfg.max_features ?? "-"}</strong></div>
+                    <div class="kv"><span>N-gram range</span><strong>${cfg.ngram_range ?? "-"}</strong></div>
+                    <div class="kv"><span>Min DF</span><strong>${cfg.min_df ?? "-"}</strong></div>
+                    <div class="kv"><span>Max DF</span><strong>${cfg.max_df ?? "-"}</strong></div>
+                    <div class="kv"><span>Stop words</span><strong>${cfg.stop_words ?? "-"}</strong></div>
+                </article>
+                <article class="config-card">
+                    <h3>Dataset Info</h3>
+                    <div class="kv"><span>Total samples</span><strong>${ds.total_samples ?? "-"}</strong></div>
+                    <div class="kv"><span>Classes</span><strong>${ds.num_classes ?? "-"}</strong></div>
+                    <div class="kv"><span>Train size</span><strong>${ds.train_size ?? "-"}</strong></div>
+                    <div class="kv"><span>Test size</span><strong>${ds.test_size ?? "-"}</strong></div>
+                    <div class="kv"><span>Leakage rate (post-clean)</span><strong>${ds.leakage_rate_after_cleaning != null ? fmtPct(ds.leakage_rate_after_cleaning) : "-"}</strong></div>
+                </article>
+                <article class="config-card">
+                    <h3>Best Model Snapshot</h3>
+                    <div class="kv"><span>Model</span><strong>${best ? best.name : "-"}</strong></div>
+                    <div class="kv"><span>Accuracy</span><strong>${best ? fmtPct(best.accuracy) : "-"}</strong></div>
+                    <div class="kv"><span>F1-Score</span><strong>${best ? fmtPct(best.f1_score) : "-"}</strong></div>
+                    <div class="kv"><span>Train time</span><strong>${best ? fmtSec(best.train_time) : "-"}</strong></div>
+                    <div class="kv"><span>Inference</span><strong>${best ? (best.inference_time * 1000).toFixed(2) + "ms" : "-"}</strong></div>
+                </article>
+            `;
+        }
+
+        function initTabs() {
+            const tabs = document.getElementById("tabs");
+            tabs.querySelectorAll(".tab-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    tabs.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    const name = btn.dataset.tab;
+                    document.querySelectorAll(".tab-pane").forEach((p) => p.classList.remove("active"));
+                    document.getElementById(`pane-${name}`).classList.add("active");
+                });
+            });
+        }
+
+        function attachActions() {
+            document.getElementById("btnSelectAll").addEventListener("click", () => {
+                selected = new Set(appData.models.map((m) => m.id));
+                appData.models.forEach((m) => {
+                    const card = document.querySelector(`[data-model='${m.id}']`);
+                    const chk = document.getElementById(`chk-${m.id}`);
+                    if (chk && card) {
+                        chk.checked = true;
+                        card.classList.add("selected");
+                    }
+                });
+            });
+
+            document.getElementById("btnClearAll").addEventListener("click", () => {
+                selected.clear();
+                appData.models.forEach((m) => {
+                    const card = document.querySelector(`[data-model='${m.id}']`);
+                    const chk = document.getElementById(`chk-${m.id}`);
+                    if (chk && card) {
+                        chk.checked = false;
+                        card.classList.remove("selected");
+                    }
+                });
+            });
+
+            document.getElementById("btnCompare").addEventListener("click", compareSelected);
+        }
+
+        async function init() {
+            initTabs();
+            await loadData();
+            attachActions();
+        }
+
+        window.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>

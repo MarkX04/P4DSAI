@@ -1,0 +1,26 @@
+{
+  "dataset": "MBTI Personality Types",
+  "n_samples": 8675,
+  "n_classes": 16,
+  "train_size": 6940,
+  "test_size": 1735,
+  "feature_extraction": "TF-IDF",
+  "n_features": 5000,
+  "models_trained": [
+    "Logistic Regression",
+    "Naive Bayes",
+    "Linear SVM",
+    "Random Forest",
+    "MLP",
+    "XGBoost"
+  ],
+  "best_model": "Logistic Regression",
+  "best_f1_score": 0.3540635591847245,
+  "leakage_rate_after_cleaning": 0.0,
+  "random_state": 42,
+  "artifacts": {
+    "comparison_csv": "/Users/mac/Documents/WorknStudy/P4DSAI/assignment2/results/model_comparison.csv",
+    "comparison_png": "/Users/mac/Documents/WorknStudy/P4DSAI/assignment2/results/model_comparison.png",
+    "model_results_json": "/Users/mac/Documents/WorknStudy/P4DSAI/assignment2/results/model_results.json"
+  }
+}

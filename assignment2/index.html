@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Assignment 2</title>
+        <title>Assignment 2 - Machine Learning Classification | P4AI-DS</title>
         <style>
             :root {
                 --bg: #f8f7fb;
@@ -12,6 +12,9 @@
                 --muted: #5e5471;
                 --line: #ddd6ec;
                 --accent: #5c4bb5;
+                --success: #10b981;
+                --warning: #f59e0b;
+                --info: #3b82f6;
             }
 
             * {
@@ -27,64 +30,354 @@
                     radial-gradient(circle at 88% 16%, #dff3ff 0%, rgba(223, 243, 255, 0) 28%),
                     var(--bg);
                 min-height: 100vh;
+                padding: 20px;
             }
 
             .container {
-                max-width: 900px;
+                max-width: 1200px;
                 margin: 0 auto;
                 padding: 28px 18px 44px;
             }
 
-            .panel {
+            .header {
                 background: var(--paper);
                 border: 1px solid var(--line);
                 border-radius: 16px;
-                padding: 24px;
+                padding: 32px;
+                margin-bottom: 32px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             }
 
             h1 {
-                margin: 0 0 10px;
+                margin: 0 0 12px;
+                font-size: 2.5rem;
+                background: linear-gradient(135deg, var(--accent), #8b5cf6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
             }
 
-            p {
-                margin: 0;
+            .subtitle {
                 color: var(--muted);
+                font-size: 1.1rem;
+                margin: 0 0 20px;
                 line-height: 1.6;
             }
 
             .badge {
                 display: inline-block;
-                margin-top: 12px;
-                padding: 6px 10px;
+                padding: 6px 12px;
                 border-radius: 999px;
                 border: 1px solid #c8bee9;
                 background: #f5f1ff;
                 color: var(--accent);
                 font-weight: 600;
                 font-size: 0.85rem;
+                margin-right: 8px;
             }
 
-            .top-link {
+            .badge.success {
+                background: #d1fae5;
+                border-color: #6ee7b7;
+                color: #065f46;
+            }
+
+            .badge.warning {
+                background: #fef3c7;
+                border-color: #fcd34d;
+                color: #92400e;
+            }
+
+            .projects-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 24px;
+                margin-bottom: 32px;
+            }
+
+            .project-card {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 28px;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .project-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(92, 75, 181, 0.15);
+                border-color: var(--accent);
+            }
+
+            .project-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                margin-bottom: 16px;
+            }
+
+            .icon-text {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            .icon-table {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .icon-image {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .project-title {
+                font-size: 1.4rem;
+                font-weight: 700;
+                margin: 0 0 8px;
+                color: var(--ink);
+            }
+
+            .project-desc {
+                color: var(--muted);
+                line-height: 1.6;
+                margin: 0 0 16px;
+                font-size: 0.95rem;
+            }
+
+            .project-meta {
+                display: flex;
+                gap: 12px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+            }
+
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.85rem;
+                color: var(--muted);
+            }
+
+            .meta-item strong {
+                color: var(--ink);
+            }
+
+            .project-link {
+                display: inline-block;
+                padding: 10px 20px;
+                background: var(--accent);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+
+            .project-link:hover {
+                background: #4a3a9a;
+                transform: translateX(2px);
+            }
+
+            .project-link.disabled {
+                background: #e5e7eb;
+                color: #9ca3af;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .back-link {
                 display: inline-block;
                 margin-top: 14px;
-                color: #433199;
+                color: var(--accent);
                 text-decoration: none;
                 font-weight: 600;
+                transition: all 0.2s ease;
             }
 
-            .top-link:hover {
+            .back-link:hover {
                 text-decoration: underline;
+                transform: translateX(-2px);
+            }
+
+            .info-section {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 24px;
+            }
+
+            .info-section h2 {
+                margin: 0 0 16px;
+                font-size: 1.5rem;
+                color: var(--ink);
+            }
+
+            .info-section ul {
+                margin: 0;
+                padding-left: 20px;
+                color: var(--muted);
+                line-height: 1.8;
+            }
+
+            .info-section li {
+                margin-bottom: 8px;
+            }
+
+            @media (max-width: 768px) {
+                .projects-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                h1 {
+                    font-size: 2rem;
+                }
             }
         </style>
     </head>
     <body>
         <main class="container">
-            <section class="panel">
-                <h1>Assignment 2</h1>
-                <p>This page is ready for Assignment 2 content and links.</p>
-                <span class="badge">Status: prepared for publish</span>
+            <!-- Header -->
+            <section class="header">
+                <h1>🤖 Assignment 2: Machine Learning Classification</h1>
+                <p class="subtitle">
+                    Building and evaluating classification models across three different data modalities: 
+                    Text, Tabular, and Image data.
+                </p>
+                <span class="badge success">✓ Text Classification</span>
+                <span class="badge warning">⏳ Tabular Classification</span>
+                <span class="badge warning">⏳ Image Classification</span>
                 <br />
-                <a class="top-link" href="../">Back to Home</a>
+                <a class="back-link" href="../">← Back to Home</a>
+            </section>
+
+            <!-- Projects Grid -->
+            <div class="projects-grid">
+                <!-- MBTI Text Classification -->
+                <article class="project-card">
+                    <div class="project-icon icon-text">📝</div>
+                    <h2 class="project-title">MBTI Text Classification</h2>
+                    <p class="project-desc">
+                        Personality type prediction from social media posts using TF-IDF and machine learning models.
+                    </p>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Dataset:</strong> 8,675 samples
+                        </span>
+                        <span class="meta-item">
+                            <strong>Classes:</strong> 16 types
+                        </span>
+                        <span class="meta-item">
+                            <strong>Models:</strong> 6 algorithms
+                        </span>
+                    </div>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Best:</strong> XGBoost (64.38%)
+                        </span>
+                        <span class="meta-item">
+                            <strong>Status:</strong> ✅ Complete
+                        </span>
+                    </div>
+                    <a href="text_classification/index.html" class="project-link">
+                        View Results →
+                    </a>
+                </article>
+
+                <!-- Taiwan Credit Tabular Classification -->
+                <article class="project-card">
+                    <div class="project-icon icon-table">📊</div>
+                    <h2 class="project-title">Credit Default Prediction</h2>
+                    <p class="project-desc">
+                        Predicting credit card default using tabular data with traditional ML and ensemble methods.
+                    </p>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Dataset:</strong> Taiwan Credit
+                        </span>
+                        <span class="meta-item">
+                            <strong>Task:</strong> Binary Classification
+                        </span>
+                    </div>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Status:</strong> ⏳ In Progress
+                        </span>
+                    </div>
+                    <a href="#" class="project-link disabled">
+                        Coming Soon
+                    </a>
+                </article>
+
+                <!-- Pokemon Image Classification -->
+                <article class="project-card">
+                    <div class="project-icon icon-image">🖼️</div>
+                    <h2 class="project-title">Pokemon Image Classification</h2>
+                    <p class="project-desc">
+                        Transfer learning with pretrained CNNs (ResNet, EfficientNet) for Pokemon species recognition.
+                    </p>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Dataset:</strong> Pokemon Images
+                        </span>
+                        <span class="meta-item">
+                            <strong>Method:</strong> Transfer Learning
+                        </span>
+                    </div>
+                    <div class="project-meta">
+                        <span class="meta-item">
+                            <strong>Status:</strong> ⏳ In Progress
+                        </span>
+                    </div>
+                    <a href="#" class="project-link disabled">
+                        Coming Soon
+                    </a>
+                </article>
+            </div>
+
+            <!-- Assignment Overview -->
+            <section class="info-section">
+                <h2>📋 Assignment Overview</h2>
+                <p style="color: var(--muted); margin-bottom: 16px;">
+                    This assignment demonstrates the application of machine learning classification techniques 
+                    across different data modalities, following the exploratory data analysis from Assignment 1.
+                </p>
+                <ul>
+                    <li><strong>Text Classification:</strong> TF-IDF + Traditional ML (LR, NB, SVM, RF, MLP, XGBoost)</li>
+                    <li><strong>Tabular Classification:</strong> Feature engineering + Ensemble methods</li>
+                    <li><strong>Image Classification:</strong> Transfer learning with pretrained CNNs</li>
+                    <li><strong>Evaluation:</strong> Comprehensive metrics, confusion matrices, and model comparison</li>
+                </ul>
+            </section>
+
+            <!-- Key Achievements -->
+            <section class="info-section">
+                <h2>🎯 Key Achievements</h2>
+                <ul>
+                    <li>✅ <strong>MBTI Text Classification:</strong> 6 models implemented with 64.38% accuracy (XGBoost)</li>
+                    <li>✅ <strong>XGBoost Optimization:</strong> Reduced training time from 430s to ~30-50s (10x faster)</li>
+                    <li>✅ <strong>JSON Automation:</strong> Dynamic HTML updates from notebook results</li>
+                    <li>✅ <strong>Comprehensive Documentation:</strong> Quick start guides and optimization details</li>
+                    <li>⏳ <strong>Tabular Classification:</strong> In development</li>
+                    <li>⏳ <strong>Image Classification:</strong> In development</li>
+                </ul>
+            </section>
+
+            <!-- Technologies Used -->
+            <section class="info-section">
+                <h2>🛠️ Technologies & Libraries</h2>
+                <ul>
+                    <li><strong>Data Processing:</strong> pandas, numpy, scikit-learn</li>
+                    <li><strong>Text Processing:</strong> NLTK, TF-IDF Vectorizer</li>
+                    <li><strong>Machine Learning:</strong> scikit-learn, XGBoost, LightGBM</li>
+                    <li><strong>Deep Learning:</strong> TensorFlow/Keras, PyTorch (optional)</li>
+                    <li><strong>Visualization:</strong> matplotlib, seaborn, plotly</li>
+                    <li><strong>Deployment:</strong> GitHub Pages, Jupyter Notebooks</li>
+                </ul>
             </section>
         </main>
     </body>
