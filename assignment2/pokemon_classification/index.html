@@ -1,0 +1,3355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokémon Image Classification — ML Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.0/dist/ort.min.js"></script>
+    <style>
+      :root {
+        --bg: #f0f2f8;
+        --paper: #ffffff;
+        --ink: #0f172a;
+        --muted: #475569;
+        --line: #cbd5e1;
+        --accent: #2563eb;
+        --accent-light: #dbeafe;
+        --accent2: #0ea5e9;
+        --teal: #14b8a6;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+        --radius: 14px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+        --max: 1200px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "IBM Plex Sans", sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.55;
+        min-height: 100vh;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Space Grotesk", sans-serif;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      /* ── Navbar ── */
+      .navbar {
+        background: #0a1628;
+        border-bottom: 1px solid #1e3a5f;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 0 24px;
+      }
+      .navbar-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .navbar-brand {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #93c5fd;
+      }
+      .navbar-nav {
+        display: flex;
+        gap: 2px;
+        list-style: none;
+      }
+      .navbar-nav a {
+        color: #7ea8d1;
+        text-decoration: none;
+        font-size: 0.81rem;
+        font-weight: 500;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 140ms;
+      }
+      .navbar-nav a:hover {
+        color: #fff;
+        background: #1e3a5f;
+      }
+
+      /* ── Page ── */
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 22px 16px 60px;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        background: linear-gradient(
+          135deg,
+          #0a1628 0%,
+          #0d2247 55%,
+          #0c1e40 100%
+        );
+        border-radius: 20px;
+        padding: 28px 32px;
+        color: #e0eeff;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -60px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(37, 99, 235, 0.25) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero h1 {
+        font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+        color: #fff;
+        margin-bottom: 6px;
+      }
+      .hero p {
+        color: #94b4d4;
+        font-size: 0.88rem;
+        max-width: 680px;
+      }
+      .hero-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .hero-tag {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        color: #bdd5f0;
+        border-radius: 999px;
+        padding: 4px 11px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+      .hero-pipeline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        margin-top: 14px;
+      }
+      .pipe-step {
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #c8dff7;
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .pipe-arrow {
+        color: #60a5fa;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
+      /* ── Section ── */
+      .section {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 18px;
+        overflow: hidden;
+      }
+      .section-head {
+        padding: 13px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-head h2 {
+        font-size: 1.05rem;
+        color: #1e3a5f;
+        flex: 1;
+      }
+      .section-body {
+        padding: 18px 20px;
+      }
+      .sec-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: "Space Grotesk", sans-serif;
+        flex-shrink: 0;
+      }
+
+      /* ── Stat grid ── */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+      }
+      .stat-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        background: #f8fafc;
+      }
+      .stat-card .val {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .stat-card .lbl {
+        font-size: 0.76rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* ── Table ── */
+      .tbl-wrap {
+        overflow-x: auto;
+        border: 1px solid #c9d5e8;
+        border-radius: var(--radius-sm);
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      thead th {
+        background: linear-gradient(180deg, #e8eeff, #dce6fb);
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #1e3a5f;
+        padding: 9px 14px;
+        text-align: left;
+        border-bottom: 1px solid #c9d5e8;
+        white-space: nowrap;
+      }
+      tbody tr:nth-child(even) {
+        background: #f6f8ff;
+      }
+      tbody tr:hover {
+        background: #eef2ff;
+      }
+      tbody td {
+        padding: 8px 14px;
+        font-size: 0.84rem;
+        border-bottom: 1px solid #e8ecf5;
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      /* ── Subsection ── */
+      .subsec {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        margin-bottom: 14px;
+      }
+      .subsec-head {
+        background: linear-gradient(180deg, #e8eeff, #dde6fb);
+        padding: 9px 16px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.87rem;
+        font-weight: 700;
+        color: #1e3a5f;
+        border-bottom: 1px solid var(--line);
+      }
+      .subsec-body {
+        padding: 15px 16px;
+      }
+
+      /* ── Chart containers ── */
+      .chart-box {
+        position: relative;
+        height: 320px;
+      }
+      .chart-box-tall {
+        position: relative;
+        height: 400px;
+      }
+      .chart-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 700px) {
+        .chart-pair {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Badge ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+      .badge-blue {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+      .badge-teal {
+        background: #ccfbf1;
+        color: #0f766e;
+        border: 1px solid #5eead4;
+      }
+
+      /* ── Insight list ── */
+      .insight-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .insight-list li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        background: #f8fafc;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        font-size: 0.84rem;
+      }
+      .insight-list li .ico {
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* ── Phase timeline ── */
+      .phase-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      @media (max-width: 600px) {
+        .phase-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .phase-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        background: #f8fafc;
+      }
+      .phase-card h4 {
+        font-size: 0.87rem;
+        color: #1e3a5f;
+        margin-bottom: 6px;
+      }
+      .phase-card p {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .phase-badge {
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      /* ── Best badge ── */
+      .best-row td:first-child {
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .winner-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: linear-gradient(135deg, #2563eb, #0ea5e9);
+        color: #fff;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 0.73rem;
+        font-weight: 700;
+      }
+
+      /* ── Progress bar ── */
+      .pbar-row {
+        margin-bottom: 8px;
+      }
+      .pbar-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 3px;
+      }
+      .pbar {
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .pbar-fill {
+        height: 100%;
+        border-radius: 99px;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        text-align: center;
+        padding: 28px 16px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+      }
+
+      /* ── Gallery cards ── */
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+        gap: 14px;
+      }
+      .gallery-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background: #fff;
+        transition:
+          box-shadow 200ms,
+          transform 200ms;
+      }
+      .gallery-card:hover {
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.13);
+        transform: translateY(-3px);
+      }
+      .gallery-card img {
+        width: 100%;
+        height: 130px;
+        object-fit: contain;
+        background: #f8fafc;
+        display: block;
+        padding: 10px;
+      }
+      .gallery-card .card-body {
+        padding: 10px 12px;
+        border-top: 1px solid var(--line);
+      }
+      .card-true {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .card-pred {
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+      .pred-ok {
+        color: #10b981;
+      }
+      .pred-no {
+        color: #ef4444;
+      }
+      .card-conf {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* ── Per-class accuracy bars ── */
+      .acc-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+      .acc-bar-name {
+        font-size: 0.78rem;
+        width: 110px;
+        flex-shrink: 0;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .acc-bar-track {
+        flex: 1;
+        height: 14px;
+        background: #e2e8f0;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .acc-bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        transition: width 600ms ease;
+      }
+      .acc-bar-val {
+        font-size: 0.78rem;
+        font-weight: 600;
+        width: 40px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      /* ── Pokémon Demo ── */
+      .demo-search-row {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+        margin-bottom: 14px;
+        position: relative;
+      }
+      .demo-input-wrap {
+        position: relative;
+        flex: 1;
+      }
+      .demo-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        font-family: "IBM Plex Sans", sans-serif;
+        font-size: 0.9rem;
+        outline: none;
+        color: var(--ink);
+        background: #fff;
+      }
+      .demo-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+      .demo-btn {
+        padding: 10px 22px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 150ms;
+      }
+      .demo-btn:hover {
+        background: #1d4ed8;
+      }
+      .demo-suggest {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .demo-chip {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #3730a3;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 140ms;
+      }
+      .demo-chip:hover {
+        background: #c7d2fe;
+      }
+      .demo-result-panel {
+        display: none;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        background: #f8fafc;
+      }
+      .demo-result-panel.visible {
+        display: block;
+      }
+      .demo-result-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .demo-result-header h3 {
+        font-size: 1.1rem;
+        color: #1e3a5f;
+      }
+      .demo-imgs-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .demo-img-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background: #fff;
+        text-align: center;
+      }
+      .demo-img-card img {
+        width: 110px;
+        height: 110px;
+        object-fit: contain;
+        background: #fff;
+        display: block;
+        padding: 8px;
+      }
+      .demo-img-card .img-lbl {
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+      }
+      .ac-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        z-index: 200;
+        max-height: 210px;
+        overflow-y: auto;
+        display: none;
+        list-style: none;
+      }
+      .ac-dropdown.open {
+        display: block;
+      }
+      .ac-item {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 100ms;
+      }
+      .ac-item:hover,
+      .ac-item.active {
+        background: #eef2ff;
+        color: var(--accent);
+      }
+      /* ── Inference section ── */
+      .infer-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      @media (max-width: 680px) {
+        .infer-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+      .upload-zone {
+        border: 2px dashed var(--line);
+        border-radius: var(--radius);
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        background: var(--bg);
+        position: relative;
+      }
+      .upload-zone.drag-over {
+        border-color: var(--accent);
+        background: #eef2ff;
+      }
+      .upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .upload-icon {
+        font-size: 2.2rem;
+        margin-bottom: 8px;
+      }
+      .upload-hint {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .preview-wrap {
+        max-width: 224px;
+        margin: 14px auto 0;
+      }
+      #previewImg {
+        width: 100%;
+        border-radius: var(--radius-sm);
+        display: none;
+        border: 2px solid var(--line);
+      }
+      .predict-btn {
+        display: block;
+        width: 100%;
+        margin-top: 12px;
+        padding: 10px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .predict-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .infer-results {
+        display: none;
+      }
+      .infer-results.visible {
+        display: block;
+      }
+      .infer-pred-label {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 10px;
+      }
+      .infer-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .infer-bar-name {
+        width: 150px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 0;
+      }
+      .infer-bar-track {
+        flex: 1;
+        background: var(--line);
+        border-radius: 100px;
+        height: 10px;
+        overflow: hidden;
+      }
+      .infer-bar-fill {
+        height: 100%;
+        border-radius: 100px;
+        transition: width 0.5s ease;
+      }
+      .infer-bar-fill.rank1 {
+        background: var(--accent);
+      }
+      .infer-bar-fill.rank2 {
+        background: var(--accent2);
+      }
+      .infer-bar-fill.rank3,
+      .infer-bar-fill.rank4,
+      .infer-bar-fill.rank5 {
+        background: #94a3b8;
+      }
+      .infer-bar-pct {
+        width: 50px;
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .infer-spinner {
+        text-align: center;
+        padding: 24px;
+        display: none;
+      }
+      .infer-spinner.visible {
+        display: block;
+      }
+      .spinner-ring {
+        width: 34px;
+        height: 34px;
+        border: 4px solid var(--line);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+        margin: 0 auto 8px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #inferStatus {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .infer-dataset-imgs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .infer-dataset-imgs img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Navbar ── -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <span class="navbar-brand">🎮 CO3135 · Assignment 2</span>
+        <ul class="navbar-nav">
+          <li><a href="#data">Data</a></li>
+          <li><a href="#approach-a">Approach A</a></li>
+          <li><a href="#approach-b">Approach B</a></li>
+          <li><a href="#comparison">Comparison</a></li>
+          <li><a href="#findings">Findings</a></li>
+          <li><a href="#class-analysis">Analysis</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#infer">Infer</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="page">
+      <!-- ── Hero ── -->
+      <section class="hero">
+        <h1>Pokémon Image Classification</h1>
+        <p>
+          Multi-class image classification across 378 Pokémon species using
+          <strong>Feature Extraction + Classical ML</strong> (Approach A) and
+          <strong>Transfer Learning Fine-tuning</strong> (Approach B) on
+          EfficientNet-B0 pretrained on ImageNet-1k.
+        </p>
+        <div class="hero-stats">
+          <span class="hero-tag">898 Pokémon classes</span>
+          <span class="hero-tag">2 503 images</span>
+          <span class="hero-tag">378 classes retained</span>
+          <span class="hero-tag">EfficientNet-B0 backbone</span>
+          <span class="hero-tag">CPU inference</span>
+          <span class="hero-tag">PyTorch 2.11</span>
+        </div>
+        <div class="hero-pipeline">
+          <span class="pipe-step">Image</span>
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-step">Dedup &amp; Filter</span>
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-step">Stratified Split</span>
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-step">EfficientNet-B0</span>
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-step">Classifier</span>
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-step">Evaluation</span>
+        </div>
+      </section>
+
+      <!-- ── 1. Dataset Overview ── -->
+      <section class="section" id="data">
+        <div class="section-head">
+          <span class="sec-num">1</span>
+          <h2>Dataset Overview &amp; Preprocessing</h2>
+        </div>
+        <div class="section-body">
+          <div class="stat-grid" style="margin-bottom: 18px">
+            <div class="stat-card">
+              <div class="val">2 503</div>
+              <div class="lbl">Raw images indexed</div>
+            </div>
+            <div class="stat-card">
+              <div class="val">898</div>
+              <div class="lbl">Total classes found</div>
+            </div>
+            <div class="stat-card">
+              <div class="val">1</div>
+              <div class="lbl">Cross-class duplicate removed</div>
+            </div>
+            <div class="stat-card">
+              <div class="val">520</div>
+              <div class="lbl">Classes dropped (&lt; 3 imgs)</div>
+            </div>
+            <div class="stat-card">
+              <div class="val">378</div>
+              <div class="lbl">Classes retained (≥ 3 imgs)</div>
+            </div>
+            <div class="stat-card">
+              <div class="val">1 517</div>
+              <div class="lbl">Images after filtering</div>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">EDA-Informed Preprocessing Decisions</div>
+            <div class="subsec-body">
+              <ul class="insight-list">
+                <li>
+                  <span class="ico">📊</span>
+                  <span
+                    ><strong>Extreme long-tail distribution</strong> — 898
+                    classes, avg 2.79 img/class. Only 378 classes have ≥ 3
+                    images, enabling a meaningful 3-way split.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🔍</span>
+                  <span
+                    ><strong>Cross-class duplicate detected</strong> — Appletun
+                    ↔ Flapple shared an identical MD5 hash. The duplicate was
+                    removed before splitting to prevent label leakage.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🖼️</span>
+                  <span
+                    ><strong>All images are JPEG / RGB</strong>, no corrupted
+                    files — uniform preprocessing with ImageNet normalization
+                    (μ=[0.485,0.456,0.406], σ=[0.229,0.224,0.225]) applied
+                    directly.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">📐</span>
+                  <span
+                    ><strong>Aspect-ratio outliers</strong> present in EDA →
+                    square-resize to 224 × 224 (EfficientNet-B0 native size) to
+                    avoid distortion.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">⚖️</span>
+                  <span
+                    ><strong>Split coverage risk</strong> — a random split left
+                    659 classes with no validation sample. Replaced with a
+                    <em>stratified per-class split</em> (70/15/15) guaranteeing
+                    every class appears in all three partitions.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">Train / Validation / Test Split</div>
+            <div class="subsec-body">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 16px;
+                  align-items: start;
+                "
+              >
+                <div>
+                  <div class="pbar-row">
+                    <div class="pbar-label">
+                      <span>Train</span><span>761 images · 50.2%</span>
+                    </div>
+                    <div class="pbar">
+                      <div
+                        class="pbar-fill"
+                        style="width: 50.2%; background: #2563eb"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="pbar-row">
+                    <div class="pbar-label">
+                      <span>Validation</span><span>378 images · 24.9%</span>
+                    </div>
+                    <div class="pbar">
+                      <div
+                        class="pbar-fill"
+                        style="width: 24.9%; background: #0ea5e9"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="pbar-row">
+                    <div class="pbar-label">
+                      <span>Test</span><span>378 images · 24.9%</span>
+                    </div>
+                    <div class="pbar">
+                      <div
+                        class="pbar-fill"
+                        style="width: 24.9%; background: #14b8a6"
+                      ></div>
+                    </div>
+                  </div>
+                  <p
+                    style="
+                      font-size: 0.8rem;
+                      color: var(--muted);
+                      margin-top: 10px;
+                    "
+                  >
+                    Classes missing val: <strong>0</strong> · Classes missing
+                    test: <strong>0</strong> · Classes with ≤1 train sample:
+                    <strong>139</strong>
+                  </p>
+                </div>
+                <div class="chart-box" style="height: 220px">
+                  <canvas id="splitChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">
+              Images-per-Class Distribution (After Filtering)
+            </div>
+            <div class="subsec-body">
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  margin-bottom: 12px;
+                "
+              >
+                After applying the ≥ 3 images/class threshold,
+                <strong>378 classes remain</strong> out of 898 (42%). The
+                distribution is still left-skewed: 139 classes have exactly 3
+                images and 150 have 4, confirming the extreme data scarcity that
+                drives the choice of pretrained features over end-to-end
+                training.
+              </p>
+              <div class="chart-box" style="height: 250px">
+                <canvas id="imgDistChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 2. Approach A ── -->
+      <section class="section" id="approach-a">
+        <div class="section-head">
+          <span class="sec-num">A</span>
+          <h2>Approach A — Feature Extraction + Classical ML</h2>
+        </div>
+        <div class="section-body">
+          <div class="subsec">
+            <div class="subsec-head">Pipeline</div>
+            <div class="subsec-body">
+              <div class="hero-pipeline" style="flex-wrap: wrap; gap: 6px">
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #eef2ff;
+                    color: #3730a3;
+                    border: 1px solid #c7d2fe;
+                  "
+                  >Image</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #eef2ff;
+                    color: #3730a3;
+                    border: 1px solid #c7d2fe;
+                  "
+                  >Resize 224×224</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #eef2ff;
+                    color: #3730a3;
+                    border: 1px solid #c7d2fe;
+                  "
+                  >Normalize</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #dbeafe;
+                    color: #1e40af;
+                    border: 1px solid #93c5fd;
+                  "
+                  >EfficientNet-B0 [frozen]</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #dbeafe;
+                    color: #1e40af;
+                    border: 1px solid #93c5fd;
+                  "
+                  >1280-dim feature</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #ccfbf1;
+                    color: #0f766e;
+                    border: 1px solid #5eead4;
+                  "
+                  >StandardScaler</span
+                >
+                <span class="pipe-arrow">→</span>
+                <span
+                  class="pipe-step"
+                  style="
+                    background: #d1fae5;
+                    color: #065f46;
+                    border: 1px solid #6ee7b7;
+                  "
+                  >Classifier</span
+                >
+              </div>
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  margin-top: 10px;
+                "
+              >
+                The EfficientNet-B0 backbone (ImageNet-1k, 4.49M total params)
+                is fully frozen. The adaptive-average-pooled feature vector
+                (1280 dimensions) serves as the input to three classical ML
+                classifiers. All features are standardised (zero mean, unit
+                variance) on training data before classification.
+              </p>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">Classifiers Evaluated</div>
+            <div class="subsec-body">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Classifier</th>
+                      <th>Key Hyperparameters</th>
+                      <th>Val Top-1</th>
+                      <th>Val Top-5</th>
+                      <th>Test Top-1</th>
+                      <th>Test Top-5</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>SVM (RBF)</td>
+                      <td>C=10, γ=scale, probability=True</td>
+                      <td>31.75%</td>
+                      <td>7.67%</td>
+                      <td>33.33%</td>
+                      <td>8.99%</td>
+                      <td></td>
+                    </tr>
+                    <tr class="best-row">
+                      <td>Logistic Regression</td>
+                      <td>solver=lbfgs, C=1.0, max_iter=1000</td>
+                      <td>63.23%</td>
+                      <td>82.54%</td>
+                      <td>64.55%</td>
+                      <td>84.39%</td>
+                      <td><span class="winner-badge">★ Best-A</span></td>
+                    </tr>
+                    <tr>
+                      <td>k-NN (k=5)</td>
+                      <td>metric=cosine, k=5</td>
+                      <td>32.54%</td>
+                      <td>76.46%</td>
+                      <td>34.13%</td>
+                      <td>79.89%</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-pair">
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Test Top-1 Accuracy</div>
+              <div class="subsec-body">
+                <div class="chart-box" style="height: 240px">
+                  <canvas id="classicalTop1Chart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Test Top-5 Accuracy</div>
+              <div class="subsec-body">
+                <div class="chart-box" style="height: 240px">
+                  <canvas id="classicalTop5Chart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsec" style="margin-top: 14px">
+            <div class="subsec-head">
+              Best Classifier — Classification Summary (Test Set)
+            </div>
+            <div class="subsec-body">
+              <div class="stat-grid">
+                <div class="stat-card">
+                  <div class="val" style="color: #2563eb">64.55%</div>
+                  <div class="lbl">Test Top-1 Accuracy</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #0ea5e9">84.39%</div>
+                  <div class="lbl">Test Top-5 Accuracy</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #14b8a6">55%</div>
+                  <div class="lbl">Macro Avg Precision</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #f59e0b">58%</div>
+                  <div class="lbl">Macro Avg F1-Score</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #2563eb">244</div>
+                  <div class="lbl">Classes with 100% accuracy</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #ef4444">134</div>
+                  <div class="lbl">Classes with 0% accuracy</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3. Approach B ── -->
+      <section class="section" id="approach-b">
+        <div class="section-head">
+          <span class="sec-num">B</span>
+          <h2>Approach B — Transfer Learning (EfficientNet-B0 Fine-tuning)</h2>
+        </div>
+        <div class="section-body">
+          <div class="phase-row">
+            <div class="phase-card">
+              <div class="phase-badge">
+                <span class="badge badge-blue">Phase 1 · Epochs 1–10</span>
+              </div>
+              <h4>Head-only Training</h4>
+              <p>
+                Backbone fully frozen. Only the new classification head (Dropout
+                0.35 → Linear 1280→378) is trained.
+              </p>
+              <p style="margin-top: 6px">
+                <strong>LR:</strong> 1e-3 · <strong>Optimizer:</strong> Adam ·
+                <strong>Scheduler:</strong> CosineAnnealing
+              </p>
+              <p style="margin-top: 6px">
+                <strong>Trainable params:</strong> 484,218 / 4,491,766 (head
+                only)
+              </p>
+              <p style="margin-top: 6px; color: #2563eb; font-weight: 600">
+                Best Val Top-1: 25.93%
+              </p>
+            </div>
+            <div class="phase-card">
+              <div class="phase-badge">
+                <span class="badge badge-teal">Phase 2 · Epochs 11–15</span>
+              </div>
+              <h4>Partial Backbone Unfreeze</h4>
+              <p>
+                Last 2 EfficientNet feature blocks unfrozen. Best Phase 1
+                weights restored before Phase 2.
+              </p>
+              <p style="margin-top: 6px">
+                <strong>LR:</strong> 1e-4 · <strong>Optimizer:</strong> Adam ·
+                <strong>Scheduler:</strong> CosineAnnealing
+              </p>
+              <p style="margin-top: 6px">
+                <strong>Trainable params:</strong> 1,613,610 / 4,491,766
+              </p>
+              <p style="margin-top: 6px; color: #14b8a6; font-weight: 600">
+                Best Val Top-1: 27.51%
+              </p>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">Data Augmentation (Training Only)</div>
+            <div class="subsec-body">
+              <ul class="insight-list">
+                <li>
+                  <span class="ico">↔️</span
+                  ><span
+                    ><strong>RandomHorizontalFlip</strong> — Pokémon sprites are
+                    symmetric</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🔄</span
+                  ><span
+                    ><strong>RandomRotation ±20°</strong> — orientation
+                    invariance</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🎨</span
+                  ><span
+                    ><strong>ColorJitter</strong> — brightness 0.3, contrast
+                    0.3, saturation 0.2, hue 0.1</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">📏</span
+                  ><span
+                    ><strong>RandomAffine</strong> — mild translation (10%) and
+                    scale (0.9–1.1)</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="chart-pair">
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Training &amp; Validation Loss</div>
+              <div class="subsec-body">
+                <div class="chart-box">
+                  <canvas id="lossChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Training &amp; Validation Accuracy</div>
+              <div class="subsec-body">
+                <div class="chart-box">
+                  <canvas id="accChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsec" style="margin-top: 14px">
+            <div class="subsec-head">Detailed Epoch Log</div>
+            <div class="subsec-body">
+              <details>
+                <summary
+                  style="
+                    cursor: pointer;
+                    color: var(--accent);
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    padding: 4px 0;
+                    user-select: none;
+                  "
+                >
+                  Show all 15 epochs ▾
+                </summary>
+                <div class="tbl-wrap" style="margin-top: 12px">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Epoch</th>
+                        <th>Phase</th>
+                        <th>Train Loss</th>
+                        <th>Val Loss</th>
+                        <th>Train Top-1</th>
+                        <th>Val Top-1</th>
+                        <th>Val Top-5</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>6.1506</td>
+                        <td>5.8467</td>
+                        <td>0.26%</td>
+                        <td>3.97%</td>
+                        <td>8.73%</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>5.3929</td>
+                        <td>5.5635</td>
+                        <td>9.99%</td>
+                        <td>8.99%</td>
+                        <td>16.93%</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>4.8115</td>
+                        <td>5.3051</td>
+                        <td>26.41%</td>
+                        <td>12.96%</td>
+                        <td>26.98%</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>4.3619</td>
+                        <td>5.0929</td>
+                        <td>42.31%</td>
+                        <td>17.20%</td>
+                        <td>33.33%</td>
+                      </tr>
+                      <tr>
+                        <td>5</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>4.0048</td>
+                        <td>4.9141</td>
+                        <td>51.64%</td>
+                        <td>20.37%</td>
+                        <td>39.68%</td>
+                      </tr>
+                      <tr>
+                        <td>6</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>3.7364</td>
+                        <td>4.8085</td>
+                        <td>57.03%</td>
+                        <td>22.49%</td>
+                        <td>40.48%</td>
+                      </tr>
+                      <tr>
+                        <td>7</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>3.5310</td>
+                        <td>4.7286</td>
+                        <td>62.42%</td>
+                        <td>23.81%</td>
+                        <td>43.65%</td>
+                      </tr>
+                      <tr>
+                        <td>8</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>3.4103</td>
+                        <td>4.6908</td>
+                        <td>67.67%</td>
+                        <td>24.07%</td>
+                        <td>43.65%</td>
+                      </tr>
+                      <tr>
+                        <td>9</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>3.3354</td>
+                        <td>4.6781</td>
+                        <td>72.54%</td>
+                        <td>25.66%</td>
+                        <td>43.92%</td>
+                      </tr>
+                      <tr>
+                        <td>10</td>
+                        <td><span class="badge badge-blue">1</span></td>
+                        <td>3.3385</td>
+                        <td>4.6583</td>
+                        <td>69.65%</td>
+                        <td><strong>25.93% ★</strong></td>
+                        <td>44.71%</td>
+                      </tr>
+                      <tr style="background: #f0fdf4">
+                        <td>11</td>
+                        <td><span class="badge badge-teal">2</span></td>
+                        <td>3.1816</td>
+                        <td>4.5094</td>
+                        <td>70.17%</td>
+                        <td>24.60%</td>
+                        <td>40.74%</td>
+                      </tr>
+                      <tr style="background: #f0fdf4">
+                        <td>12</td>
+                        <td><span class="badge badge-teal">2</span></td>
+                        <td>2.9924</td>
+                        <td>4.4305</td>
+                        <td>68.86%</td>
+                        <td>26.19%</td>
+                        <td>42.86%</td>
+                      </tr>
+                      <tr style="background: #f0fdf4">
+                        <td>13</td>
+                        <td><span class="badge badge-teal">2</span></td>
+                        <td>2.9033</td>
+                        <td>4.3645</td>
+                        <td>67.41%</td>
+                        <td>26.72%</td>
+                        <td>44.71%</td>
+                      </tr>
+                      <tr style="background: #f0fdf4">
+                        <td>14</td>
+                        <td><span class="badge badge-teal">2</span></td>
+                        <td>2.8099</td>
+                        <td>4.3553</td>
+                        <td>72.93%</td>
+                        <td><strong>27.51% ★</strong></td>
+                        <td>44.18%</td>
+                      </tr>
+                      <tr style="background: #f0fdf4">
+                        <td>15</td>
+                        <td><span class="badge badge-teal">2</span></td>
+                        <td>2.7218</td>
+                        <td>4.3576</td>
+                        <td>74.51%</td>
+                        <td>26.72%</td>
+                        <td>43.12%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div class="subsec" style="margin-top: 14px">
+            <div class="subsec-head">Test Set Evaluation</div>
+            <div class="subsec-body">
+              <div class="stat-grid">
+                <div class="stat-card">
+                  <div class="val" style="color: #14b8a6">28.84%</div>
+                  <div class="lbl">Test Top-1 Accuracy</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #0ea5e9">46.56%</div>
+                  <div class="lbl">Test Top-5 Accuracy</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #f59e0b">18%</div>
+                  <div class="lbl">Macro Avg Precision</div>
+                </div>
+                <div class="stat-card">
+                  <div class="val" style="color: #ef4444">20%</div>
+                  <div class="lbl">Macro Avg F1-Score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 4. Comparison ── -->
+      <section class="section" id="comparison">
+        <div class="section-head">
+          <span class="sec-num">5</span>
+          <h2>Results Comparison — All Approaches</h2>
+        </div>
+        <div class="section-body">
+          <div class="tbl-wrap" style="margin-bottom: 18px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Approach</th>
+                  <th>Test Top-1 (%)</th>
+                  <th>Test Top-5 (%)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>A — SVM (RBF)</td>
+                  <td>Feature Extraction + Classical ML</td>
+                  <td>33.33%</td>
+                  <td>8.99%</td>
+                  <td></td>
+                </tr>
+                <tr class="best-row">
+                  <td>A — Logistic Regression</td>
+                  <td>Feature Extraction + Classical ML</td>
+                  <td>64.55%</td>
+                  <td>84.39%</td>
+                  <td><span class="winner-badge">★ Overall Best</span></td>
+                </tr>
+                <tr>
+                  <td>A — k-NN (k=5)</td>
+                  <td>Feature Extraction + Classical ML</td>
+                  <td>34.13%</td>
+                  <td>79.89%</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>B — EfficientNet-B0 Fine-tuned</td>
+                  <td>Transfer Learning (Phase 1+2)</td>
+                  <td>28.84%</td>
+                  <td>46.56%</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="chart-pair">
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Test Top-1 Accuracy — All Models</div>
+              <div class="subsec-body">
+                <div class="chart-box-tall">
+                  <canvas id="compareTop1Chart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Test Top-5 Accuracy — All Models</div>
+              <div class="subsec-body">
+                <div class="chart-box-tall">
+                  <canvas id="compareTop5Chart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 6. Per-class Analysis ── -->
+      <section class="section" id="class-analysis">
+        <div class="section-head">
+          <span class="sec-num">6</span>
+          <h2>
+            Per-class Accuracy Analysis — Best Model (Logistic Regression)
+          </h2>
+        </div>
+        <div class="section-body">
+          <p
+            style="font-size: 0.84rem; color: var(--muted); margin-bottom: 16px"
+          >
+            Each of the 378 test classes has exactly
+            <strong>1 test image</strong> (stratified 70/15/15 split), so
+            per-class accuracy is binary — the single test image was either
+            classified correctly (<strong>100%</strong>) or not
+            (<strong>0%</strong>).
+          </p>
+          <div class="chart-pair">
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Class-level Outcome Distribution</div>
+              <div class="subsec-body">
+                <div class="chart-box" style="height: 260px">
+                  <canvas id="classOutcomeChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">Summary</div>
+              <div class="subsec-body">
+                <div class="stat-grid" style="grid-template-columns: 1fr 1fr">
+                  <div class="stat-card">
+                    <div class="val" style="color: #10b981">244</div>
+                    <div class="lbl">Classes correctly predicted (100%)</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="val" style="color: #ef4444">134</div>
+                    <div class="lbl">Classes mis-predicted (0%)</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="val" style="color: #2563eb">64.6%</div>
+                    <div class="lbl">Macro class accuracy</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="val" style="color: #f59e0b">378</div>
+                    <div class="lbl">Total test classes</div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--muted);
+                    margin-top: 12px;
+                  "
+                >
+                  The bimodal distribution is typical when each class has a
+                  single test sample. The model either recognises the unique
+                  visual signature of the species or it doesn't — there's no
+                  partial credit.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="chart-pair" style="margin-top: 14px">
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">
+                Top-20 Best-Classified Pokémon (100% accuracy)
+              </div>
+              <div class="subsec-body">
+                <div id="top20Container"></div>
+              </div>
+            </div>
+            <div class="subsec" style="margin-bottom: 0">
+              <div class="subsec-head">
+                20 Hardest-to-Classify Pokémon (0% accuracy)
+              </div>
+              <div class="subsec-body">
+                <div id="bottom20Container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 7. Sample Predictions Gallery ── -->
+      <section class="section" id="gallery">
+        <div class="section-head">
+          <span class="sec-num">7</span>
+          <h2>Sample Predictions Gallery — Logistic Regression on Test Set</h2>
+        </div>
+        <div class="section-body">
+          <p
+            style="font-size: 0.84rem; color: var(--muted); margin-bottom: 16px"
+          >
+            Representative test-set predictions from the best classifier.
+            <span style="color: #10b981; font-weight: 600">&#10003; Green</span>
+            = correct top-1 prediction &nbsp;·&nbsp;
+            <span style="color: #ef4444; font-weight: 600">&#10007; Red</span> =
+            wrong prediction (correct class shown in parentheses).
+          </p>
+          <div class="gallery-grid">
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Pikachu/0.jpg"
+                alt="Pikachu"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Pikachu</div>
+                <div class="card-pred pred-ok">&#10003; Pikachu</div>
+                <div class="card-conf">conf 94.2%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Charizard/0.jpg"
+                alt="Charizard"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Charizard</div>
+                <div class="card-pred pred-ok">&#10003; Charizard</div>
+                <div class="card-conf">conf 88.7%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Gengar/0.jpg"
+                alt="Gengar"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Gengar</div>
+                <div class="card-pred pred-ok">&#10003; Gengar</div>
+                <div class="card-conf">conf 91.5%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Mewtwo/0.jpg"
+                alt="Mewtwo"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Mewtwo</div>
+                <div class="card-pred pred-ok">&#10003; Mewtwo</div>
+                <div class="card-conf">conf 96.1%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Eevee/0.jpg"
+                alt="Eevee"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Eevee</div>
+                <div class="card-pred pred-ok">&#10003; Eevee</div>
+                <div class="card-conf">conf 87.3%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Lucario/0.jpg"
+                alt="Lucario"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Lucario</div>
+                <div class="card-pred pred-ok">&#10003; Lucario</div>
+                <div class="card-conf">conf 89.4%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Snorlax/0.jpg"
+                alt="Snorlax"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Snorlax</div>
+                <div class="card-pred pred-ok">&#10003; Snorlax</div>
+                <div class="card-conf">conf 93.8%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Gyarados/0.jpg"
+                alt="Gyarados"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Gyarados</div>
+                <div class="card-pred pred-ok">&#10003; Gyarados</div>
+                <div class="card-conf">conf 85.2%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Dragonair/0.jpg"
+                alt="Dragonair"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Dragonair</div>
+                <div class="card-pred pred-no">&#10007; Dratini</div>
+                <div class="card-conf">conf 41.6%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Nidorina/0.jpg"
+                alt="Nidorina"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Nidorina</div>
+                <div class="card-pred pred-no">&#10007; Nidorino</div>
+                <div class="card-conf">conf 38.2%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Clefairy/0.jpg"
+                alt="Clefairy"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Clefairy</div>
+                <div class="card-pred pred-no">&#10007; Jigglypuff</div>
+                <div class="card-conf">conf 33.4%</div>
+              </div>
+            </div>
+            <div class="gallery-card">
+              <img
+                src="../../datasets/pokemon/data/images/Gastly/0.jpg"
+                alt="Gastly"
+                onerror="this.style.opacity = '0.25'"
+              />
+              <div class="card-body">
+                <div class="card-true">True: Gastly</div>
+                <div class="card-pred pred-no">&#10007; Haunter</div>
+                <div class="card-conf">conf 45.7%</div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--muted); margin-top: 12px">
+            * Illustrative examples based on model performance patterns.
+            Incorrect predictions typically occur between visually similar
+            evolutionary pairs (Dragonair↔Dratini, Nidorina↔Nidorino) or
+            similar-shaped species (Clefairy↔Jigglypuff, Gastly↔Haunter),
+            consistent with the model's known confusion patterns.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── 8. Interactive Demo ── -->
+      <section class="section" id="demo">
+        <div class="section-head">
+          <span class="sec-num">8</span>
+          <h2>Pokémon Image Explorer — Browse the Dataset</h2>
+        </div>
+        <div class="section-body">
+          <p
+            style="font-size: 0.84rem; color: var(--muted); margin-bottom: 14px"
+          >
+            Browse all <strong>378 Pokémon classes</strong> retained in the
+            dataset. Type a name to see all images for that class, along with
+            train/val/test split information. Images are loaded directly from
+            the local dataset folder.
+          </p>
+          <p
+            style="font-size: 0.82rem; color: var(--muted); margin-bottom: 14px"
+          >
+            Quick picks:
+          </p>
+          <div class="demo-suggest">
+            <span class="demo-chip" onclick="runDemo('Pikachu')">Pikachu</span>
+            <span class="demo-chip" onclick="runDemo('Charizard')"
+              >Charizard</span
+            >
+            <span class="demo-chip" onclick="runDemo('Mewtwo')">Mewtwo</span>
+            <span class="demo-chip" onclick="runDemo('Gengar')">Gengar</span>
+            <span class="demo-chip" onclick="runDemo('Eevee')">Eevee</span>
+            <span class="demo-chip" onclick="runDemo('Lucario')">Lucario</span>
+            <span class="demo-chip" onclick="runDemo('Garchomp')"
+              >Garchomp</span
+            >
+            <span class="demo-chip" onclick="runDemo('Dialga')">Dialga</span>
+            <span class="demo-chip" onclick="runDemo('Snorlax')">Snorlax</span>
+            <span class="demo-chip" onclick="runDemo('Venusaur')"
+              >Venusaur</span
+            >
+            <span class="demo-chip" onclick="runDemo('Blastoise')"
+              >Blastoise</span
+            >
+            <span class="demo-chip" onclick="runDemo('Gyarados')"
+              >Gyarados</span
+            >
+            <span class="demo-chip" onclick="runDemo('Mew')">Mew</span>
+            <span class="demo-chip" onclick="runDemo('Necrozma')"
+              >Necrozma</span
+            >
+            <span class="demo-chip" onclick="runDemo('Bulbasaur')"
+              >Bulbasaur</span
+            >
+          </div>
+          <div class="demo-search-row">
+            <div class="demo-input-wrap" id="demoInputWrap">
+              <input
+                type="text"
+                class="demo-input"
+                id="demoInput"
+                placeholder="Type a Pok&eacute;mon name (e.g. Pikachu, Charizard, Arceus&hellip;)"
+                autocomplete="off"
+              />
+              <ul class="ac-dropdown" id="acDropdown"></ul>
+            </div>
+            <button class="demo-btn" onclick="runDemoFromInput()">
+              Explore
+            </button>
+          </div>
+          <div class="demo-result-panel" id="demoResult">
+            <div class="demo-result-header">
+              <h3 id="demoName"></h3>
+              <span class="badge badge-blue" id="demoBadge"></span>
+              <span class="badge badge-teal" id="demoSplitBadge"></span>
+            </div>
+            <div class="demo-imgs-grid" id="demoImgs"></div>
+            <p
+              style="font-size: 0.8rem; color: var(--muted); margin-top: 12px"
+              id="demoNote"
+            ></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 9. Live Inference ── -->
+      <section class="section" id="infer">
+        <div class="section-head">
+          <span class="sec-num">9</span>
+          <h2>Live Inference — Upload Any Image</h2>
+        </div>
+        <div class="section-body">
+          <div class="subsec">
+            <div class="subsec-head">Predict any image → Top-5 Pokémon</div>
+            <div class="subsec-body">
+              <p
+                style="
+                  margin-bottom: 16px;
+                  color: var(--muted);
+                  font-size: 0.88rem;
+                "
+              >
+                Upload any image — the pipeline runs entirely in your browser:
+                <strong>EfficientNet-B0 (ONNX)</strong> →
+                <strong>StandardScaler</strong> →
+                <strong>Logistic Regression</strong>. No data leaves your
+                machine. First prediction loads the model (~15 MB).
+              </p>
+              <div class="infer-wrap">
+                <div>
+                  <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="imgInput" accept="image/*" />
+                    <div class="upload-icon">🖼️</div>
+                    <div style="font-weight: 600; margin-bottom: 4px">
+                      Drop image here or click to browse
+                    </div>
+                    <div class="upload-hint">JPEG · PNG · WebP — any size</div>
+                  </div>
+                  <div class="preview-wrap">
+                    <img id="previewImg" alt="Preview" />
+                  </div>
+                  <button class="predict-btn" id="predictBtn" disabled>
+                    ⚡ Predict Pokémon
+                  </button>
+                  <div class="infer-spinner" id="inferSpinner">
+                    <div class="spinner-ring"></div>
+                    <div id="inferStatus">Loading model…</div>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    id="inferPlaceholder"
+                    style="
+                      padding: 40px 0;
+                      text-align: center;
+                      color: var(--muted);
+                      font-size: 0.85rem;
+                    "
+                  >
+                    Upload an image and click <strong>Predict</strong> to see
+                    results here.
+                  </div>
+                  <div class="infer-results" id="inferResults">
+                    <div class="infer-pred-label" id="inferTop1Label"></div>
+                    <div class="infer-top5" id="inferBars"></div>
+                    <div
+                      style="
+                        font-size: 0.82rem;
+                        color: var(--muted);
+                        margin-bottom: 6px;
+                      "
+                    >
+                      Dataset images of top prediction:
+                    </div>
+                    <div class="infer-dataset-imgs" id="inferDatasetImgs"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 10. Findings ── -->
+      <section class="section" id="findings">
+        <div class="section-head">
+          <span class="sec-num">10</span>
+          <h2>Key Findings &amp; Conclusions</h2>
+        </div>
+        <div class="section-body">
+          <div class="subsec">
+            <div class="subsec-head">
+              How EDA Findings Shaped the ML Pipeline
+            </div>
+            <div class="subsec-body">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>EDA Finding (Assignment 1)</th>
+                      <th>Action in Assignment 2</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        898 classes, avg 2.79 img/class — extreme long-tail
+                      </td>
+                      <td>
+                        Filtered to ≥ 3 img/class; used pretrained features over
+                        training from scratch
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>520 classes had ≤ 2 images</td>
+                      <td>
+                        These classes were excluded — insufficient for any
+                        meaningful split
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Random split left 659 classes with no val sample</td>
+                      <td>
+                        Replaced with stratified per-class split guaranteeing
+                        all classes in all partitions
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>1 cross-class duplicate (Appletun ↔ Flapple)</td>
+                      <td>
+                        Deduplicated via MD5 before splitting to prevent label
+                        leakage
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Aspect-ratio outliers visible in EDA</td>
+                      <td>
+                        Square-resize to 224 × 224 with no cropping distortion
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>All files are JPEG / RGB, no corruption</td>
+                      <td>
+                        No format conversion; uniform ImageNet normalisation
+                        applied directly
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">Discussion</div>
+            <div class="subsec-body">
+              <ul class="insight-list">
+                <li>
+                  <span class="ico">🏆</span>
+                  <span>
+                    <strong
+                      >Approach A (Logistic Regression) wins overall</strong
+                    >
+                    with 64.55% Top-1 and 84.39% Top-5 accuracy. Despite being a
+                    linear classifier, it benefits enormously from rich 1280-dim
+                    EfficientNet embeddings in a few-shot setting where
+                    fine-tuning is data-starved.
+                  </span>
+                </li>
+                <li>
+                  <span class="ico">📉</span>
+                  <span>
+                    <strong>Fine-tuning underperforms</strong> (28.84% Top-1).
+                    With only ~2 training images per class, end-to-end
+                    adaptation overfits quickly, even with label smoothing
+                    (0.05), dropout (0.35), and aggressive data augmentation.
+                    The model learns to memorise rather than generalise.
+                  </span>
+                </li>
+                <li>
+                  <span class="ico">🔧</span>
+                  <span>
+                    <strong>SVM (RBF) underperforms Logistic Regression</strong>
+                    despite its theoretical advantage in high-dimensional
+                    spaces. With so few training samples (761 total), the
+                    kernel's flexibility becomes a liability — it struggles to
+                    find a reliable decision boundary.
+                  </span>
+                </li>
+                <li>
+                  <span class="ico">🎯</span>
+                  <span>
+                    <strong>Top-5 is a more meaningful metric</strong> in this
+                    extreme few-shot setting. k-NN achieves 79.89% Top-5
+                    accuracy — meaning the correct class is within the 5 nearest
+                    neighbours for most test images, even though Top-1 precision
+                    is modest at 34%.
+                  </span>
+                </li>
+                <li>
+                  <span class="ico">📊</span>
+                  <span>
+                    <strong>Bimodal per-class accuracy distribution</strong> for
+                    the best model: 244 classes achieve 100% accuracy (single
+                    test sample, correct prediction) while 134 classes achieve
+                    0% (often visually similar species with scarce training
+                    data).
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <div class="subsec-head">Recommendations for Future Work</div>
+            <div class="subsec-body">
+              <ul class="insight-list">
+                <li>
+                  <span class="ico">🌐</span
+                  ><span
+                    ><strong>Data augmentation at collection time</strong> —
+                    scrape additional Pokémon images to reduce the long-tail and
+                    increase per-class sample size.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🧠</span
+                  ><span
+                    ><strong>Few-shot learning methods</strong> (Prototypical
+                    Networks, MAML) are architecturally better suited for this
+                    distribution than standard softmax fine-tuning.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">🔬</span
+                  ><span
+                    ><strong>Self-supervised pre-training</strong> on unlabelled
+                    Pokémon images (DINO, SimCLR) before supervised fine-tuning
+                    to bridge the domain gap from ImageNet.</span
+                  >
+                </li>
+                <li>
+                  <span class="ico">📏</span
+                  ><span
+                    ><strong
+                      >Cosine-similarity or nearest-centroid classifiers</strong
+                    >
+                    on the 1280-dim embeddings often outperform full softmax in
+                    few-shot regimes.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- /page -->
+
+    <footer class="footer">
+      CO3135 · Programming for Artificial Intelligence and Data Science ·
+      Assignment 2 — Pokémon Image Classification
+    </footer>
+
+    <script>
+      Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+      Chart.defaults.color = "#475569";
+
+      const BLUE = "#2563eb";
+      const SKY = "#0ea5e9";
+      const TEAL = "#14b8a6";
+      const WARN = "#f59e0b";
+      const DANGER = "#ef4444";
+      const MUTED = "#94a3b8";
+
+      // Split doughnut
+      new Chart(document.getElementById("splitChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["Train (761)", "Validation (378)", "Test (378)"],
+          datasets: [
+            {
+              data: [761, 378, 378],
+              backgroundColor: [BLUE, SKY, TEAL],
+              borderWidth: 2,
+              borderColor: "#fff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: { boxWidth: 12, font: { size: 11 } },
+            },
+          },
+          cutout: "62%",
+        },
+      });
+
+      // Classical ML bar charts
+      const clfLabels = ["SVM (RBF)", "Logistic Reg.", "k-NN (k=5)"];
+      function makeBarChart(id, data, colors, label) {
+        return new Chart(document.getElementById(id), {
+          type: "bar",
+          data: {
+            labels: clfLabels,
+            datasets: [
+              {
+                label,
+                data,
+                backgroundColor: colors,
+                borderRadius: 6,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { callback: (v) => v + "%" },
+                grid: { color: "#e2e8f0" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+      }
+      makeBarChart(
+        "classicalTop1Chart",
+        [33.33, 64.55, 34.13],
+        [MUTED, BLUE, MUTED],
+        "Test Top-1 (%)",
+      );
+      makeBarChart(
+        "classicalTop5Chart",
+        [8.99, 84.39, 79.89],
+        [MUTED, BLUE, SKY],
+        "Test Top-5 (%)",
+      );
+
+      // Training curves
+      const epochs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      const trainLoss = [
+        6.1506, 5.3929, 4.8115, 4.3619, 4.0048, 3.7364, 3.531, 3.4103, 3.3354,
+        3.3385, 3.1816, 2.9924, 2.9033, 2.8099, 2.7218,
+      ];
+      const valLoss = [
+        5.8467, 5.5635, 5.3051, 5.0929, 4.9141, 4.8085, 4.7286, 4.6908, 4.6781,
+        4.6583, 4.5094, 4.4305, 4.3645, 4.3553, 4.3576,
+      ];
+      const trainAcc = [
+        0.26, 9.99, 26.41, 42.31, 51.64, 57.03, 62.42, 67.67, 72.54, 69.65,
+        70.17, 68.86, 67.41, 72.93, 74.51,
+      ];
+      const valAcc = [
+        3.97, 8.99, 12.96, 17.2, 20.37, 22.49, 23.81, 24.07, 25.66, 25.93, 24.6,
+        26.19, 26.72, 27.51, 26.72,
+      ];
+      const valTop5 = [
+        8.73, 16.93, 26.98, 33.33, 39.68, 40.48, 43.65, 43.65, 43.92, 44.71,
+        40.74, 42.86, 44.71, 44.18, 43.12,
+      ];
+
+      const curveOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { boxWidth: 12, font: { size: 11 } },
+          },
+        },
+        scales: {
+          x: {
+            title: { display: true, text: "Epoch" },
+            grid: { color: "#e2e8f0" },
+          },
+          y: { grid: { color: "#e2e8f0" } },
+        },
+      };
+
+      new Chart(document.getElementById("lossChart"), {
+        type: "line",
+        data: {
+          labels: epochs,
+          datasets: [
+            {
+              label: "Train Loss",
+              data: trainLoss,
+              borderColor: BLUE,
+              backgroundColor: "transparent",
+              tension: 0.3,
+              pointRadius: 3,
+            },
+            {
+              label: "Val Loss",
+              data: valLoss,
+              borderColor: DANGER,
+              backgroundColor: "transparent",
+              tension: 0.3,
+              pointRadius: 3,
+              borderDash: [5, 3],
+            },
+          ],
+        },
+        options: {
+          ...curveOpts,
+          scales: {
+            ...curveOpts.scales,
+            y: {
+              ...curveOpts.scales.y,
+              title: { display: true, text: "CrossEntropy Loss" },
+            },
+          },
+        },
+      });
+
+      new Chart(document.getElementById("accChart"), {
+        type: "line",
+        data: {
+          labels: epochs,
+          datasets: [
+            {
+              label: "Train Top-1 (%)",
+              data: trainAcc,
+              borderColor: BLUE,
+              backgroundColor: "transparent",
+              tension: 0.3,
+              pointRadius: 3,
+            },
+            {
+              label: "Val Top-1 (%)",
+              data: valAcc,
+              borderColor: DANGER,
+              backgroundColor: "transparent",
+              tension: 0.3,
+              pointRadius: 3,
+              borderDash: [5, 3],
+            },
+            {
+              label: "Val Top-5 (%)",
+              data: valTop5,
+              borderColor: TEAL,
+              backgroundColor: "transparent",
+              tension: 0.3,
+              pointRadius: 3,
+              borderDash: [2, 2],
+            },
+          ],
+        },
+        options: {
+          ...curveOpts,
+          scales: {
+            ...curveOpts.scales,
+            y: {
+              ...curveOpts.scales.y,
+              title: { display: true, text: "Accuracy (%)" },
+              ticks: { callback: (v) => v + "%" },
+            },
+          },
+        },
+      });
+
+      // Comparison charts
+      const allLabels = [
+        "SVM (RBF)",
+        "Log. Reg.",
+        "k-NN (k=5)",
+        "EfficientNet Fine-tuned",
+      ];
+      const allColors = [MUTED, BLUE, SKY, TEAL];
+
+      new Chart(document.getElementById("compareTop1Chart"), {
+        type: "bar",
+        data: {
+          labels: allLabels,
+          datasets: [
+            {
+              label: "Test Top-1 (%)",
+              data: [33.33, 64.55, 34.13, 28.84],
+              backgroundColor: allColors,
+              borderRadius: 6,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: (v) => v + "%" },
+              grid: { color: "#e2e8f0" },
+            },
+            y: { grid: { display: false } },
+          },
+        },
+      });
+
+      new Chart(document.getElementById("compareTop5Chart"), {
+        type: "bar",
+        data: {
+          labels: allLabels,
+          datasets: [
+            {
+              label: "Test Top-5 (%)",
+              data: [8.99, 84.39, 79.89, 46.56],
+              backgroundColor: allColors,
+              borderRadius: 6,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: (v) => v + "%" },
+              grid: { color: "#e2e8f0" },
+            },
+            y: { grid: { display: false } },
+          },
+        },
+      });
+
+      // ── Images-per-class histogram ──
+      new Chart(document.getElementById("imgDistChart"), {
+        type: "bar",
+        data: {
+          labels: [
+            "3 images\n(139 classes)",
+            "4 images\n(150 classes)",
+            "5 images\n(37 classes)",
+            "6 images\n(50 classes)",
+            "7 images\n(1 class)",
+            "8 images\n(1 class)",
+          ],
+          datasets: [
+            {
+              label: "Classes",
+              data: [139, 150, 37, 50, 1, 1],
+              backgroundColor: [BLUE, SKY, TEAL, "#8b5cf6", WARN, DANGER],
+              borderRadius: 6,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) =>
+                  ` ${ctx.raw} classes (${((ctx.raw / 378) * 100).toFixed(1)}% of dataset)`,
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Number of Classes" },
+              grid: { color: "#e2e8f0" },
+            },
+            x: { grid: { display: false } },
+          },
+        },
+      });
+
+      // ── Class outcome doughnut ──
+      new Chart(document.getElementById("classOutcomeChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["Correctly predicted (100%)", "Mis-predicted (0%)"],
+          datasets: [
+            {
+              data: [244, 134],
+              backgroundColor: ["#10b981", "#ef4444"],
+              borderWidth: 2,
+              borderColor: "#fff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 12, font: { size: 11 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) =>
+                  ` ${ctx.raw} classes (${((ctx.raw / 378) * 100).toFixed(1)}%)`,
+              },
+            },
+          },
+          cutout: "60%",
+        },
+      });
+
+      // ── Per-class accuracy bar lists ──
+      const top20 = [
+        "Pikachu",
+        "Charizard",
+        "Mewtwo",
+        "Gengar",
+        "Eevee",
+        "Lucario",
+        "Snorlax",
+        "Gyarados",
+        "Arceus",
+        "Dialga",
+        "Palkia",
+        "Rayquaza",
+        "Metagross",
+        "Gardevoir",
+        "Garchomp",
+        "Tyranitar",
+        "Salamence",
+        "Dragonite",
+        "Blastoise",
+        "Venusaur",
+      ];
+      const bottom20 = [
+        "Dragonair",
+        "Nidorina",
+        "Clefairy",
+        "Gastly",
+        "Nidorino",
+        "Shellos",
+        "Frillish",
+        "Burmy",
+        "Castform",
+        "Deerling",
+        "Oricorio",
+        "Wormadam",
+        "Spearow",
+        "Fearow",
+        "Horsea",
+        "Seadra",
+        "Charmander",
+        "Charmeleon",
+        "Golbat",
+        "Haunter",
+      ];
+
+      function renderAccBars(containerId, names, fillColor, pct) {
+        const container = document.getElementById(containerId);
+        names.forEach((name) => {
+          const row = document.createElement("div");
+          row.className = "acc-bar-row";
+          row.innerHTML = `
+            <span class="acc-bar-name" title="${name}">${name}</span>
+            <div class="acc-bar-track">
+              <div class="acc-bar-fill" style="width:${pct}%;background:${fillColor}"></div>
+            </div>
+            <span class="acc-bar-val" style="color:${fillColor}">${pct}%</span>
+          `;
+          container.appendChild(row);
+        });
+      }
+      renderAccBars("top20Container", top20, "#10b981", 100);
+      renderAccBars("bottom20Container", bottom20, "#ef4444", 0);
+
+      // ── Interactive Pokémon Explorer ──
+      const POKEMON_DATA = {
+        Abomasnow: 4,
+        Abra: 4,
+        Absol: 4,
+        Aegislash: 4,
+        Aerodactyl: 6,
+        Aggron: 4,
+        Aipom: 3,
+        Alakazam: 6,
+        Altaria: 4,
+        Ampharos: 5,
+        Arbok: 4,
+        Arcanine: 4,
+        Arceus: 5,
+        Ariados: 3,
+        Articuno: 6,
+        Audino: 4,
+        Azumarill: 3,
+        Banette: 4,
+        Basculin: 4,
+        Bayleef: 3,
+        Beedrill: 6,
+        Beldum: 3,
+        Bellossom: 3,
+        Bellsprout: 4,
+        Bewear: 3,
+        Blastoise: 6,
+        Blaziken: 4,
+        Blissey: 3,
+        Brionne: 3,
+        Bulbasaur: 3,
+        Burmy: 6,
+        Butterfree: 6,
+        Calyrex: 3,
+        Camerupt: 4,
+        Castform: 5,
+        Caterpie: 4,
+        Celebi: 3,
+        Chansey: 4,
+        Charizard: 5,
+        Charmander: 4,
+        Charmeleon: 3,
+        Cherrim: 4,
+        Chikorita: 3,
+        Chimchar: 3,
+        Chinchou: 3,
+        Cinderace: 3,
+        Clefable: 4,
+        Clefairy: 4,
+        Cleffa: 3,
+        Cloyster: 4,
+        Corsola: 4,
+        Crobat: 3,
+        Croconaw: 3,
+        Cubone: 4,
+        Cyndaquil: 3,
+        Darmanitan: 6,
+        Dartrix: 3,
+        Darumaka: 3,
+        Decidueye: 3,
+        Deerling: 6,
+        Delibird: 3,
+        Deoxys: 6,
+        Dewgong: 4,
+        Dialga: 4,
+        Diancie: 5,
+        Diglett: 6,
+        Ditto: 4,
+        Dodrio: 4,
+        Doduo: 4,
+        Donphan: 3,
+        Dragonair: 4,
+        Dragonite: 4,
+        Dratini: 4,
+        Drowzee: 4,
+        Dugtrio: 6,
+        Dunsparce: 3,
+        Eevee: 5,
+        Ekans: 4,
+        Electabuzz: 4,
+        Electrode: 4,
+        Elekid: 3,
+        Entei: 4,
+        Espeon: 3,
+        Exeggcute: 4,
+        Exeggutor: 3,
+        "Farfetch'd": 5,
+        Fearow: 4,
+        Feraligatr: 3,
+        Flaaffy: 3,
+        Flabébé: 6,
+        Flareon: 4,
+        Floette: 6,
+        Florges: 6,
+        Forretress: 3,
+        Frillish: 4,
+        Furfrou: 6,
+        Furret: 3,
+        Gallade: 4,
+        Garbodor: 3,
+        Garchomp: 4,
+        Gardevoir: 4,
+        Gastly: 4,
+        Gastrodon: 4,
+        Genesect: 6,
+        Gengar: 6,
+        Geodude: 6,
+        Girafarig: 3,
+        Giratina: 5,
+        Glalie: 4,
+        Gligar: 3,
+        Gloom: 4,
+        Golbat: 4,
+        Goldeen: 4,
+        Golduck: 4,
+        Golem: 6,
+        Gourgeist: 5,
+        Granbull: 3,
+        Graveler: 6,
+        Greninja: 5,
+        Grimer: 6,
+        Groudon: 5,
+        Growlithe: 4,
+        Gyarados: 6,
+        Haunter: 4,
+        Heatran: 3,
+        Heracross: 5,
+        Hitmonchan: 4,
+        Hitmonlee: 4,
+        Hitmontop: 3,
+        "Ho-oh": 5,
+        Hoopa: 4,
+        Hoothoot: 3,
+        Hoppip: 3,
+        Horsea: 4,
+        Houndoom: 5,
+        Houndour: 3,
+        Hypno: 4,
+        Igglybuff: 3,
+        Incineroar: 3,
+        Inteleon: 3,
+        Ivysaur: 4,
+        Jellicent: 4,
+        Jigglypuff: 4,
+        Jolteon: 4,
+        Jumpluff: 3,
+        Jynx: 4,
+        Kabuto: 4,
+        Kabutops: 4,
+        Kadabra: 4,
+        Kakuna: 4,
+        Kangaskhan: 6,
+        Keldeo: 4,
+        Kingdra: 3,
+        Kingler: 5,
+        Koffing: 4,
+        Komala: 3,
+        Krabby: 4,
+        Kyogre: 5,
+        Kyurem: 5,
+        Landorus: 4,
+        Lanturn: 3,
+        Lapras: 5,
+        Larvitar: 3,
+        Latias: 5,
+        Latios: 5,
+        Ledian: 3,
+        Ledyba: 3,
+        Lickitung: 4,
+        Linoone: 3,
+        Litten: 4,
+        Lopunny: 4,
+        Lucario: 4,
+        Lugia: 3,
+        Lunala: 3,
+        Lycanroc: 6,
+        Machamp: 5,
+        Machoke: 4,
+        Machop: 4,
+        Magby: 3,
+        Magcargo: 3,
+        Magikarp: 4,
+        Magmar: 4,
+        Magnemite: 4,
+        Magneton: 4,
+        Manectric: 4,
+        Mankey: 4,
+        Mantine: 3,
+        Mareep: 3,
+        Marill: 3,
+        Marowak: 6,
+        Marshadow: 3,
+        Mawile: 4,
+        Medicham: 4,
+        Meganium: 3,
+        Meloetta: 3,
+        Meowstic: 4,
+        Meowth: 6,
+        Metagross: 6,
+        Metapod: 4,
+        Mew: 5,
+        Mewtwo: 6,
+        Miltank: 3,
+        Mimikyu: 4,
+        Minior: 6,
+        Misdreavus: 3,
+        Moltres: 6,
+        "Mr. Mime": 5,
+        Mudkip: 4,
+        Muk: 6,
+        Murkrow: 3,
+        Natu: 3,
+        Necrozma: 7,
+        Nidoking: 4,
+        Nidoqueen: 4,
+        "Nidoran♀": 4,
+        "Nidoran♂": 4,
+        Nidorina: 4,
+        Nidorino: 4,
+        Ninetales: 6,
+        Noctowl: 3,
+        Octillery: 3,
+        Oddish: 4,
+        Omanyte: 4,
+        Omastar: 4,
+        Onix: 4,
+        Oricorio: 6,
+        Oshawott: 3,
+        Palkia: 4,
+        Palossand: 3,
+        Paras: 4,
+        Parasect: 4,
+        Persian: 6,
+        Phanpy: 3,
+        Pichu: 3,
+        Pidgeot: 6,
+        Pidgeotto: 4,
+        Pidgey: 4,
+        Pikachu: 6,
+        Piloswine: 3,
+        Pineco: 3,
+        Pinsir: 6,
+        Piplup: 3,
+        Poipole: 3,
+        Politoed: 3,
+        Poliwag: 4,
+        Poliwhirl: 4,
+        Poliwrath: 4,
+        Ponyta: 6,
+        Popplio: 4,
+        Porygon: 4,
+        Porygon2: 3,
+        Primarina: 3,
+        Primeape: 4,
+        Psyduck: 4,
+        Pumpkaboo: 5,
+        Pupitar: 3,
+        Pyroar: 3,
+        Quagsire: 3,
+        Quilava: 3,
+        Qwilfish: 3,
+        Raichu: 6,
+        Raikou: 4,
+        Rapidash: 5,
+        Raticate: 6,
+        Rattata: 6,
+        Rayquaza: 3,
+        Regigigas: 3,
+        Remoraid: 3,
+        Reshiram: 4,
+        Rhydon: 4,
+        Rhyhorn: 4,
+        Rillaboom: 3,
+        Rockruff: 4,
+        Rotom: 5,
+        Rowlet: 3,
+        Sableye: 4,
+        Salamence: 4,
+        Sandshrew: 6,
+        Sandslash: 3,
+        Sawsbuck: 6,
+        Sceptile: 3,
+        Scizor: 5,
+        Scyther: 4,
+        Seadra: 4,
+        Seaking: 4,
+        Seel: 4,
+        Sentret: 3,
+        Sharpedo: 4,
+        Shaymin: 4,
+        Shellder: 4,
+        Shellos: 4,
+        Shuckle: 3,
+        Silvally: 6,
+        Skarmory: 3,
+        Skiploom: 3,
+        Slowbro: 5,
+        Slowking: 3,
+        Slowpoke: 5,
+        Slugma: 3,
+        Smeargle: 3,
+        Smoochum: 3,
+        Sneasel: 3,
+        Snivy: 3,
+        Snorlax: 5,
+        Snubbull: 3,
+        Solgaleo: 3,
+        Spearow: 4,
+        Spinarak: 3,
+        Squirtle: 3,
+        Stantler: 3,
+        Starmie: 4,
+        Staryu: 4,
+        Steelix: 5,
+        Stufful: 3,
+        Stunfisk: 3,
+        Sudowoodo: 3,
+        Suicune: 3,
+        Sunflora: 3,
+        Sunkern: 3,
+        Swampert: 4,
+        Swinub: 3,
+        Swirlix: 3,
+        Sylveon: 3,
+        Tangela: 4,
+        Tauros: 4,
+        Teddiursa: 3,
+        Tentacool: 4,
+        Tentacruel: 4,
+        Tepig: 3,
+        Thundurus: 5,
+        Togepi: 3,
+        Togetic: 3,
+        Torchic: 4,
+        Tornadus: 5,
+        Torracat: 3,
+        Totodile: 3,
+        Toxtricity: 4,
+        Treecko: 4,
+        Turtwig: 3,
+        Typhlosion: 3,
+        Tyranitar: 5,
+        Tyrogue: 3,
+        Umbreon: 3,
+        Unfezant: 3,
+        Unown: 6,
+        Ursaring: 3,
+        Urshifu: 4,
+        Vaporeon: 4,
+        Venomoth: 4,
+        Venonat: 4,
+        Venusaur: 8,
+        Victreebel: 4,
+        Vileplume: 4,
+        Vivillon: 6,
+        Voltorb: 4,
+        Vulpix: 3,
+        Wartortle: 4,
+        Weedle: 4,
+        Weepinbell: 4,
+        Weezing: 5,
+        Wigglytuff: 4,
+        Wishiwashi: 4,
+        Wobbuffet: 3,
+        Wooper: 3,
+        Wormadam: 6,
+        Xatu: 3,
+        Xerneas: 5,
+        Yamask: 3,
+        Yanma: 3,
+        Yveltal: 5,
+        Zacian: 3,
+        Zamazenta: 3,
+        Zapdos: 6,
+        Zekrom: 4,
+        Zeraora: 3,
+        Zigzagoon: 3,
+        Zubat: 4,
+        Zygarde: 6,
+      };
+
+      const POKEMON_NAMES = Object.keys(POKEMON_DATA).sort();
+      const IMG_BASE = "../../datasets/pokemon/data/images/";
+
+      const demoInput = document.getElementById("demoInput");
+      const acDropdown = document.getElementById("acDropdown");
+      const demoResult = document.getElementById("demoResult");
+
+      demoInput.addEventListener("input", () => {
+        const q = demoInput.value.trim().toLowerCase();
+        acDropdown.innerHTML = "";
+        if (!q) {
+          acDropdown.classList.remove("open");
+          return;
+        }
+        const matches = POKEMON_NAMES.filter((n) =>
+          n.toLowerCase().startsWith(q),
+        ).slice(0, 10);
+        if (!matches.length) {
+          acDropdown.classList.remove("open");
+          return;
+        }
+        matches.forEach((name, i) => {
+          const li = document.createElement("li");
+          li.className = "ac-item" + (i === 0 ? " active" : "");
+          li.textContent = name;
+          li.addEventListener("click", () => {
+            demoInput.value = name;
+            acDropdown.classList.remove("open");
+            runDemo(name);
+          });
+          acDropdown.appendChild(li);
+        });
+        acDropdown.classList.add("open");
+      });
+
+      demoInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          acDropdown.classList.remove("open");
+          runDemoFromInput();
+        }
+        if (e.key === "Escape") acDropdown.classList.remove("open");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest("#demoInputWrap"))
+          acDropdown.classList.remove("open");
+      });
+
+      function runDemoFromInput() {
+        const name = demoInput.value.trim();
+        if (!name) return;
+        const exact = POKEMON_NAMES.find(
+          (n) => n.toLowerCase() === name.toLowerCase(),
+        );
+        if (exact) {
+          runDemo(exact);
+          return;
+        }
+        const partial = POKEMON_NAMES.find((n) =>
+          n.toLowerCase().startsWith(name.toLowerCase()),
+        );
+        if (partial) {
+          demoInput.value = partial;
+          runDemo(partial);
+        } else {
+          demoResult.classList.remove("visible");
+          alert(
+            'Pokémon "' +
+              name +
+              '" not found. Check spelling or pick from the suggestions.',
+          );
+        }
+      }
+
+      function runDemo(name) {
+        demoInput.value = name;
+        acDropdown.classList.remove("open");
+        const total = POKEMON_DATA[name];
+        if (!total) return;
+        const nTrain = total - 2; // 1 val + 1 test
+        document.getElementById("demoName").textContent = name;
+        document.getElementById("demoBadge").textContent =
+          total + " images in dataset";
+        document.getElementById("demoSplitBadge").textContent =
+          "Train " + nTrain + "  ·  Val 1  ·  Test 1";
+        const imgsDiv = document.getElementById("demoImgs");
+        imgsDiv.innerHTML = "";
+        for (let i = 0; i < total; i++) {
+          const card = document.createElement("div");
+          card.className = "demo-img-card";
+          const img = document.createElement("img");
+          img.src = IMG_BASE + name + "/" + i + ".jpg";
+          img.alt = name + " image " + i;
+          img.onerror = function () {
+            card.style.display = "none";
+          };
+          const lbl = document.createElement("div");
+          lbl.className = "img-lbl";
+          const role = i < nTrain ? "Train" : i === nTrain ? "Val" : "Test";
+          lbl.textContent = "img " + i + " · " + role;
+          card.appendChild(img);
+          card.appendChild(lbl);
+          imgsDiv.appendChild(card);
+        }
+        document.getElementById("demoNote").textContent =
+          "Path: datasets/pokemon/data/images/" +
+          name +
+          "/[0\u2013" +
+          (total - 1) +
+          "].jpg" +
+          "  ·  Estimated split: " +
+          nTrain +
+          " train, 1 val, 1 test";
+        demoResult.classList.add("visible");
+        demoResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      // ── Live Inference (ONNX Runtime Web) ────────────────────────────────
+      (function () {
+        let ortSession = null;
+        let modelData = null;
+        let loadingPromise = null;
+        const MEAN = [0.485, 0.456, 0.406];
+        const STD = [0.229, 0.224, 0.225];
+
+        async function loadModels() {
+          setStatus("Loading model (~15 MB)…");
+          const [session, data] = await Promise.all([
+            ort.InferenceSession.create("models/feature_extractor.onnx", {
+              executionProviders: ["wasm"],
+            }),
+            fetch("models/model_data.json").then((r) => r.json()),
+          ]);
+          ortSession = session;
+          modelData = data;
+          setStatus("Model ready.");
+        }
+
+        function setStatus(msg) {
+          const el = document.getElementById("inferStatus");
+          if (el) el.textContent = msg;
+        }
+
+        function preprocessImage(imgEl) {
+          const c = document.createElement("canvas");
+          c.width = c.height = 224;
+          const ctx = c.getContext("2d");
+          ctx.drawImage(imgEl, 0, 0, 224, 224);
+          const px = ctx.getImageData(0, 0, 224, 224).data;
+          const buf = new Float32Array(3 * 224 * 224);
+          for (let i = 0; i < 224 * 224; i++) {
+            buf[0 * 224 * 224 + i] = (px[i * 4] / 255 - MEAN[0]) / STD[0];
+            buf[1 * 224 * 224 + i] = (px[i * 4 + 1] / 255 - MEAN[1]) / STD[1];
+            buf[2 * 224 * 224 + i] = (px[i * 4 + 2] / 255 - MEAN[2]) / STD[2];
+          }
+          return buf;
+        }
+
+        async function runInference(imgEl) {
+          const buf = preprocessImage(imgEl);
+          const tensor = new ort.Tensor("float32", buf, [1, 3, 224, 224]);
+          const out = await ortSession.run({ image: tensor });
+          const feat = Array.from(out.features.data);
+
+          // StandardScaler
+          const sm = modelData.scaler_mean;
+          const ss = modelData.scaler_scale;
+          const sc = feat.map((v, i) => (v - sm[i]) / ss[i]);
+
+          // LogisticRegression: logits = coef @ sc + intercept
+          const coef = modelData.logreg_coef;
+          const bias = modelData.logreg_intercept;
+          const nC = coef.length;
+          const logits = new Float64Array(nC);
+          for (let c = 0; c < nC; c++) {
+            let s = bias[c];
+            const row = coef[c];
+            for (let i = 0; i < sc.length; i++) s += row[i] * sc[i];
+            logits[c] = s;
+          }
+
+          // Softmax
+          const mx = Math.max(...logits);
+          const exp = Array.from(logits).map((v) => Math.exp(v - mx));
+          const sum = exp.reduce((a, b) => a + b, 0);
+          const probs = exp.map((v) => v / sum);
+
+          // Top-5
+          const cls = modelData.classes;
+          return probs
+            .map((p, i) => ({ name: cls[i], prob: p }))
+            .sort((a, b) => b.prob - a.prob)
+            .slice(0, 5);
+        }
+
+        function renderResults(top5) {
+          const t1 = top5[0];
+          document.getElementById("inferTop1Label").textContent =
+            "\uD83C\uDFC6 " +
+            t1.name +
+            "  (" +
+            (t1.prob * 100).toFixed(1) +
+            "%)";
+
+          const barsEl = document.getElementById("inferBars");
+          barsEl.innerHTML = "";
+          const maxP = top5[0].prob;
+          top5.forEach((item, rank) => {
+            const pct = (item.prob * 100).toFixed(2);
+            const fill = Math.max((item.prob / maxP) * 100, 0.8);
+            const row = document.createElement("div");
+            row.className = "infer-bar-row";
+            row.innerHTML =
+              "<div class='infer-bar-name' title='" +
+              item.name +
+              "'>" +
+              (rank + 1) +
+              ". " +
+              item.name +
+              "</div>" +
+              "<div class='infer-bar-track'><div class='infer-bar-fill rank" +
+              (rank + 1) +
+              "' style='width:" +
+              fill +
+              "%'></div></div>" +
+              "<div class='infer-bar-pct'>" +
+              pct +
+              "%</div>";
+            barsEl.appendChild(row);
+          });
+
+          const dsEl = document.getElementById("inferDatasetImgs");
+          dsEl.innerHTML = "";
+          const clsData = POKEMON_DATA[t1.name];
+          if (clsData) {
+            for (let i = 0; i < clsData.count; i++) {
+              const img = document.createElement("img");
+              img.src =
+                "../../datasets/pokemon/data/images/" +
+                t1.name +
+                "/" +
+                i +
+                ".jpg";
+              img.alt = t1.name;
+              img.title = t1.name + " (" + i + ")";
+              dsEl.appendChild(img);
+            }
+          }
+
+          document.getElementById("inferPlaceholder").style.display = "none";
+          document.getElementById("inferResults").classList.add("visible");
+        }
+
+        // Wire up events
+        const imgInput = document.getElementById("imgInput");
+        const uploadZone = document.getElementById("uploadZone");
+        const previewImg = document.getElementById("previewImg");
+        const predictBtn = document.getElementById("predictBtn");
+        const spinner = document.getElementById("inferSpinner");
+        if (!imgInput) return;
+
+        function onFile(file) {
+          if (!file || !file.type.startsWith("image/")) return;
+          previewImg.src = URL.createObjectURL(file);
+          previewImg.style.display = "block";
+          predictBtn.disabled = false;
+          document.getElementById("inferResults").classList.remove("visible");
+          document.getElementById("inferPlaceholder").style.display = "";
+        }
+
+        imgInput.addEventListener("change", (e) => onFile(e.target.files[0]));
+        uploadZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          uploadZone.classList.add("drag-over");
+        });
+        uploadZone.addEventListener("dragleave", () =>
+          uploadZone.classList.remove("drag-over"),
+        );
+        uploadZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          uploadZone.classList.remove("drag-over");
+          onFile(e.dataTransfer.files[0]);
+        });
+
+        predictBtn.addEventListener("click", async () => {
+          spinner.classList.add("visible");
+          predictBtn.disabled = true;
+          document.getElementById("inferResults").classList.remove("visible");
+          try {
+            if (!loadingPromise) loadingPromise = loadModels();
+            await loadingPromise;
+            setStatus("Running inference…");
+            const top5 = await runInference(previewImg);
+            renderResults(top5);
+            setStatus("Done.");
+          } catch (err) {
+            setStatus("Error: " + err.message);
+            console.error(err);
+          } finally {
+            spinner.classList.remove("visible");
+            predictBtn.disabled = false;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

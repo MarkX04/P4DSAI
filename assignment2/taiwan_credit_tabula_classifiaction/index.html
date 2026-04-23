@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taiwan Credit Default — ML Classification Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #f0f4f1;
+        --paper: #ffffff;
+        --ink: #111a15;
+        --muted: #4b5f51;
+        --line: #d1dbd5;
+        --accent: #0f766e;
+        --accent-light: #d1faf5;
+        --warn: #b45309;
+        --radius: 14px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 20px rgba(15, 118, 110, 0.09);
+        --max: 1200px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "IBM Plex Sans", sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.55;
+        min-height: 100vh;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Space Grotesk", sans-serif;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      /* ── Navbar ── */
+      .navbar {
+        background: #0d1f17;
+        border-bottom: 1px solid #1e3828;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 0 24px;
+      }
+      .navbar-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .navbar-brand {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #a7f3d0;
+      }
+      .navbar-nav {
+        display: flex;
+        gap: 2px;
+        list-style: none;
+      }
+      .navbar-nav a {
+        color: #9db8a6;
+        text-decoration: none;
+        font-size: 0.81rem;
+        font-weight: 500;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: all 140ms;
+      }
+      .navbar-nav a:hover {
+        color: #fff;
+        background: #1e3828;
+      }
+
+      /* ── Page ── */
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 22px 16px 60px;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        background: linear-gradient(
+          135deg,
+          #0d1f17 0%,
+          #0f2d22 55%,
+          #122918 100%
+        );
+        border-radius: 20px;
+        padding: 28px 32px;
+        color: #e8f5ef;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -60px;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(15, 118, 110, 0.22) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero h1 {
+        font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+        color: #fff;
+        margin-bottom: 6px;
+      }
+      .hero p {
+        color: #a7c4b5;
+        font-size: 0.88rem;
+        max-width: 680px;
+      }
+      .hero-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .hero-tag {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        color: #c3e6d5;
+        border-radius: 999px;
+        padding: 4px 11px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+      .hero-pipeline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        margin-top: 14px;
+      }
+      .pipe-step {
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #d4eedf;
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .pipe-arrow {
+        color: #4fd1c5;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
+      /* ── Section ── */
+      .section {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 18px;
+        overflow: hidden;
+      }
+      .section-head {
+        padding: 13px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-head h2 {
+        font-size: 1.05rem;
+        color: #1a3d2e;
+        flex: 1;
+      }
+      .section-body {
+        padding: 18px 20px;
+      }
+      .sec-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: "Space Grotesk", sans-serif;
+        flex-shrink: 0;
+      }
+
+      /* ── Method Board ── */
+      .board-controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .ctrl-btn {
+        border: 1px solid #9cd5cc;
+        background: #f0faf8;
+        color: #0f5c57;
+        border-radius: 999px;
+        padding: 5px 13px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition: all 140ms;
+      }
+      .ctrl-btn:hover {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .sel-count {
+        margin-left: auto;
+        font-size: 0.82rem;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      .method-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+        gap: 12px;
+      }
+      .method-card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 13px;
+        cursor: pointer;
+        transition: all 160ms;
+        position: relative;
+        background: #fafcfb;
+        user-select: none;
+      }
+      .method-card:hover {
+        border-color: #9cd5cc;
+        background: #f0faf8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14);
+      }
+      .method-card.selected {
+        border-color: var(--accent);
+        background: #f0faf8;
+        box-shadow: 0 4px 14px rgba(15, 118, 110, 0.18);
+      }
+      .method-card.selected .card-check {
+        opacity: 1;
+      }
+      .card-check {
+        position: absolute;
+        top: 8px;
+        right: 9px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 140ms;
+      }
+      .card-name {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #1a3d2e;
+        margin-bottom: 3px;
+        padding-right: 20px;
+      }
+      .card-desc {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-bottom: 7px;
+        line-height: 1.4;
+      }
+      .card-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        border-radius: 6px;
+        padding: 3px 7px;
+        font-size: 0.71rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .badge-acc {
+        background: #d1faf5;
+        color: #0f5c57;
+        border: 1px solid #a7e8e2;
+      }
+      .badge-f1 {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+      .badge-auc {
+        background: #f3e8ff;
+        color: #6b21a8;
+        border: 1px solid #d8b4fe;
+      }
+      .badge-fast {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+      .badge-medium {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+      }
+      .badge-slow {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+
+      /* ── Compare ── */
+      .compare-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+      }
+      .compare-empty .big {
+        font-size: 2.4rem;
+        margin-bottom: 8px;
+      }
+      .compare-empty p {
+        font-size: 0.9rem;
+      }
+
+      /* ── Subsection ── */
+      .subsec {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        margin-bottom: 14px;
+      }
+      .subsec-head {
+        background: linear-gradient(180deg, #e8f5ee, #deeee6);
+        padding: 9px 16px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.87rem;
+        font-weight: 700;
+        color: #1a3d2e;
+        border-bottom: 1px solid var(--line);
+      }
+      .subsec-body {
+        padding: 15px 16px;
+      }
+
+      /* ── Table ── */
+      .tbl-wrap {
+        overflow-x: auto;
+        border: 1px solid #c5d2c9;
+        border-radius: var(--radius-sm);
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.86rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 11px;
+        border-bottom: 1px solid #d5e0d8;
+        border-right: 1px solid #d5e0d8;
+        white-space: nowrap;
+      }
+      tr th:last-child,
+      tr td:last-child {
+        border-right: none;
+      }
+      th {
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(180deg, #d9ece0, #cce4d6);
+        color: #143325;
+        font-size: 0.81rem;
+        font-weight: 600;
+        border-bottom: 2px solid #9bb2a3;
+      }
+      tbody tr:nth-child(even) {
+        background: #f9fcfa;
+      }
+      tbody tr:hover {
+        background: #eefaf6;
+      }
+      .row-best {
+        font-weight: 600;
+        background: #edfaf6 !important;
+      }
+      .row-best td:first-child {
+        border-left: 3px solid var(--accent);
+      }
+      .cdot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+
+      /* ── Tabs ── */
+      .tab-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .tab-btn {
+        border: 1px solid var(--line);
+        background: #f4f8f5;
+        color: #2a4f3b;
+        border-radius: 8px;
+        padding: 5px 11px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition: all 130ms;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .tab-btn:hover:not(.active) {
+        background: #e0f5ef;
+        border-color: #9cd5cc;
+      }
+
+      /* ── Chart controls (pill buttons) ── */
+      .pill-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .pill-btn {
+        border: 1px solid #9cd5cc;
+        background: #f0faf8;
+        color: #0f5c57;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "IBM Plex Sans", sans-serif;
+        transition: all 130ms;
+      }
+      .pill-btn.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .pill-btn:hover:not(.active) {
+        background: #d9f5ef;
+      }
+
+      /* ── Confusion Matrix ── */
+      .cm-layout {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      .cm-grid {
+        display: grid;
+        grid-template-columns: auto 1fr 1fr;
+        gap: 0;
+        font-family: "Space Grotesk", sans-serif;
+        min-width: 270px;
+      }
+      .cm-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid #d0ddd6;
+        min-height: 52px;
+      }
+      .cm-hdr {
+        background: #e5f0eb;
+        color: #1a3d2e;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+      .cm-TN {
+        background: #d1f0e6;
+        color: #0d4a30;
+        font-size: 1.05rem;
+      }
+      .cm-FP {
+        background: #ffe4d6;
+        color: #7c2d12;
+        font-size: 1.05rem;
+      }
+      .cm-FN {
+        background: #fff0d6;
+        color: #7c2d12;
+        font-size: 1.05rem;
+      }
+      .cm-TP {
+        background: #c8f7e0;
+        color: #063d23;
+        font-size: 1.05rem;
+      }
+      .cm-row-hdr {
+        background: #ecf4ee;
+        color: #1a3d2e;
+        font-size: 0.7rem;
+        font-weight: 700;
+        min-width: 70px;
+      }
+      .cm-corner {
+        background: transparent;
+        border: none;
+      }
+      .cm-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+        flex: 1;
+        min-width: 180px;
+      }
+      .cm-stat {
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 7px 11px;
+        background: #f8fdf9;
+      }
+      .cm-stat .s-lbl {
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+      .cm-stat .s-val {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      /* ── Charts ── */
+      .chart-wrap {
+        position: relative;
+      }
+      .chart-wrap canvas {
+        max-height: 340px;
+      }
+      .chart-wrap-tall canvas {
+        max-height: 400px;
+      }
+
+      /* ── Two-col ── */
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 740px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        .method-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* ── Note ── */
+      .note {
+        border-left: 3px solid var(--accent);
+        background: #f2fcfa;
+        color: #1a4f49;
+        padding: 9px 12px;
+        border-radius: 0 7px 7px 0;
+        font-size: 0.86rem;
+        margin-top: 11px;
+      }
+      .note-warn {
+        border-left-color: var(--warn);
+        background: #fffbeb;
+        color: #78350f;
+      }
+
+      /* ── Rank ── */
+      .rank {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        font-size: 0.72rem;
+        font-weight: 700;
+        font-family: "Space Grotesk", sans-serif;
+      }
+      .rank-1 {
+        background: #ffd700;
+        color: #6b4d00;
+      }
+      .rank-2 {
+        background: #e2e8f0;
+        color: #334155;
+      }
+      .rank-3 {
+        background: #d4956b;
+        color: #4a1f10;
+      }
+
+      /* ── Footer ── */
+      footer {
+        text-align: center;
+        padding: 22px 16px;
+        font-size: 0.84rem;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        margin-top: 6px;
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(7px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-in {
+        animation: fade-in 260ms ease both;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <span class="navbar-brand">Taiwan Credit Default · ML Report</span>
+        <ul class="navbar-nav">
+          <li><a href="#methods">Methods</a></li>
+          <li><a href="#compare">Compare</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#conclusion">Conclusion</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="page">
+      <!-- HERO -->
+      <section class="hero">
+        <h1>Taiwan Credit Default — ML Classification Report</h1>
+        <p>
+          Seven classifiers trained on the UCI Taiwan Credit Default dataset
+          (UCI ML Repository). Full comparative analysis on precision, recall,
+          F1-score and AUC-ROC across a held-out test set of 4,500 samples.
+        </p>
+        <div class="hero-stats">
+          <span class="hero-tag">📊 30,000 samples</span>
+          <span class="hero-tag">🔢 23 → 26 features (OHE)</span>
+          <span class="hero-tag">🎯 Binary: Default / No Default</span>
+          <span class="hero-tag">⚖️ 22.12% default rate</span>
+          <span class="hero-tag">📐 70 / 15 / 15 stratified split</span>
+          <span class="hero-tag">Train=21,000 · Val=4,500 · Test=4,500</span>
+        </div>
+        <div class="hero-pipeline">
+          <span class="pipe-step">📥 Raw Data</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">🧹 Clean + OHE</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">🔀 Split 70/15/15</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">⚙️ StandardScaler</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">🏋 Train 7 Models</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">📐 Val Select</span
+          ><span class="pipe-arrow">→</span>
+          <span class="pipe-step">🧪 Test Evaluate</span>
+        </div>
+      </section>
+
+      <!-- SECTION 1: METHOD BOARD -->
+      <section class="section" id="methods">
+        <div class="section-head">
+          <span class="sec-num">1</span>
+          <h2>Method Board</h2>
+        </div>
+        <div class="section-body">
+          <p
+            style="color: var(--muted); font-size: 0.86rem; margin-bottom: 13px"
+          >
+            Click cards to select/deselect models. The comparison section
+            updates automatically. Metrics shown are from the held-out
+            <strong>test set</strong> (4,500 samples).
+          </p>
+          <div class="board-controls">
+            <button class="ctrl-btn" onclick="selectAll()">Select All</button>
+            <button class="ctrl-btn" onclick="clearAll()">Clear All</button>
+            <span class="sel-count" id="sel-count">7 selected</span>
+          </div>
+          <div class="method-grid" id="method-grid"><!-- JS rendered --></div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: COMPARISON -->
+      <section class="section" id="compare">
+        <div class="section-head">
+          <span class="sec-num">2</span>
+          <h2>Comparison Results</h2>
+        </div>
+        <div class="section-body" id="compare-body"><!-- JS rendered --></div>
+      </section>
+
+      <!-- SECTION 3: FEATURE IMPORTANCE -->
+      <section class="section" id="features">
+        <div class="section-head">
+          <span class="sec-num">3</span>
+          <h2>
+            Feature Importance
+            <span
+              style="
+                font-size: 0.76rem;
+                font-weight: 500;
+                color: var(--muted);
+                margin-left: 8px;
+              "
+              >Tree-based models only · Top 10 features</span
+            >
+          </h2>
+        </div>
+        <div class="section-body">
+          <div class="pill-bar" id="fi-tabs">
+            <button class="pill-btn active" onclick="switchFI('gb', this)">
+              Gradient Boosting
+            </button>
+            <button class="pill-btn" onclick="switchFI('rf', this)">
+              Random Forest
+            </button>
+            <button class="pill-btn" onclick="switchFI('dt', this)">
+              Decision Tree
+            </button>
+          </div>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chart-fi"></canvas>
+          </div>
+          <div class="note" style="margin-top: 12px">
+            <strong>PAY_1</strong> (most recent repayment status) dominates all
+            tree models &mdash; 57.99% in Gradient Boosting, 46.24% in Decision
+            Tree, 10.23% in Random Forest. Recent payment behavior is the
+            strongest single predictor of default. Random Forest distributes
+            importance more evenly across bill amounts and demographic features.
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: CONCLUSION -->
+      <section class="section" id="conclusion">
+        <div class="section-head">
+          <span class="sec-num">4</span>
+          <h2>Conclusion — Final Rankings</h2>
+        </div>
+        <div class="section-body">
+          <p
+            style="color: var(--muted); font-size: 0.86rem; margin-bottom: 12px"
+          >
+            All metrics from the held-out test set. Ranked by F1-score on the
+            Default (positive) class.
+          </p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Test Acc</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1 ↓</th>
+                  <th>AUC-ROC</th>
+                  <th>Train Acc</th>
+                  <th>Val Acc</th>
+                  <th>Overfit</th>
+                </tr>
+              </thead>
+              <tbody id="conclusion-tbody">
+                <!-- JS rendered -->
+              </tbody>
+            </table>
+          </div>
+          <div class="note" style="margin-top: 14px">
+            <strong>Random Forest</strong> achieves the highest F1 (0.4645).
+            <strong>Gradient Boosting</strong> leads on AUC-ROC (0.7824) — best
+            at ranking defaulters. <strong>Neural Network (MLP)</strong> has the
+            highest recall (41.47%), detecting the most actual defaults.
+            <strong>Logistic Regression</strong> has the highest precision
+            (70.66%) but misses most actual defaults (recall 23.69%).
+          </div>
+          <div class="note note-warn" style="margin-top: 8px">
+            ⚠️ Class imbalance (≈78% No Default / 22% Default): all models show
+            low recall on the Default class (24&ndash;41%). For production
+            credit scoring, consider threshold tuning, SMOTE oversampling, or
+            cost-sensitive learning to improve Default detection.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Taiwan Credit Default · Machine Learning Classification Report ·
+      Assignment 2 · HCMUT HK252
+    </footer>
+
+    <script>
+      // ═══════════════════════════════════════════════════════════
+      // DATA (all values from notebook output — real sklearn results)
+      // ═══════════════════════════════════════════════════════════
+
+      const MODEL_KEYS = ["gb", "mlp", "rf", "svm", "dt", "knn", "lr"];
+
+      const MODELS = {
+        gb: {
+          name: "Gradient Boosting",
+          short: "GB",
+          desc: "GBM, n_estimators=200",
+          trainAcc: 0.8344,
+          valAcc: 0.8184,
+          testAcc: 0.8147,
+          prec: 0.6467,
+          rec: 0.3584,
+          f1: 0.4612,
+          auc: 0.7824,
+          trainAuc: 0.8279,
+          valAuc: 0.7789,
+          speed: "Slow",
+          color: "#0f766e",
+        },
+        mlp: {
+          name: "Neural Network (MLP)",
+          short: "MLP",
+          desc: "(128→64), ReLU, Adam",
+          trainAcc: 0.9185,
+          valAcc: 0.7609,
+          testAcc: 0.7658,
+          prec: 0.4672,
+          rec: 0.4147,
+          f1: 0.4394,
+          auc: 0.7005,
+          trainAuc: 0.9599,
+          valAuc: 0.6906,
+          speed: "Medium",
+          color: "#0891b2",
+        },
+        rf: {
+          name: "Random Forest",
+          short: "RF",
+          desc: "Bagging, n_estimators=200",
+          trainAcc: 0.9995,
+          valAcc: 0.8122,
+          testAcc: 0.8124,
+          prec: 0.631,
+          rec: 0.3675,
+          f1: 0.4645,
+          auc: 0.7637,
+          trainAuc: 1.0,
+          valAuc: 0.7568,
+          speed: "Medium",
+          color: "#2563eb",
+        },
+        svm: {
+          name: "SVM (RBF)",
+          short: "SVM",
+          desc: "RBF kernel, probability=True",
+          trainAcc: 0.8265,
+          valAcc: 0.8144,
+          testAcc: 0.8131,
+          prec: 0.6541,
+          rec: 0.3303,
+          f1: 0.439,
+          auc: 0.7102,
+          trainAuc: 0.7865,
+          valAuc: 0.7274,
+          speed: "Medium",
+          color: "#7c3aed",
+        },
+        dt: {
+          name: "Decision Tree",
+          short: "DT",
+          desc: "CART, max_depth=10",
+          trainAcc: 0.8517,
+          valAcc: 0.8042,
+          testAcc: 0.8036,
+          prec: 0.5921,
+          rec: 0.3614,
+          f1: 0.4489,
+          auc: 0.7177,
+          trainAuc: 0.8304,
+          valAuc: 0.7151,
+          speed: "Fast",
+          color: "#16a34a",
+        },
+        knn: {
+          name: "KNN (k=5)",
+          short: "KNN",
+          desc: "Euclidean distance",
+          trainAcc: 0.845,
+          valAcc: 0.7944,
+          testAcc: 0.794,
+          prec: 0.5537,
+          rec: 0.3574,
+          f1: 0.4344,
+          auc: 0.7015,
+          trainAuc: 0.8803,
+          valAuc: 0.7028,
+          speed: "Medium",
+          color: "#d97706",
+        },
+        lr: {
+          name: "Logistic Regression",
+          short: "LR",
+          desc: "L2 penalty, max_iter=1000",
+          trainAcc: 0.8133,
+          valAcc: 0.8089,
+          testAcc: 0.8093,
+          prec: 0.7066,
+          rec: 0.2369,
+          f1: 0.3549,
+          auc: 0.7187,
+          trainAuc: 0.7291,
+          valAuc: 0.7143,
+          speed: "Fast",
+          color: "#dc2626",
+        },
+      };
+
+      const CM_DATA = {
+        gb: { TN: 3309, FP: 195, FN: 639, TP: 357 },
+        mlp: { TN: 3033, FP: 471, FN: 583, TP: 413 },
+        rf: { TN: 3290, FP: 214, FN: 630, TP: 366 },
+        svm: { TN: 3330, FP: 174, FN: 667, TP: 329 },
+        dt: { TN: 3256, FP: 248, FN: 636, TP: 360 },
+        knn: { TN: 3217, FP: 287, FN: 640, TP: 356 },
+        lr: { TN: 3406, FP: 98, FN: 760, TP: 236 },
+      };
+
+      // ROC curve points: all real sklearn roc_curve output (downsampled to 10 pts)
+      const ROC_DATA = {
+        gb: {
+          auc: 0.7824,
+          pts: [
+            [0, 0],
+            [0.026, 0.23],
+            [0.063, 0.39],
+            [0.112, 0.514],
+            [0.172, 0.614],
+            [0.282, 0.697],
+            [0.387, 0.774],
+            [0.503, 0.852],
+            [0.709, 0.93],
+            [1, 1],
+          ],
+        },
+        mlp: {
+          auc: 0.7005,
+          pts: [
+            [0, 0],
+            [0.037, 0.187],
+            [0.084, 0.327],
+            [0.15, 0.436],
+            [0.227, 0.528],
+            [0.34, 0.627],
+            [0.481, 0.722],
+            [0.6, 0.817],
+            [0.775, 0.915],
+            [1, 1],
+          ],
+        },
+        rf: {
+          auc: 0.7637,
+          pts: [
+            [0, 0],
+            [0.004, 0.078],
+            [0.023, 0.213],
+            [0.043, 0.329],
+            [0.067, 0.397],
+            [0.103, 0.482],
+            [0.177, 0.574],
+            [0.342, 0.717],
+            [0.61, 0.874],
+            [1, 1],
+          ],
+        },
+        svm: {
+          auc: 0.7102,
+          pts: [
+            [0, 0],
+            [0.026, 0.245],
+            [0.065, 0.388],
+            [0.148, 0.485],
+            [0.247, 0.576],
+            [0.356, 0.668],
+            [0.495, 0.747],
+            [0.658, 0.829],
+            [0.833, 0.91],
+            [1, 1],
+          ],
+        },
+        dt: {
+          auc: 0.7177,
+          pts: [
+            [0, 0],
+            [0.028, 0.159],
+            [0.053, 0.318],
+            [0.082, 0.388],
+            [0.1, 0.43],
+            [0.176, 0.535],
+            [0.216, 0.571],
+            [0.414, 0.709],
+            [0.697, 0.86],
+            [1, 1],
+          ],
+        },
+        knn: {
+          auc: 0.7015,
+          pts: [
+            [0, 0],
+            [0.007, 0.064],
+            [0.007, 0.064],
+            [0.031, 0.203],
+            [0.082, 0.357],
+            [0.082, 0.357],
+            [0.215, 0.545],
+            [0.534, 0.774],
+            [0.534, 0.774],
+            [1, 1],
+          ],
+        },
+        lr: {
+          auc: 0.7187,
+          pts: [
+            [0, 0],
+            [0.029, 0.239],
+            [0.065, 0.379],
+            [0.132, 0.491],
+            [0.223, 0.582],
+            [0.353, 0.669],
+            [0.511, 0.752],
+            [0.644, 0.832],
+            [0.811, 0.914],
+            [1, 1],
+          ],
+        },
+      };
+
+      // Feature importance: real sklearn feature_importances_ values (top 10 per model)
+      const FI_DATA = {
+        gb: {
+          labels: [
+            "PAY_1",
+            "PAY_2",
+            "PAY_3",
+            "BILL_AMT_1",
+            "Credit_Limit",
+            "PAY_AMT_3",
+            "PAY_5",
+            "PAY_AMT_2",
+            "PAY_AMT_1",
+            "PAY_6",
+          ],
+          vals: [
+            0.5799, 0.0662, 0.0393, 0.0385, 0.029, 0.0269, 0.0228, 0.0222,
+            0.0222, 0.0212,
+          ],
+        },
+        rf: {
+          labels: [
+            "PAY_1",
+            "Age",
+            "Credit_Limit",
+            "BILL_AMT_1",
+            "BILL_AMT_2",
+            "PAY_AMT_1",
+            "BILL_AMT_3",
+            "BILL_AMT_6",
+            "BILL_AMT_4",
+            "BILL_AMT_5",
+          ],
+          vals: [
+            0.1023, 0.066, 0.0596, 0.0592, 0.0536, 0.0503, 0.0501, 0.0497,
+            0.0494, 0.0493,
+          ],
+        },
+        dt: {
+          labels: [
+            "PAY_1",
+            "PAY_2",
+            "PAY_AMT_3",
+            "Credit_Limit",
+            "BILL_AMT_6",
+            "PAY_AMT_2",
+            "BILL_AMT_1",
+            "PAY_5",
+            "Age",
+            "BILL_AMT_5",
+          ],
+          vals: [
+            0.4624, 0.0977, 0.0531, 0.0433, 0.0306, 0.0294, 0.0276, 0.0266,
+            0.0265, 0.0245,
+          ],
+        },
+      };
+
+      // ═══════════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════════
+      let selected = new Set(MODEL_KEYS);
+      let rocChart = null,
+        overfitChart = null,
+        fiChart = null;
+      let currentFI = "gb";
+
+      // ═══════════════════════════════════════════════════════════
+      // METHOD BOARD
+      // ═══════════════════════════════════════════════════════════
+      function buildBoard() {
+        const grid = document.getElementById("method-grid");
+        grid.innerHTML = "";
+        MODEL_KEYS.forEach((key) => {
+          const m = MODELS[key];
+          const speedClass = {
+            Fast: "badge-fast",
+            Medium: "badge-medium",
+            Slow: "badge-slow",
+          }[m.speed];
+          const card = document.createElement("div");
+          card.className =
+            "method-card" + (selected.has(key) ? " selected" : "");
+          card.dataset.key = key;
+          card.onclick = () => toggleModel(key);
+          card.innerHTML = `
+      <div class="card-check">✓</div>
+      <div class="card-name">${m.name}</div>
+      <div class="card-desc">${m.desc}</div>
+      <div class="card-badges">
+        <span class="badge badge-acc">📊 ${(m.testAcc * 100).toFixed(2)}%</span>
+        <span class="badge badge-f1">F1 ${m.f1.toFixed(4)}</span>
+        <span class="badge badge-auc">AUC ${m.auc.toFixed(4)}</span>
+        <span class="badge ${speedClass}">⚡ ${m.speed}</span>
+      </div>`;
+          grid.appendChild(card);
+        });
+        updateCount();
+      }
+
+      function toggleModel(key) {
+        if (selected.has(key)) selected.delete(key);
+        else selected.add(key);
+        document
+          .querySelectorAll(".method-card")
+          .forEach((c) =>
+            c.classList.toggle("selected", selected.has(c.dataset.key)),
+          );
+        updateCount();
+        renderComparison();
+      }
+
+      function selectAll() {
+        MODEL_KEYS.forEach((k) => selected.add(k));
+        document
+          .querySelectorAll(".method-card")
+          .forEach((c) => c.classList.add("selected"));
+        updateCount();
+        renderComparison();
+      }
+
+      function clearAll() {
+        selected.clear();
+        document
+          .querySelectorAll(".method-card")
+          .forEach((c) => c.classList.remove("selected"));
+        updateCount();
+        renderComparison();
+      }
+
+      function updateCount() {
+        document.getElementById("sel-count").textContent =
+          `${selected.size} of ${MODEL_KEYS.length} selected`;
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // COMPARISON
+      // ═══════════════════════════════════════════════════════════
+      function renderComparison() {
+        const body = document.getElementById("compare-body");
+        if (rocChart) {
+          rocChart.destroy();
+          rocChart = null;
+        }
+        if (overfitChart) {
+          overfitChart.destroy();
+          overfitChart = null;
+        }
+
+        if (selected.size === 0) {
+          body.innerHTML = `<div class="compare-empty"><div class="big">🔍</div><p>Select at least one model above to view comparison results.</p></div>`;
+          return;
+        }
+
+        const keys = MODEL_KEYS.filter((k) => selected.has(k));
+        const isSingle = keys.length === 1;
+
+        body.innerHTML = `
+    <div class="subsec animate-in">
+      <div class="subsec-head">📋 Performance Metrics — Test Set (n = 4,500)</div>
+      <div class="subsec-body">
+        <div class="tbl-wrap">${buildMetricsTable(keys)}</div>
+      </div>
+    </div>
+
+    <div class="subsec animate-in">
+      <div class="subsec-head">🔢 Confusion Matrix${isSingle ? " — " + MODELS[keys[0]].name : ""}</div>
+      <div class="subsec-body" id="cm-section">${buildCMSection(keys)}</div>
+    </div>
+
+    <div class="two-col">
+      <div class="subsec animate-in">
+        <div class="subsec-head">📈 ROC Curves</div>
+        <div class="subsec-body">
+          <div class="chart-wrap"><canvas id="chart-roc"></canvas></div>
+        </div>
+      </div>
+      <div class="subsec animate-in">
+        <div class="subsec-head">⚖️ Overfitting — Train / Val / Test AUC</div>
+        <div class="subsec-body">
+          <div class="chart-wrap"><canvas id="chart-overfit"></canvas></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+        // Init CM for first key
+        showCM(keys[0]);
+        buildROCChart(keys);
+        buildOverfitChart(keys);
+      }
+
+      // ── Metrics table ──
+      function buildMetricsTable(keys) {
+        const sorted = [...keys].sort((a, b) => MODELS[b].f1 - MODELS[a].f1);
+        const rankIcon = (i) =>
+          i === 0
+            ? '<span class="rank rank-1">1</span>'
+            : i === 1
+              ? '<span class="rank rank-2">2</span>'
+              : i === 2
+                ? '<span class="rank rank-3">3</span>'
+                : `<span style="color:var(--muted);font-size:0.79rem">${i + 1}</span>`;
+
+        const rows = sorted
+          .map((k, i) => {
+            const m = MODELS[k];
+            const gap = Math.abs(m.trainAcc - m.testAcc);
+            const gapColor =
+              gap > 0.15 ? "#dc2626" : gap > 0.05 ? "#d97706" : "#16a34a";
+            return `<tr class="${i === 0 ? "row-best" : ""}">
+      <td>${rankIcon(i)}</td>
+      <td><span class="cdot" style="background:${m.color}"></span>${m.name}</td>
+      <td>${(m.testAcc * 100).toFixed(2)}%</td>
+      <td>${(m.prec * 100).toFixed(2)}%</td>
+      <td>${(m.rec * 100).toFixed(2)}%</td>
+      <td><strong>${m.f1.toFixed(4)}</strong></td>
+      <td>${m.auc.toFixed(4)}</td>
+      <td style="color:${gapColor};font-weight:600">${gap.toFixed(4)}</td>
+    </tr>`;
+          })
+          .join("");
+
+        return `<table>
+    <thead><tr>
+      <th>Rank</th><th>Model</th><th>Accuracy</th>
+      <th>Precision</th><th>Recall</th><th>F1-Score ↓</th>
+      <th>AUC-ROC</th><th>|Train−Test|</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+      }
+
+      // ── Confusion Matrix section ──
+      function buildCMSection(keys) {
+        const tabs =
+          keys.length > 1
+            ? `<div class="tab-bar">${keys
+                .map(
+                  (k) =>
+                    `<button class="tab-btn${k === keys[0] ? " active" : ""}" data-key="${k}" onclick="showCM('${k}',this)">${MODELS[k].short}</button>`,
+                )
+                .join("")}</div>`
+            : "";
+        return `${tabs}
+    <div class="cm-layout">
+      <div class="cm-grid" id="cm-grid"><!-- filled --></div>
+      <div class="cm-stats" id="cm-stats"><!-- filled --></div>
+    </div>`;
+      }
+
+      function showCM(key, btn) {
+        if (btn) {
+          document
+            .querySelectorAll("#cm-section .tab-btn")
+            .forEach((b) =>
+              b.classList.toggle("active", b.dataset.key === key),
+            );
+        }
+        const d = CM_DATA[key];
+        if (!d) return;
+        const n = d.TN + d.FP + d.FN + d.TP;
+        const acc = (d.TN + d.TP) / n;
+        const prec = d.TP / (d.TP + d.FP);
+        const rec = d.TP / (d.TP + d.FN);
+        const f1 = (2 * prec * rec) / (prec + rec);
+        const spec = d.TN / (d.TN + d.FP);
+
+        const gridEl = document.getElementById("cm-grid");
+        const statsEl = document.getElementById("cm-stats");
+        if (!gridEl || !statsEl) return;
+
+        gridEl.innerHTML = `
+    <div class="cm-cell cm-corner"></div>
+    <div class="cm-cell cm-hdr">Pred: No Default</div>
+    <div class="cm-cell cm-hdr">Pred: Default</div>
+    <div class="cm-cell cm-row-hdr">Actual: No Default</div>
+    <div class="cm-cell cm-TN">${d.TN.toLocaleString()}</div>
+    <div class="cm-cell cm-FP">${d.FP.toLocaleString()}</div>
+    <div class="cm-cell cm-row-hdr">Actual: Default</div>
+    <div class="cm-cell cm-FN">${d.FN.toLocaleString()}</div>
+    <div class="cm-cell cm-TP">${d.TP.toLocaleString()}</div>`;
+
+        statsEl.innerHTML = `
+    <div class="cm-stat"><div class="s-lbl">Accuracy</div><div class="s-val">${(acc * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">Precision</div><div class="s-val">${(prec * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">Recall</div><div class="s-val">${(rec * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">F1-Score</div><div class="s-val">${(f1 * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">Specificity</div><div class="s-val">${(spec * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">FP Rate</div><div class="s-val">${((1 - spec) * 100).toFixed(2)}%</div></div>
+    <div class="cm-stat"><div class="s-lbl">True Neg</div><div class="s-val">${d.TN.toLocaleString()}</div></div>
+    <div class="cm-stat"><div class="s-lbl">True Pos</div><div class="s-val">${d.TP.toLocaleString()}</div></div>`;
+      }
+
+      // ── ROC chart ──
+      function buildROCChart(keys) {
+        const ctx = document.getElementById("chart-roc").getContext("2d");
+        const datasets = keys.map((k) => ({
+          label: `${MODELS[k].short} (AUC=${ROC_DATA[k].auc})`,
+          data: ROC_DATA[k].pts.map(([x, y]) => ({ x, y })),
+          borderColor: MODELS[k].color,
+          backgroundColor: "transparent",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.35,
+        }));
+        datasets.push({
+          label: "Random (AUC=0.50)",
+          data: [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 },
+          ],
+          borderColor: "#94a3b8",
+          backgroundColor: "transparent",
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+        });
+        rocChart = new Chart(ctx, {
+          type: "scatter",
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { font: { size: 10 }, boxWidth: 18 },
+              },
+              tooltip: {
+                callbacks: {
+                  label: (c) =>
+                    ` FPR=${c.raw.x.toFixed(3)}  TPR=${c.raw.y.toFixed(3)}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                min: 0,
+                max: 1,
+                title: { display: true, text: "False Positive Rate" },
+              },
+              y: {
+                min: 0,
+                max: 1,
+                title: { display: true, text: "True Positive Rate" },
+              },
+            },
+            showLine: true,
+            elements: { line: { fill: false } },
+          },
+        });
+      }
+
+      // ── Overfit chart ──
+      function buildOverfitChart(keys) {
+        const ctx = document.getElementById("chart-overfit").getContext("2d");
+        overfitChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: keys.map((k) => MODELS[k].short),
+            datasets: [
+              {
+                label: "Train AUC",
+                data: keys.map((k) => MODELS[k].trainAuc),
+                backgroundColor: "#93c5fd",
+                borderColor: "#2563eb",
+                borderWidth: 1,
+              },
+              {
+                label: "Val AUC",
+                data: keys.map((k) => MODELS[k].valAuc),
+                backgroundColor: "#6ee7b7",
+                borderColor: "#0f766e",
+                borderWidth: 1,
+              },
+              {
+                label: "Test AUC",
+                data: keys.map((k) => MODELS[k].auc),
+                backgroundColor: "#fcd34d",
+                borderColor: "#d97706",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { position: "top" },
+              tooltip: {
+                callbacks: {
+                  label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(4)}`,
+                },
+              },
+            },
+            scales: {
+              y: {
+                min: 0.65,
+                max: 1.05,
+                title: { display: true, text: "AUC-ROC" },
+              },
+            },
+          },
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // FEATURE IMPORTANCE
+      // ═══════════════════════════════════════════════════════════
+      function buildFIChart() {
+        const d = FI_DATA[currentFI];
+        const color = { gb: "#0f766e", rf: "#2563eb", dt: "#16a34a" }[
+          currentFI
+        ];
+        if (fiChart) {
+          fiChart.destroy();
+          fiChart = null;
+        }
+        const ctx = document.getElementById("chart-fi").getContext("2d");
+        fiChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: d.labels,
+            datasets: [
+              {
+                label: MODELS[currentFI].name + " — Feature Importance",
+                data: d.vals,
+                backgroundColor: color + "bb",
+                borderColor: color,
+                borderWidth: 1.5,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (c) => ` ${(c.raw * 100).toFixed(2)}%` },
+              },
+            },
+            scales: {
+              x: { min: 0, title: { display: true, text: "Importance Score" } },
+              y: { ticks: { font: { size: 11 } } },
+            },
+          },
+        });
+      }
+
+      function switchFI(model, btn) {
+        document
+          .querySelectorAll("#fi-tabs .pill-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFI = model;
+        buildFIChart();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // CONCLUSION TABLE
+      // ═══════════════════════════════════════════════════════════
+      function buildConclusion() {
+        const sorted = [...MODEL_KEYS].sort(
+          (a, b) => MODELS[b].f1 - MODELS[a].f1,
+        );
+        const rankIcon = (i) =>
+          i === 0
+            ? '<span class="rank rank-1">1</span>'
+            : i === 1
+              ? '<span class="rank rank-2">2</span>'
+              : i === 2
+                ? '<span class="rank rank-3">3</span>'
+                : `<span style="color:var(--muted);font-size:0.79rem">${i + 1}</span>`;
+
+        document.getElementById("conclusion-tbody").innerHTML = sorted
+          .map((k, i) => {
+            const m = MODELS[k];
+            const overfit = Math.abs(m.trainAcc - m.testAcc);
+            const oc =
+              overfit > 0.15
+                ? "#dc2626"
+                : overfit > 0.05
+                  ? "#d97706"
+                  : "#16a34a";
+            return `<tr class="${i === 0 ? "row-best" : ""}">
+      <td>${rankIcon(i)}</td>
+      <td><span class="cdot" style="background:${m.color}"></span>${m.name}</td>
+      <td>${(m.testAcc * 100).toFixed(2)}%</td>
+      <td>${(m.prec * 100).toFixed(2)}%</td>
+      <td>${(m.rec * 100).toFixed(2)}%</td>
+      <td><strong>${m.f1.toFixed(4)}</strong></td>
+      <td>${m.auc.toFixed(4)}</td>
+      <td>${(m.trainAcc * 100).toFixed(2)}%</td>
+      <td>${(m.valAcc * 100).toFixed(2)}%</td>
+      <td style="color:${oc};font-weight:600">${overfit.toFixed(4)}</td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════════════════
+      document.addEventListener("DOMContentLoaded", () => {
+        buildBoard();
+        renderComparison();
+        buildFIChart();
+        buildConclusion();
+      });
+    </script>
+  </body>
+</html>
